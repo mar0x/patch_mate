@@ -16,8 +16,8 @@
 #include "program_title.h"
 #include "settings.h"
 
-#include "in.h"
-#include "out.h"
+#include "in_lite.h"
+#include "out_lite.h"
 #include "lcd.h"
 
 #include "config.h"
