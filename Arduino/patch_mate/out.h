@@ -39,11 +39,11 @@ private:
        Q4   4    3   LOOP 2 (1) RELAY
        Q5   5    2   -
        Q6   6    1   -
-       A7   7    0   -
+       Q7   7    0   -
 
-       DS            10
+       DS            A3
       ST_CP          16 (micro) / 11 (pro mini)
-      SH_CP          14 (micro) / 12 (pro mini)
+      SH_CP          A2
 
      */
 
