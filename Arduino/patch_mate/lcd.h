@@ -2,13 +2,23 @@
 
 #include <LiquidCrystal.h>
 
+#include "config.h"
+
 enum {
     LCD_RS = 2,
     LCD_E = 3,
+
+#ifdef PATCH_MATE_LITE
     LCD_DB4 = 8,
     LCD_DB5 = 7,
     LCD_DB6 = 6,
     LCD_DB7 = 5,
+#else
+    LCD_DB4 = 4,
+    LCD_DB5 = 5,
+    LCD_DB6 = 6,
+    LCD_DB7 = 7,
+#endif
 };
 
 static LiquidCrystal lcd(LCD_RS, LCD_E, LCD_DB4, LCD_DB5, LCD_DB6, LCD_DB7);

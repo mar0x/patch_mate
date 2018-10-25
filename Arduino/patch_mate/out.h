@@ -28,37 +28,49 @@ struct out {
     bool relay_changed() const;
 
 private:
-    /* 1x 74HC595 pinout
-
+    /* 2x 74HC595 pinout
+                 +8
       pin  msb  lsb  desc
       --------------------
-       Q0   0    7   -
-       Q1   1    6   LOOP 1 (0) LED
-       Q2   2    5   LOOP 2 (1) LED
-       Q3   3    4   LOOP 1 (0) RELAY
-       Q4   4    3   LOOP 2 (1) RELAY
-       Q5   5    2   -
-       Q6   6    1   -
-       Q7   7    0   -
+       Q0   0    7   LOOP 1 (0) RELAY
+       Q1   1    6   LOOP 2 (1) RELAY
+       Q2   2    5   LOOP 3 (2) RELAY
+       Q3   3    4   LOOP 4 (3) RELAY
+       Q4   4    3   LOOP 5 (4) RELAY
+       Q5   5    2   LOOP 6 (5) RELAY
+       Q6   6    1   LOOP 7 (6) RELAY
+       Q7   7    0   LOOP 8 (7) RELAY
 
-       DS            A3
-      ST_CP          16 (micro) / 11 (pro mini)
-      SH_CP          A2
+            +8
+      pin  msb  lsb  desc
+      --------------------
+       Q0   0    7   LOOP 1 (0) LED
+       Q1   1    6   LOOP 2 (1) LED
+       Q2   2    5   LOOP 3 (2) LED
+       Q3   3    4   LOOP 4 (3) LED
+       Q4   4    3   LOOP 5 (4) LED
+       Q5   5    2   LOOP 6 (5) LED
+       Q6   6    1   LOOP 7 (6) LED
+       Q7   7    0   LOOP 8 (7) LED
+
+       DS            A2
+      ST_CP          10
+      SH_CP          A1
 
      */
 
     enum {
-        LED_START   = 1,
-        RELAY_START = 3,
-        RELAY_MASK  = B00011000,
+        LED_START   = 8,
+        RELAY_START = 0,
+        RELAY_MASK  = 0x00FF,
     };
 
-    using mute_out = artl::digital_out<4>;
-    using store_out = artl::digital_out<artl::pin::id::micro_15>; // or mini_13
+    using mute_out = artl::digital_out<8>;
+    using store_out = artl::digital_out<A3>;
 
-    using data = artl::digital_out<A3>;
-    using latch = artl::digital_out<artl::pin::id::micro_16>; // or mini_11
-    using clock = artl::digital_out<A2>;
+    using data = artl::digital_out<A2>;
+    using latch = artl::digital_out<10>;
+    using clock = artl::digital_out<A1>;
 
     using sipo_t = uint16_t;
     using sipo = artl::sipo<sipo_t, artl::msb_first, data, latch, clock>;

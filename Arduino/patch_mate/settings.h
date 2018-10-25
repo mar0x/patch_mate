@@ -14,11 +14,11 @@ public:
     static int setup(int s);
 
     uint8_t midi_channel = 0;
-    uint8_t midi_controller[8] = { 0 };
-    uint8_t lcd_bright = 255;
-    uint8_t lcd_contrast = 255;
+    uint8_t midi_loop_ctrl_in[8] = { 255, 255, 255, 255, 255, 255, 255, 255 };
+    uint8_t midi_loop_ctrl_out[8] = { 255, 255, 255, 255, 255, 255, 255, 255 };
+    uint8_t midi_prog_chg_out = 0;
     uint8_t usb_debug = 0;
-    unsigned int mute_delay_ms = 100;
+    uint16_t mute_delay_ms = 100;
     uint8_t hide_cursor_delay_s = 5;
 
     void read();
