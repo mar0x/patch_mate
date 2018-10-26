@@ -68,10 +68,10 @@ private:
         LOOP1 = 6,
         LOOP2 = 5,
         LOOP3 = 4,
-        LOOP4 = 3,
-        LOOP5 = 2,
-        LOOP6 = 1,
-        LOOP7 = 0,
+        LOOP4 = 0,
+        LOOP5 = 1,
+        LOOP6 = 2,
+        LOOP7 = 3,
     };
 
     enum {
