@@ -34,13 +34,13 @@ private:
       pin  msb  lsb  desc
       --------------------
        A    0    7   RIGHT
-       B    1    6   // ENC B
+       B    1    6   NC -> GND
        C    2    5   LOOP 2 (1)
        D    3    4   LOOP 1 (0)
        E    4    3   GND
        F    5    2   GND
        G    6    1   LEFT
-       H    7    0   // ENC_A
+       H    7    0   NC -> GND
 
       QH'            A3
       CLK            A2
@@ -50,8 +50,6 @@ private:
     enum lsb_bits {
         LEFT  = 1,
         RIGHT = 7,
-  //    ENC_A = 0,
-  //    ENC_B = 6,
         LOOP0 = 4,
         LOOP1 = 5,
     };
@@ -129,14 +127,12 @@ in::right() const
 inline bool
 in::encoder_a() const
 {
-    // return (val_ & (1 << ENC_A)) == 0;
     return enc_a_in().read();
 }
 
 inline bool
 in::encoder_b() const
 {
-    // return (val_ & (1 << ENC_B)) == 0;
     return enc_b_in().read();
 }
 
