@@ -25,7 +25,7 @@ public:
     void write() const;
 
     void write(const uint8_t& v) const;
-    void write(const unsigned int& v) const;
+    void write(const uint16_t& v) const;
 };
 
 int settings::ee_start_ = 0;
@@ -57,7 +57,7 @@ settings::write(const uint8_t& v) const
 }
 
 inline void
-settings::write(const unsigned int& v) const
+settings::write(const uint16_t& v) const
 {
     int off = (const uint8_t *) &v - (const uint8_t *) this;
     EEPROM.put(ee_start_ + off, v);

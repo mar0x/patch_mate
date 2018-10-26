@@ -233,14 +233,14 @@ print_number(char *buf, uint8_t size, unsigned long n)
 
 template<typename T> T rotate(T v, unsigned int max, int dir) {
     T res = (v + max + dir) % max;
-    debug(5, "rotate: ", v, ", ", max, ", ", dir, " = ", res);
+    debug(2, "rotate: ", v, ", ", max, ", ", dir, " = ", res);
     return res;
 }
 
 template<typename T> T rotate(T v, unsigned int min, unsigned int max, int dir) {
     unsigned int range = max - min;
     T res = min + (v - min + range + dir) % range;
-    debug(5, "rotate: ", v, ", ", min, ", ", max, ", ", dir, " = ", res);
+    debug(2, "rotate: ", v, ", ", min, ", ", max, ", ", dir, " = ", res);
     return res;
 }
 
@@ -476,7 +476,7 @@ controller::process_midi_cmd() {
 
 inline void
 controller::set_program(uint8_t prog) {
-    debug(3, "set_program: ", prog);
+    debug(1, "set_program: ", program_, " -> ", prog);
 
     program_ = prog;
 
@@ -503,6 +503,7 @@ controller::set_program(uint8_t prog) {
         lcd_update(0, 1, 15);
     }
 
+    // adjust loop led for all modes except MODE_SETTINGS_CTRL_IN & MODE_SETTINGS_CTRL_OUT
     if (mode_ != MODE_SETTINGS_CTRL_IN && mode_ != MODE_SETTINGS_CTRL_OUT) {
         for(uint8_t i = 0; i < MAX_LOOP; i++) {
             out_.loop_led(i, loop_state_[i]);
@@ -518,19 +519,24 @@ controller::set_program(uint8_t prog) {
 
 inline void
 controller::set_loop(uint8_t i, bool v) {
-    debug(3, "set_loop: ", i, " ", v);
+    debug(1, "set_loop: ", i, " ", loop_state_[i], " -> ", v);
 
     out_.loop_relay(i, v);
+
+    // send controller change MIDI command if configured
     send_loop(i, v);
 
+    // adjust loop led for all modes except MODE_SETTINGS_CTRL_IN & MODE_SETTINGS_CTRL_OUT
     if (mode_ != MODE_SETTINGS_CTRL_IN && mode_ != MODE_SETTINGS_CTRL_OUT) {
         out_.loop_led(i, v);
     }
 
     loop_state_.set(i, v);
 
-    set_dirty((loop_state_ != loop_state_master_) ||
-        (program_title_ != program_title_master_));
+    if (mode_ == MODE_NORMAL) {
+        set_dirty((loop_state_ != loop_state_master_) ||
+            (program_title_ != program_title_master_));
+    }
 }
 
 inline void
@@ -546,6 +552,8 @@ controller::send_loop(uint8_t i, bool v) {
 inline void
 controller::on_down(uint8_t i, bool down, unsigned long t) {
     if (!down) {
+        debug(5, "on_down: release ", i);
+
         if (i == RIGHT && show_master_) {
             show_master(false);
         }
@@ -569,7 +577,6 @@ controller::on_down(uint8_t i, bool down, unsigned long t) {
             case 7: set_mode(MODE_SETTINGS_USB_DEBUG, t); break;
 #endif
         }
-
         return;
     }
 
@@ -581,17 +588,16 @@ controller::on_down(uint8_t i, bool down, unsigned long t) {
             case 2: set_mode(MODE_GAME_SNAKE, t); break;
             case 3: set_mode(MODE_GAME_HERO, t); break;
         }
-
         return;
     }
 
     if (mode_ == MODE_NORMAL) {
         // toggle LOOP
         if (i < MAX_LOOP && left_.up() && right_.up()) {
-            bool v = !loop_state_[i];
+            bool v = loop_state_[i];
 
-            debug(5, "toggle loop ", i, " -> ", v);
-            set_loop(i, v);
+            debug(2, "toggle loop ", i, " ", v, " -> ", !v);
+            set_loop(i, !v);
 
             return;
         }
@@ -774,6 +780,11 @@ controller::on_hold(uint8_t i, unsigned long t) {
             store_blink_timer_.start(t);
             return;
 
+        case MODE_SETTINGS_PROG_OUT:
+            settings_.midi_prog_chg_out = edit_value_;
+            settings_.write(settings_.midi_prog_chg_out);
+            break;
+
         case MODE_SETTINGS_MUTE_DELAY:
             settings_.mute_delay_ms = edit_value_;
             settings_.write(settings_.mute_delay_ms);
@@ -874,9 +885,9 @@ controller::on_rotate(short dir, unsigned long t) {
         c = rotate_char(c, dir);
         lcd_buf[1][cursor_pos_] = c;
 
-        show_cursor(t);
-        lcd.write(c);
         lcd.setCursor(cursor_pos_, 1);
+        lcd.write(c);
+        show_cursor(t);
 
         set_dirty((loop_state_ != loop_state_master_) ||
             (program_title_ != program_title_master_));
@@ -995,7 +1006,7 @@ controller::set_edit_loop(uint8_t edit_loop) {
 
 inline void
 controller::set_mode(uint8_t m, unsigned long t) {
-    debug(5, "set_mode: ", m);
+    debug(1, "set_mode: ", mode_, " -> ", m);
 
     if (m == mode_) return;
 
@@ -1160,7 +1171,7 @@ controller::set_dirty(bool dirty)
 {
     if (dirty == dirty_) return;
 
-    debug(6, "dirty=", dirty);
+    debug(3, "dirty = ", dirty);
 
     dirty_ = dirty;
 }

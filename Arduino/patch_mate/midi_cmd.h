@@ -75,11 +75,17 @@ struct midi_cmd {
 
   template<typename STREAM>
   void write(STREAM& s) {
+#if defined(DEBUG)
+      for (uint8_t i = 0; i < size_; ++i) {
+          debug(4, "midi write: ", cmd_[i]);
+      }
+#endif
+
       s.write(cmd_, size_);
   }
 
   bool read(uint8_t b) {
-      debug(1, "midi read: ", b);
+      debug(4, "midi read: ", b);
 
       if ((b & CMD_BIT) == CMD_BIT) {
           cmd_[0] = b;
