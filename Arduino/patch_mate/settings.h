@@ -14,8 +14,8 @@ public:
     static int setup(int s);
 
     uint8_t midi_channel = 0;
-    uint8_t midi_loop_ctrl_in[8] = { 255, 255, 255, 255, 255, 255, 255, 255 };
-    uint8_t midi_loop_ctrl_out[8] = { 255, 255, 255, 255, 255, 255, 255, 255 };
+    uint8_t midi_loop_ctrl_in[8] = { 128, 128, 128, 128, 128, 128, 128, 128 };
+    uint8_t midi_loop_ctrl_out[8] = { 128, 128, 128, 128, 128, 128, 128, 128 };
     uint8_t midi_prog_chg_out = 0;
     uint8_t usb_debug = 0;
     uint16_t mute_delay_ms = 100;

@@ -541,7 +541,7 @@ controller::set_loop(uint8_t i, bool v) {
 
 inline void
 controller::send_loop(uint8_t i, bool v) {
-    if (settings_.midi_loop_ctrl_out[i] != 255) {
+    if (settings_.midi_loop_ctrl_out[i] <= 127) {
         midi_cmd cmd(settings_.midi_channel, midi_cmd::CMD_CTRL_CHANGE,
             settings_.midi_loop_ctrl_out[i], v ? 127 : 0);
 
@@ -759,7 +759,7 @@ controller::on_hold(uint8_t i, unsigned long t) {
             break;
 
         case MODE_SETTINGS_CTRL_IN:
-            settings_.midi_loop_ctrl_in[edit_loop_ - 1] = edit_value_ - 1;
+            settings_.midi_loop_ctrl_in[edit_loop_ - 1] = edit_value_;
             settings_.write(settings_.midi_loop_ctrl_in[edit_loop_ - 1]);
 
             edit_value_master_ = edit_value_;
@@ -770,7 +770,7 @@ controller::on_hold(uint8_t i, unsigned long t) {
             return;
 
         case MODE_SETTINGS_CTRL_OUT:
-            settings_.midi_loop_ctrl_out[edit_loop_ - 1] = edit_value_ - 1;
+            settings_.midi_loop_ctrl_out[edit_loop_ - 1] = edit_value_;
             settings_.write(settings_.midi_loop_ctrl_out[edit_loop_ - 1]);
 
             edit_value_master_ = edit_value_;
@@ -972,10 +972,13 @@ controller::start_edit(unsigned int value, unsigned int min, unsigned int max, u
 
 inline void
 controller::print_edit_value() {
-    if (edit_value_ == 0 &&
+    if (edit_value_ > 127 &&
           (mode_ == MODE_SETTINGS_CTRL_IN ||
-           mode_ == MODE_SETTINGS_CTRL_OUT ||
-           mode_ == MODE_SETTINGS_PROG_OUT)) {
+           mode_ == MODE_SETTINGS_CTRL_OUT)) {
+        memcpy(lcd_buf[1] + 13, "OFF", 3);
+    } else if (edit_value_ == 0 &&
+          (mode_ == MODE_SETTINGS_PROG_OUT ||
+           mode_ == MODE_SETTINGS_USB_DEBUG)) {
         memcpy(lcd_buf[1] + 13, "OFF", 3);
     } else if (edit_value_ != 0 && mode_ == MODE_SETTINGS_PROG_OUT) {
         memcpy(lcd_buf[1] + 13, "ON ", 3);
@@ -990,10 +993,10 @@ controller::set_edit_loop(uint8_t edit_loop) {
 
     switch (mode_) {
     case MODE_SETTINGS_CTRL_IN:
-        start_edit((uint8_t)(settings_.midi_loop_ctrl_in[edit_loop_ - 1] + 1), 0, 127);
+        start_edit(settings_.midi_loop_ctrl_in[edit_loop_ - 1], 0, 128);
         break;
     case MODE_SETTINGS_CTRL_OUT:
-        start_edit((uint8_t)(settings_.midi_loop_ctrl_out[edit_loop_ - 1] + 1), 0, 127);
+        start_edit(settings_.midi_loop_ctrl_out[edit_loop_ - 1], 0, 128);
         break;
     }
 
