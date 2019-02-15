@@ -10,6 +10,10 @@ namespace artl {
 template<uint8_t PIN_NO, typename PIN_TRAITS = pin_traits<PIN_NO> >
 struct digital_out {
 
+    enum {
+        pin = PIN_NO
+    };
+
     using traits = PIN_TRAITS;
 
     void setup() const { traits().output(); }

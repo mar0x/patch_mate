@@ -10,12 +10,29 @@ template<uint8_t N>
 struct pin_change_mask {
 };
 
+#ifdef PCMSK
+
+template<>
+struct pin_change_mask<0> {
+    volatile uint8_t& msk() { return PCMSK; }
+
+    constexpr static uint8_t icr_bit_mask = 1 << PCIE;
+};
+
+#else
+
+#ifdef PCMSK0
+
 template<>
 struct pin_change_mask<0> {
     volatile uint8_t& msk() { return PCMSK0; }
 
     constexpr static uint8_t icr_bit_mask = 1 << PCIE0;
 };
+
+#endif
+
+#endif
 
 #ifdef PCMSK1
 
@@ -63,10 +80,6 @@ struct base_pin_change_traits {
 #define ARTL_PINOUT_STANDARD
 #endif
 
-#ifdef ARDUINO_AVR_LEONARDO
-#include "variants/leonardo/pin_change_traits.h"
-#endif
-
 #ifdef ARDUINO_AVR_PRO
 #define ARTL_PINOUT_STANDARD
 #endif
@@ -75,6 +88,14 @@ struct base_pin_change_traits {
 #define ARTL_PINOUT_STANDARD
 #endif
 
+#ifdef ARDUINO_AVR_LEONARDO
+#include "variants/leonardo/pin_change_traits.h"
+#endif
+
 #ifdef ARTL_PINOUT_STANDARD
 #include "variants/standard/pin_change_traits.h"
+#endif
+
+#ifdef ARDUINO_attiny
+#include "variants/tiny14/pin_change_traits.h"
 #endif

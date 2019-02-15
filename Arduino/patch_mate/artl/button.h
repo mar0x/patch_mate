@@ -33,11 +33,9 @@ struct button : public HANDLERS {
             down_ = down;
             bounce_ = true;
             state_change_time_ = t;
-
-            return false;
         }
 
-        if (bounce_ == 0) {
+        if (!bounce_) {
             if (down_ && !hold_ &&
                 t - state_change_time_ >= time_traits().hold())
             {

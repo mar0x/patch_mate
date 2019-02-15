@@ -9,6 +9,10 @@ namespace artl {
 template<uint8_t PIN_NO, typename TRAITS = pin_traits<PIN_NO> >
 struct digital_pin {
 
+    enum {
+        pin = PIN_NO
+    };
+
     using traits = TRAITS;
 
 
@@ -24,6 +28,8 @@ struct digital_pin {
     void write(bool v) const { traits().write(v); }
 
     bool read() { return traits().read(); }
+
+    uint8_t read_bit() { return traits().read_bit(); }
 
 
     constexpr operator uint8_t() const { return PIN_NO; }
