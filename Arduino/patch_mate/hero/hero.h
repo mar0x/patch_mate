@@ -1,8 +1,6 @@
 
 #pragma once
 
-#include "../lcd.h"
-
 namespace hero {
 
 struct Hero {

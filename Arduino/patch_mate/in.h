@@ -3,6 +3,9 @@
 
 #include <HardwareSerial.h>
 
+#include "artl/button.h"
+#include "artl/encoder.h"
+
 #include "artl/digital_out.h"
 #include "artl/digital_in.h"
 
@@ -14,19 +17,30 @@
 
 namespace patch_mate {
 
+template<typename T>
 struct in {
-    void setup();
-    void update(unsigned long t);
+    using traits = T;
 
-    bool loop(uint8_t i) const;
-    bool left() const;
-    bool right() const;
-    bool encoder_a() const;
-    bool encoder_b() const;
-    bool store() const;
+    in();
+
+    void setup();
+    void update(unsigned long t, bool slow);
 
     static constexpr
-    HardwareSerial& midi();
+    HardwareSerial& midi() {
+#if defined(HAVE_HWSERIAL1)
+        return Serial1;
+#else
+        return Serial;
+#endif
+    }
+
+    using button_type = artl::button<typename traits::button_handler>;
+
+    const button_type& loop(uint8_t i) const { return loop_[i]; }
+    const button_type& left() const { return left_; }
+    const button_type& right() const { return right_; }
+    const button_type& store() const { return store_; }
 
 private:
     /* 2x 74HC165 pinout
@@ -92,12 +106,27 @@ private:
     using piso_t = uint16_t;
     using piso = artl::piso<piso_t, artl::lsb_first, qh, ld, clk>;
 
+    using encoder_type = artl::encoder<typename traits::encoder_handler>;
+
     piso_t val_;
+
+    button_type loop_[8];
+    button_type left_;
+    button_type right_;
+    button_type store_;
+    encoder_type encoder_;
 };
 
+template<typename T> inline
+in<T>::in() :
+    loop_{ 0, 1, 2, 3, 4, 5, 6, 7 },
+    left_(traits::LEFT),
+    right_(traits::RIGHT),
+    store_(traits::STORE)
+{ }
 
-inline void
-in::setup()
+template<typename T> inline void
+in<T>::setup()
 {
     enc_a_in().setup();
     enc_b_in().setup();
@@ -110,63 +139,27 @@ in::setup()
 
     enc_a_int().enable();
     enc_b_int().enable();
-
-    // PCICR = 1 << PCIE0; // enable interrupt
-    // PCMSK0 = (1 << PCINT6) | (1 << PCINT3); // encoder inputs
 }
 
-inline void
-in::update(unsigned long)
+template<typename T> inline void
+in<T>::update(unsigned long t, bool slow)
 {
+    encoder_.update(enc_a_in().read(), enc_b_in().read(), t);
+
+    if (!slow) return;
+
     qh().setup();
     val_ = piso().read();
-}
 
-inline bool
-in::loop(uint8_t i) const
-{
-    uint8_t m[] = { LOOP0, LOOP1, LOOP2, LOOP3, LOOP4, LOOP5, LOOP6, LOOP7 };
-    return (val_ & (1 << m[i])) == 0;
-}
+    static const uint8_t m[] = { LOOP0, LOOP1, LOOP2, LOOP3, LOOP4, LOOP5, LOOP6, LOOP7 };
 
-inline bool
-in::left() const
-{
-    return (val_ & (1 << LEFT)) == 0;
-}
+    for (uint8_t i = 0; i < 8; i++) {
+        loop_[i].update((val_ & (1 << m[i])) == 0, t);
+    }
 
-inline bool
-in::right() const
-{
-    return (val_ & (1 << RIGHT)) == 0;
-}
-
-inline bool
-in::encoder_a() const
-{
-    return enc_a_in().read();
-}
-
-inline bool
-in::encoder_b() const
-{
-    return enc_b_in().read();
-}
-
-inline bool
-in::store() const
-{
-    return (val_ & (1 << STORE)) == 0;
-}
-
-inline constexpr HardwareSerial&
-in::midi()
-{
-#if defined(HAVE_HWSERIAL1)
-    return Serial1;
-#else
-    return Serial;
-#endif
+    store_.update((val_ & (1 << STORE)) == 0, t);
+    left_.update((val_ & (1 << LEFT)) == 0, t);
+    right_.update((val_ & (1 << RIGHT)) == 0, t);
 }
 
 }

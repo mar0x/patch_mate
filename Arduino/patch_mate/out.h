@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <HardwareSerial.h>
+
 #include "artl/digital_out.h"
 
 #include "artl/bit_order.h"
@@ -16,6 +18,7 @@ struct out {
 
     void loop_relay(uint8_t i, bool v);
     void loop_led(uint8_t i, bool v);
+    void loop_led(uint8_t mask);
     void loop(uint8_t i, bool v);
     void store_led(bool v);
 
@@ -26,6 +29,15 @@ struct out {
     void commit_led();
 
     bool relay_changed() const;
+
+    static constexpr
+    HardwareSerial& midi() {
+#if defined(HAVE_HWSERIAL1)
+        return Serial1;
+#else
+        return Serial;
+#endif
+    }
 
 private:
     /* 2x 74HC595 pinout
@@ -61,8 +73,9 @@ private:
 
     enum {
         LED_START   = 8,
+        LED_MASK    = 0xFF00U,
         RELAY_START = 0,
-        RELAY_MASK  = 0x00FF,
+        RELAY_MASK  = 0x00FFU,
     };
 
     using mute_out = artl::digital_out<8>;
@@ -119,6 +132,14 @@ out::loop_led(uint8_t i, bool v)
     } else {
         new_ &= ~m;
     }
+}
+
+inline void
+out::loop_led(uint8_t mask)
+{
+    sipo_t m = mask;
+
+    new_ = (new_ & ~LED_MASK) | ((m << LED_START) & LED_MASK);
 }
 
 inline void

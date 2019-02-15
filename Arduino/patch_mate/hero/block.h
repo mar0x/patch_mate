@@ -3,13 +3,11 @@
 
 #include <stdlib.h>
 
-#include "../lcd.h"
-
 namespace hero {
 
 struct Block {
     enum {
-        MAX_LENGTH = 32,
+        MAX_LENGTH = LCD_COLUMNS * 2,
     };
 
     enum {
@@ -48,9 +46,9 @@ struct Block {
         }
     }
 
-    uint8_t row_;
+    uint8_t row_:2;
+    uint8_t length_:6;
     uint8_t start_;
-    uint8_t length_;
 };
 
 }

@@ -1,8 +1,6 @@
 
 #pragma once
 
-#include <EEPROM.h>
-
 #include "debug.h"
 
 namespace patch_mate {

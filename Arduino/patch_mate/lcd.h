@@ -1,7 +1,5 @@
 #pragma once
 
-#include <LiquidCrystal.h>
-
 #include "config.h"
 
 enum {
@@ -19,22 +17,32 @@ enum {
     LCD_DB6 = 6,
     LCD_DB7 = 7,
 #endif
+
+    LCD_LINES = 2,
+    LCD_COLUMNS = 16,
 };
 
 static LiquidCrystal lcd(LCD_RS, LCD_E, LCD_DB4, LCD_DB5, LCD_DB6, LCD_DB7);
-static char lcd_buf[2][16];
+static char lcd_buf[LCD_LINES][LCD_COLUMNS];
 
 inline void
 lcd_buf_clear()
 {
-    memset(lcd_buf[0], ' ', 16);
-    memset(lcd_buf[1], ' ', 16);
+    for (uint8_t i = 0; i < LCD_LINES; i++) {
+        memset(lcd_buf[i], ' ', LCD_COLUMNS);
+    }
+}
+
+inline void
+lcd_buf_clear(uint8_t line)
+{
+    memset(lcd_buf[line], ' ', LCD_COLUMNS);
 }
 
 inline void
 lcd_setup()
 {
-    lcd.begin(16, 2);
+    lcd.begin(LCD_COLUMNS, LCD_LINES);
 }
 
 inline void
@@ -54,8 +62,9 @@ lcd_update(uint8_t col, uint8_t row)
 inline void
 lcd_update()
 {
-    lcd_update(0, 0, 16);
-    lcd_update(0, 1, 16);
+    for (uint8_t i = 0; i < LCD_LINES; i++) {
+        lcd_update(0, i, LCD_COLUMNS);
+    }
 }
 
 inline void

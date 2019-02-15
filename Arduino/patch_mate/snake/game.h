@@ -2,7 +2,6 @@
 #pragma once
 
 #include "../debug.h"
-#include "../lcd.h"
 
 #include "pos.h"
 #include "graphic.h"

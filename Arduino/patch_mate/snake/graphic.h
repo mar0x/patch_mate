@@ -2,14 +2,13 @@
 #pragma once
 
 #include "pos.h"
-#include "../lcd.h"
 
 namespace snake {
 
 struct Graphic {
     enum {
-        WIDTH = 16,
-        HEIGHT = 4,
+        WIDTH = LCD_COLUMNS,
+        HEIGHT = LCD_LINES * 2,
     };
 
     enum {
@@ -60,24 +59,24 @@ struct Graphic {
          */
 
         const uint8_t blank[] = {
-            B00000,
-            B00000,
-            B00000,
-            B00000,
+            0b00000,
+            0b00000,
+            0b00000,
+            0b00000,
         };
 
         const uint8_t block[] = {
-            B01110,
-            B01110,
-            B01110,
-            B00000,
+            0b01110,
+            0b01110,
+            0b01110,
+            0b00000,
         };
 
         const uint8_t apple[] = {
-            B00100,
-            B01010,
-            B00100,
-            B00000,
+            0b00100,
+            0b01010,
+            0b00100,
+            0b00000,
         };
 
         const uint8_t *bitmap[3] = { blank, block, apple };

@@ -1,51 +1,40 @@
 
 #pragma once
 
-
 #include "config.h"
-
 #include "debug.h"
 
 #include "artl/button.h"
 #include "artl/encoder.h"
-
 #include "artl/timer.h"
 #include "artl/tc.h"
-
-#include <avr/sleep.h>
 
 #include "midi_cmd.h"
 #include "loop_state.h"
 #include "program_title.h"
 #include "settings.h"
 
-#ifdef PATCH_MATE_LITE
-#include "in_lite.h"
-#include "out_lite.h"
-#else
-#include "in.h"
-#include "out.h"
+#if defined(ARDUINO_ARCH_AVR)
+#include "artl/yield.h"
 #endif
 
 #include "lcd.h"
 
 #include "midi_mon.h"
+
+#if defined(WITH_SNAKE)
 #include "snake/game.h"
+#endif
+
+#if defined(WITH_HERO)
 #include "hero/game.h"
+#endif
 
 namespace patch_mate {
 
 struct controller {
 
     enum {
-        LOOP0 = 0,
-        STORE = 8,
-        LEFT,
-        RIGHT
-    };
-
-    enum {
-        MAX_PROGRAM = 128,
         MAX_CURSOR_POS = 15,
     };
 
@@ -58,10 +47,13 @@ struct controller {
     void reset_eeprom();
 
     void process_midi_cmd();
+    void midi_out(const midi_cmd& cmd);
 
     void set_program(uint8_t prog);
     void set_loop(uint8_t loop, bool val);
     void send_loop(uint8_t loop, bool val);
+
+    bool led4loop() const;
 
     void on_down(uint8_t, bool, unsigned long);
     void on_hold(uint8_t, unsigned long);
@@ -101,6 +93,24 @@ struct controller {
     using encoder_type = artl::encoder<encoder_handler>;
 
 
+    struct in_traits {
+        using button_handler = controller::button_handler;
+        using encoder_handler = controller::encoder_handler;
+
+        enum {
+            LOOP0 = 0,
+            STORE = 8,
+            LEFT,
+            RIGHT
+        };
+    };
+
+    enum {
+        STORE = in_traits::STORE,
+        LEFT = in_traits::LEFT,
+        RIGHT = in_traits::RIGHT
+    };
+
     struct mute_timer_callback {
         void operator ()(unsigned long);
     };
@@ -137,6 +147,7 @@ struct controller {
         MODE_SETTINGS_CTRL_IN,
         MODE_SETTINGS_CTRL_OUT,
         MODE_SETTINGS_PROG_OUT,
+        MODE_SETTINGS_MIDI_FWD,
         MODE_SETTINGS_MUTE_DELAY,
         MODE_SETTINGS_HIDE_CURSOR,
 #if defined(DEBUG)
@@ -144,23 +155,28 @@ struct controller {
 #endif
         MODE_SETTINGS_FACTORY_RESET,
         MODE_SETTINGS_LAST = MODE_SETTINGS_FACTORY_RESET,
-        MODE_MIDI_MONITOR,
+        MODE_MIDI_IN_MONITOR,
+        MODE_MIDI_OUT_MONITOR,
         MODE_ABOUT,
         MODE_UPTIME,
         MODE_LOOP_COUNT,
         MODE_INPUT_COUNT,
         MODE_PC_COUNT,
+#if defined(WITH_SNAKE)
         MODE_GAME_SNAKE,
+#endif
+#if defined(WITH_HERO)
         MODE_GAME_HERO,
+#endif
         MODE_MAX,
+
+        MODE_LED_IGNORE_LOOP_MASK = (1 << MODE_SETTINGS_CTRL_IN) |
+                                    (1 << MODE_SETTINGS_CTRL_OUT) |
+                                    (1 << MODE_MIDI_IN_MONITOR) |
+                                    (1 << MODE_MIDI_OUT_MONITOR),
     };
 
-    button_type loop_[8];
-    button_type left_;
-    button_type right_;
-    button_type store_;
-    encoder_type encoder_;
-    in in_;
+    in<in_traits> in_;
     out out_;
 
     mute_timer mute_timer_;
@@ -180,6 +196,7 @@ struct controller {
     unsigned int edit_value_step_;
 
     midi_cmd midi_cmd_;
+    midi_cmd last_out_cmd_;
 
     bool dirty_ = false;
     bool bad_magic_;
@@ -199,10 +216,17 @@ struct controller {
     unsigned long loop_count_ = 0;
     unsigned long pc_count_ = 0;
     unsigned long input_count_ = 0;
+    unsigned long last_out_ms_ = 0;
 
-    midi_mon midi_mon_;
+    midi_mon midi_mon_[2];
+
+#if defined(WITH_SNAKE)
     snake::Game snake_;
+#endif
+#if defined(WITH_HERO)
     hero::Game hero_;
+#endif
+
 
     volatile bool enable_input_;
     using input_tc = artl::tc<1>;
@@ -212,9 +236,18 @@ struct controller {
 
 controller controller_;
 
-ISR (PCINT0_vect) {
+#if defined(ISR) && defined(PCINT0_vect)
+ISR(PCINT0_vect) {
     ++controller_.pc_count_;
 }
+#endif
+
+#if defined(ISR) && defined(TIMER1_COMPA_vect)
+ISR(TIMER1_COMPA_vect)
+{
+    controller_.enable_input_ = true;
+}
+#endif
 
 inline void
 print_number(char *buf, uint8_t size, unsigned long n)
@@ -244,25 +277,16 @@ template<typename T> T rotate(T v, unsigned int min, unsigned int max, int dir) 
     return res;
 }
 
-ISR(TIMER1_COMPA_vect)
-{
-    controller_.enable_input_ = true;
-}
-
 inline void
 yield()
 {
-    sleep_enable();
-    set_sleep_mode(SLEEP_MODE_IDLE);
-    sleep_cpu();
+#if defined(ARDUINO_ARCH_AVR)
+    artl::yield();
+#endif
 }
 
 inline
-controller::controller() :
-    loop_( { 0, 1, 2, 3, 4, 5, 6, 7 } ),
-    left_(LEFT),
-    right_(RIGHT),
-    store_(STORE)
+controller::controller()
 {
 }
 
@@ -271,16 +295,18 @@ controller::setup() {
 #if defined(HAVE_HWSERIAL1) && defined(DEBUG)
     Serial.begin(115200);
 #endif
-
     in_.setup();
     out_.setup();
+
+    unsigned long t = millis();
+
+    midi_mon_[0].setup(t);
+    midi_mon_[1].setup(t);
 
     lcd_setup();
 
     out_.mute();
     on_mute_ = true;
-
-    unsigned long t = millis();
 
     if (read_eeprom()) {
         set_mode(MODE_NORMAL, t);
@@ -291,25 +317,29 @@ controller::setup() {
 
     mute(t);
 
-    enable_input_ = false;
+    enable_input_ = true;
 
+#if defined(ARDUINO_ARCH_AVR)
     input_tc().setup(0, 0, 4, input_tc::cs::presc_256);
     input_tc().ocra() = 200;
     input_tc().cnt() = 0;
     input_tc().oca().enable();
+#endif
 
     yield();
 }
 
 inline void
 controller::loop() {
+    unsigned long t = millis();
+
     ++loop_count_;
 
     while (!midi_cmd_ && in_.midi().available()) {
         uint8_t b = in_.midi().read();
 
-        if (mode_ == MODE_MIDI_MONITOR) {
-            midi_mon_.read(b);
+        if (midi_mon_[0].active()) {
+            midi_mon_[0].read(b);
         }
 
         midi_cmd_.read(b);
@@ -319,35 +349,30 @@ controller::loop() {
         process_midi_cmd();
     }
 
-    encoder_.update(in_.encoder_a(), in_.encoder_b(), millis());
+    in_.update(t, enable_input_);
 
+#if defined(ISR) && defined(TIMER1_COMPA_vect)
     if (!enable_input_) {
         yield();
         return;
     }
 
-    ++input_count_;
     enable_input_ = false;
+#endif
 
-    unsigned long t = millis();
+    ++input_count_;
 
     mute_timer_.update(t);
     hide_cursor_timer_.update(t);
     store_blink_timer_.update(t);
 
-    in_.update(t);
-
-    for (uint8_t i = 0; i < MAX_LOOP; i++) {
-        loop_[i].update(in_.loop(i), t);
-    }
-
-    store_.update(in_.store(), t);
-    left_.update(in_.left(), t);
-    right_.update(in_.right(), t);
-
     switch (mode_) {
-    case MODE_MIDI_MONITOR:
-        midi_mon_.update(t);
+    case MODE_MIDI_IN_MONITOR:
+        midi_mon_[0].update(t);
+        break;
+
+    case MODE_MIDI_OUT_MONITOR:
+        midi_mon_[1].update(t);
         break;
 
     case MODE_UPTIME: {
@@ -386,12 +411,16 @@ controller::loop() {
         }
         break;
     }
+#if defined(WITH_SNAKE)
     case MODE_GAME_SNAKE:
         snake_.update(t);
         break;
+#endif
+#if defined(WITH_HERO)
     case MODE_GAME_HERO:
         hero_.update(t);
         break;
+#endif
     }
 
     if (!store_blink_timer_.active()) {
@@ -471,7 +500,25 @@ controller::process_midi_cmd() {
         }
     }
 
+    if (settings_.midi_out & settings::MIDI_OUT_ALL) {
+        midi_out(midi_cmd_);
+    }
+
     midi_cmd_.reset();
+}
+
+inline void
+controller::midi_out(const midi_cmd& cmd) {
+    if (midi_mon_[1].active()) {
+        for (uint8_t i = 0; i < cmd.size(); i++) {
+            midi_mon_[1].read(cmd[i]);
+        }
+    }
+
+    last_out_cmd_ = cmd;
+    last_out_ms_ = millis();
+
+    out_.midi().write(cmd, cmd.size());
 }
 
 inline void
@@ -482,6 +529,12 @@ controller::set_program(uint8_t prog) {
 
     loop_state_.read(prog);
     loop_state_master_ = loop_state_;
+
+    if (settings_.midi_out & settings::MIDI_OUT_PROG) {
+        midi_cmd cmd(settings_.midi_channel, midi_cmd::CMD_PROG_CHANGE, program_);
+
+        midi_out(cmd);
+    }
 
     for(uint8_t i = 0; i < MAX_LOOP; i++) {
         out_.loop_relay(i, loop_state_[i]);
@@ -503,17 +556,9 @@ controller::set_program(uint8_t prog) {
         lcd_update(0, 1, 15);
     }
 
-    // adjust loop led for all modes except MODE_SETTINGS_CTRL_IN & MODE_SETTINGS_CTRL_OUT
-    if (mode_ != MODE_SETTINGS_CTRL_IN && mode_ != MODE_SETTINGS_CTRL_OUT) {
-        for(uint8_t i = 0; i < MAX_LOOP; i++) {
-            out_.loop_led(i, loop_state_[i]);
-        }
-    }
-
-    if (settings_.midi_prog_chg_out) {
-        midi_cmd cmd(settings_.midi_channel, midi_cmd::CMD_PROG_CHANGE, program_);
-
-        cmd.write(in_.midi());
+    // adjust loop led for all modes except MODE_LED_IGNORE_LOOP_MASK
+    if (led4loop()) {
+        out_.loop_led(loop_state_);
     }
 }
 
@@ -526,8 +571,8 @@ controller::set_loop(uint8_t i, bool v) {
     // send controller change MIDI command if configured
     send_loop(i, v);
 
-    // adjust loop led for all modes except MODE_SETTINGS_CTRL_IN & MODE_SETTINGS_CTRL_OUT
-    if (mode_ != MODE_SETTINGS_CTRL_IN && mode_ != MODE_SETTINGS_CTRL_OUT) {
+    // adjust loop led for all modes except MODE_LED_IGNORE_LOOP_MASK
+    if (led4loop()) {
         out_.loop_led(i, v);
     }
 
@@ -545,8 +590,13 @@ controller::send_loop(uint8_t i, bool v) {
         midi_cmd cmd(settings_.midi_channel, midi_cmd::CMD_CTRL_CHANGE,
             settings_.midi_loop_ctrl_out[i], v ? 127 : 0);
 
-        cmd.write(in_.midi());
+        midi_out(cmd);
     }
+}
+
+inline bool
+controller::led4loop() const {
+    return ((1 << mode_) & MODE_LED_IGNORE_LOOP_MASK) == 0;
 }
 
 inline void
@@ -564,15 +614,14 @@ controller::on_down(uint8_t i, bool down, unsigned long t) {
     debug(4, "on_down: ", i);
 
     // change mode: hold LEFT and press LOOP
-    if (i < MAX_LOOP && left_.hold()) {
+    if (i < MAX_LOOP && in_.left().down()) {
         switch(i) {
             case 0: set_mode(MODE_SETTINGS_CHANNEL, t); break;
             case 1: set_mode(MODE_SETTINGS_CTRL_IN, t); break;
             case 2: set_mode(MODE_SETTINGS_CTRL_OUT, t); break;
             case 3: set_mode(MODE_SETTINGS_PROG_OUT, t); break;
-            case 4: set_mode(MODE_SETTINGS_MUTE_DELAY, t); break;
-            case 5: set_mode(MODE_SETTINGS_HIDE_CURSOR, t); break;
-            case 6: set_mode(MODE_MIDI_MONITOR, t); break;
+            case 4: set_mode(MODE_SETTINGS_MIDI_FWD, t); break;
+            case 6: set_mode(MODE_MIDI_IN_MONITOR, t); break;
 #if defined(DEBUG)
             case 7: set_mode(MODE_SETTINGS_USB_DEBUG, t); break;
 #endif
@@ -581,19 +630,26 @@ controller::on_down(uint8_t i, bool down, unsigned long t) {
     }
 
     // change mode ex: hold RIGHT and press LOOP
-    if (i < MAX_LOOP && right_.hold()) {
+    if (i < MAX_LOOP && in_.right().down()) {
         switch(i) {
             case 0: set_mode(MODE_ABOUT, t); break;
             case 1: set_mode(MODE_UPTIME, t); break;
+#if defined(WITH_SNAKE)
             case 2: set_mode(MODE_GAME_SNAKE, t); break;
+#endif
+#if defined(WITH_HERO)
             case 3: set_mode(MODE_GAME_HERO, t); break;
+#endif
+            case 4: set_mode(MODE_SETTINGS_MUTE_DELAY, t); break;
+            case 5: set_mode(MODE_SETTINGS_HIDE_CURSOR, t); break;
+            case 6: set_mode(MODE_MIDI_OUT_MONITOR, t); break;
         }
         return;
     }
 
     if (mode_ == MODE_NORMAL) {
         // toggle LOOP
-        if (i < MAX_LOOP && left_.up() && right_.up()) {
+        if (i < MAX_LOOP && in_.left().up() && in_.right().up()) {
             bool v = loop_state_[i];
 
             debug(2, "toggle loop ", i, " ", v, " -> ", !v);
@@ -603,7 +659,7 @@ controller::on_down(uint8_t i, bool down, unsigned long t) {
         }
 
         // move cursor LEFT
-        if (i == LEFT && right_.up()) {
+        if (i == LEFT && in_.right().up()) {
             cursor_pos_ = rotate(cursor_pos_, MAX_CURSOR_POS, -1);
             show_cursor(t);
 
@@ -611,7 +667,7 @@ controller::on_down(uint8_t i, bool down, unsigned long t) {
         }
 
         // move cursor RIGHT
-        if (i == RIGHT && left_.up()) {
+        if (i == RIGHT && in_.left().up()) {
             cursor_pos_ = rotate(cursor_pos_, MAX_CURSOR_POS, 1);
             show_cursor(t);
 
@@ -621,7 +677,7 @@ controller::on_down(uint8_t i, bool down, unsigned long t) {
         // cancel changes and stay in NORMAL
         // hold RIGHT then press LEFT or
         // hold LEFT then press RIGHT
-        if ((i == LEFT && right_.hold()) || (i == RIGHT && left_.hold()))
+        if ((i == LEFT && in_.right().hold()) || (i == RIGHT && in_.left().hold()))
         {
             if (dirty_) { set_program(program_); }
             return;
@@ -633,7 +689,7 @@ controller::on_down(uint8_t i, bool down, unsigned long t) {
     // cancel changes and back to NORMAL mode
     // hold RIGHT then press LEFT or
     // hold LEFT then press RIGHT
-    if ((i == LEFT && right_.hold()) || (i == RIGHT && left_.hold()))
+    if ((i == LEFT && in_.right().hold()) || (i == RIGHT && in_.left().hold()))
     {
         set_mode(MODE_NORMAL, t);
         return;
@@ -643,17 +699,17 @@ controller::on_down(uint8_t i, bool down, unsigned long t) {
         bool loop_changed = false;
 
         // controller -> LOOP mapping
-        if (i == LEFT && right_.up()) {
+        if (i == LEFT && in_.right().up()) {
             set_edit_loop(rotate(edit_loop_, 1, MAX_LOOP + 1, -1));
             loop_changed = true;
         }
 
-        if (i == RIGHT && left_.up()) {
+        if (i == RIGHT && in_.left().up()) {
             set_edit_loop(rotate(edit_loop_, 1, MAX_LOOP + 1, 1));
             loop_changed = true;
         }
 
-        if (i < MAX_LOOP && left_.up() && right_.up()) {
+        if (i < MAX_LOOP && in_.left().up() && in_.right().up()) {
             if (i + 1 != edit_loop_) {
                 set_edit_loop(i + 1);
                 loop_changed = true;
@@ -668,26 +724,50 @@ controller::on_down(uint8_t i, bool down, unsigned long t) {
         return;
     }
 
+#if defined(WITH_SNAKE)
     if (mode_ == MODE_GAME_SNAKE) {
-        if (i == LEFT && right_.up()) {
+        if (i == LEFT && in_.right().up()) {
             snake_.turn_left(t);
         }
 
-        if (i == RIGHT && left_.up()) {
+        if (i == RIGHT && in_.left().up()) {
             snake_.turn_right(t);
         }
     }
+#endif
 
+#if defined(WITH_HERO)
     if (mode_ == MODE_GAME_HERO) {
         if (i == STORE) {
             hero_.jump(t);
         }
     }
+#endif
 
-    if (mode_ == MODE_MIDI_MONITOR) {
+    if (mode_ == MODE_MIDI_IN_MONITOR ||
+        mode_ == MODE_MIDI_OUT_MONITOR) {
+        uint8_t m = mode_ - MODE_MIDI_IN_MONITOR;
         if (i == STORE) {
             // enable/pause capturing
-            set_dirty(midi_mon_.toggle_pause(t));
+            set_dirty(midi_mon_[m].toggle_pause(t));
+        }
+
+        if (i == LEFT && in_.right().up()) {
+            midi_mon_[m].mode_prev(t);
+
+            out_.loop_led(1 << midi_mon_[m].mode());
+        }
+
+        if (i == RIGHT && in_.left().up()) {
+            midi_mon_[m].mode_next(t);
+
+            out_.loop_led(1 << midi_mon_[m].mode());
+        }
+
+        if (i < MAX_LOOP && i < midi_mon::MODE_MAX && in_.left().up() && in_.right().up()) {
+            midi_mon_[m].mode(i, t);
+
+            out_.loop_led(1 << i);
         }
     }
 }
@@ -696,7 +776,7 @@ inline void
 controller::on_hold(uint8_t i, unsigned long t) {
     debug(4, "on_hold: ", i);
 
-    if (i == STORE && left_.hold() && right_.hold()) {
+    if (i == STORE && in_.left().hold() && in_.right().hold()) {
         set_mode(MODE_SETTINGS_FACTORY_RESET, t);
         return;
     }
@@ -724,11 +804,11 @@ controller::on_hold(uint8_t i, unsigned long t) {
             return;
         }
 
-        if (i == RIGHT && left_.up()) {
+        if (i == RIGHT && in_.left().up()) {
             show_master(true);
         }
 
-        if ((i == LEFT && right_.down()) || (i == RIGHT && left_.down())) {
+        if ((i == LEFT && in_.right().down()) || (i == RIGHT && in_.left().down())) {
             // cancel changes
             if (dirty_) { set_program(program_); }
         }
@@ -781,8 +861,21 @@ controller::on_hold(uint8_t i, unsigned long t) {
             return;
 
         case MODE_SETTINGS_PROG_OUT:
-            settings_.midi_prog_chg_out = edit_value_;
-            settings_.write(settings_.midi_prog_chg_out);
+            if (edit_value_) {
+                settings_.midi_out |= settings::MIDI_OUT_PROG;
+            } else {
+                settings_.midi_out &= ~settings::MIDI_OUT_PROG;
+            }
+            settings_.write(settings_.midi_out);
+            break;
+
+        case MODE_SETTINGS_MIDI_FWD:
+            if (edit_value_) {
+                settings_.midi_out |= settings::MIDI_OUT_ALL;
+            } else {
+                settings_.midi_out &= ~settings::MIDI_OUT_ALL;
+            }
+            settings_.write(settings_.midi_out);
             break;
 
         case MODE_SETTINGS_MUTE_DELAY:
@@ -820,7 +913,7 @@ controller::on_hold(uint8_t i, unsigned long t) {
     // cancel changes and back to NORMAL mode
     // hold RIGHT then press LEFT or
     // hold LEFT then press RIGHT
-    if ((i == LEFT && right_.down()) || (i == RIGHT && left_.down())) {
+    if ((i == LEFT && in_.right().down()) || (i == RIGHT && in_.left().down())) {
         set_mode(MODE_NORMAL, t);
     }
 }
@@ -864,7 +957,7 @@ controller::on_rotate(short dir, unsigned long t) {
     debug(4, "on_rotate: ", dir);
 
     // rotate on RIGHT hold - change mode
-    if (right_.hold()) {
+    if (in_.right().hold()) {
         uint8_t m = rotate(mode_, MODE_NORMAL, MODE_MAX, dir);
 
         set_mode(m, t);
@@ -875,8 +968,8 @@ controller::on_rotate(short dir, unsigned long t) {
     case MODE_NORMAL: {
 
         // rotate on LEFT hold - change program
-        if (left_.hold()) {
-            set_program(rotate(program_, MAX_PROGRAM, dir));
+        if (in_.left().hold()) {
+            set_program(rotate(program_, MAX_PROGRAMS, dir));
 
             return;
         }
@@ -899,6 +992,7 @@ controller::on_rotate(short dir, unsigned long t) {
     case MODE_SETTINGS_CTRL_IN:
     case MODE_SETTINGS_CTRL_OUT:
     case MODE_SETTINGS_PROG_OUT:
+    case MODE_SETTINGS_MIDI_FWD:
     case MODE_SETTINGS_MUTE_DELAY:
     case MODE_SETTINGS_HIDE_CURSOR:
 #if defined(DEBUG)
@@ -914,6 +1008,7 @@ controller::on_rotate(short dir, unsigned long t) {
         lcd_update(13, 1, 3);
         break;
 
+#if defined(WITH_SNAKE)
     case MODE_GAME_SNAKE:
         if (dir > 0) {
             snake_.turn_right(t);
@@ -921,14 +1016,19 @@ controller::on_rotate(short dir, unsigned long t) {
             snake_.turn_left(t);
         }
         break;
+#endif
 
-    case MODE_MIDI_MONITOR:
+    case MODE_MIDI_IN_MONITOR:
+    case MODE_MIDI_OUT_MONITOR: {
+        uint8_t m = mode_ - MODE_MIDI_IN_MONITOR;
         if (dir > 0) {
-            midi_mon_.scroll_down(t);
+            midi_mon_[m].scroll_down(t);
         } else {
-            midi_mon_.scroll_up(t);
+            midi_mon_[m].scroll_up(t);
         }
         break;
+    }
+
     }
 }
 
@@ -978,9 +1078,15 @@ controller::print_edit_value() {
         memcpy(lcd_buf[1] + 13, "OFF", 3);
     } else if (edit_value_ == 0 &&
           (mode_ == MODE_SETTINGS_PROG_OUT ||
-           mode_ == MODE_SETTINGS_USB_DEBUG)) {
+           mode_ == MODE_SETTINGS_MIDI_FWD
+#if defined(DEBUG)
+           || mode_ == MODE_SETTINGS_USB_DEBUG
+#endif
+          )) {
         memcpy(lcd_buf[1] + 13, "OFF", 3);
-    } else if (edit_value_ != 0 && mode_ == MODE_SETTINGS_PROG_OUT) {
+    } else if (edit_value_ != 0 &&
+        (mode_ == MODE_SETTINGS_PROG_OUT ||
+        mode_ == MODE_SETTINGS_MIDI_FWD)) {
         memcpy(lcd_buf[1] + 13, "ON ", 3);
     } else {
         print_number(lcd_buf[1] + 13, 3, edit_value_);
@@ -1002,9 +1108,7 @@ controller::set_edit_loop(uint8_t edit_loop) {
 
     print_number(lcd_buf[1], 1, edit_loop_);
 
-    for(uint8_t i = 0; i < MAX_LOOP; i++) {
-        out_.loop_led(i, i == edit_loop_ - 1);
-    }
+    out_.loop_led(1 << (edit_loop_ - 1));
 }
 
 inline void
@@ -1015,6 +1119,11 @@ controller::set_mode(uint8_t m, unsigned long t) {
 
     if (mode_ == MODE_SETTINGS_FACTORY_RESET) {
         store_blink_timer_.stop();
+    }
+
+    if (mode_ == MODE_MIDI_IN_MONITOR ||
+        mode_ == MODE_MIDI_OUT_MONITOR) {
+        midi_mon_[mode_ - MODE_MIDI_IN_MONITOR].hide(t);
     }
 
     mode_ = m;
@@ -1041,7 +1150,7 @@ controller::set_mode(uint8_t m, unsigned long t) {
         break;
 
     case MODE_SETTINGS_CHANNEL:
-        start_edit(settings_.midi_channel + 1, 1, 127);
+        start_edit(settings_.midi_channel + 1, 1, 16);
         memcpy(lcd_buf[1], "MIDI Channel ", 13);
         break;
 
@@ -1056,8 +1165,13 @@ controller::set_mode(uint8_t m, unsigned long t) {
         break;
 
     case MODE_SETTINGS_PROG_OUT:
-        start_edit(settings_.midi_prog_chg_out, 0, 1, 1);
+        start_edit((settings_.midi_out & settings::MIDI_OUT_PROG) != 0, 0, 1, 1);
         memcpy(lcd_buf[1], "Prog Chg OUT ", 13);
+        break;
+
+    case MODE_SETTINGS_MIDI_FWD:
+        start_edit((settings_.midi_out & settings::MIDI_OUT_ALL) != 0, 0, 1, 1);
+        memcpy(lcd_buf[1], "MIDI Forward ", 13);
         break;
 
     case MODE_SETTINGS_MUTE_DELAY:
@@ -1085,15 +1199,26 @@ controller::set_mode(uint8_t m, unsigned long t) {
         break;
 #endif
 
-    case MODE_MIDI_MONITOR:
-        midi_mon_.setup(t);
-        memcpy(lcd_buf[0], "  MIDI Monitor  ", 16);
+    case MODE_MIDI_IN_MONITOR:
+        midi_mon_[0].show(t);
+        memcpy(lcd_buf[0], "MIDI IN Monitor ", 16);
         memcpy(lcd_buf[1], "0               ", 16);
-        set_dirty(true);  // turn 'STORE' led 'ON', capture enabled
+        set_dirty(midi_mon_[0].active());  // turn 'STORE' led 'ON', capture enabled
+
+        out_.loop_led(1 << midi_mon_[0].mode());
+        break;
+
+    case MODE_MIDI_OUT_MONITOR:
+        midi_mon_[1].show(t);
+        memcpy(lcd_buf[0], "MIDI OUT Monitor", 16);
+        memcpy(lcd_buf[1], "0               ", 16);
+        set_dirty(midi_mon_[1].active());  // turn 'STORE' led 'ON', capture enabled
+
+        out_.loop_led(1 << midi_mon_[1].mode());
         break;
 
     case MODE_ABOUT:
-        memcpy(lcd_buf[0], "About 2018.10.25", 16);
+        memcpy(lcd_buf[0], "About 2019.02.14", 16);
         memcpy(lcd_buf[1], " MIDI PatchMate ", 16);
         break;
 
@@ -1125,33 +1250,38 @@ controller::set_mode(uint8_t m, unsigned long t) {
         print_number(lcd_buf[1], 14, uptime_);
         break;
 
+#if defined(WITH_SNAKE)
     case MODE_GAME_SNAKE:
         snake_.setup();
         memcpy(lcd_buf[0], " Snake \4\3\3\3\3 \6  ", 16);
         memcpy(lcd_buf[1], " \1\1\1\1\1\1\4 16x2   ", 16);
         break;
+#endif
 
+#if defined(WITH_HERO)
     case MODE_GAME_HERO:
         hero_.setup();
         memcpy(lcd_buf[0], " Hero  \3        ", 16);
         memcpy(lcd_buf[1], "  \1   \6\5\7  16x2 ", 16);
         break;
+#endif
     }
 
-    if (mode_ != MODE_SETTINGS_CTRL_IN && mode_ != MODE_SETTINGS_CTRL_OUT) {
-        for(uint8_t i = 0; i < MAX_LOOP; i++) {
-            out_.loop_led(i, loop_state_[i]);
-        }
+    // adjust loop led for all modes except MODE_LED_IGNORE_LOOP_MASK
+    if (led4loop()) {
+        out_.loop_led(loop_state_);
     }
 
     hide_cursor();
 
     lcd_update();
-
-    if (mode_ == MODE_MIDI_MONITOR) {
+/*
+    if (mode_ == MODE_MIDI_IN_MONITOR ||
+        mode_ == MODE_MIDI_OUT_MONITOR) {
         lcd.setCursor(2, 1);
         lcd.cursor();
     }
+*/
 }
 
 inline void
@@ -1189,13 +1319,9 @@ controller::show_master(bool master)
     }
 
     if (master) {
-        for(uint8_t i = 0; i < MAX_LOOP; i++) {
-            out_.loop_led(i, loop_state_master_[i]);
-        }
+        out_.loop_led(loop_state_master_);
     } else {
-        for(uint8_t i = 0; i < MAX_LOOP; i++) {
-            out_.loop_led(i, loop_state_[i]);
-        }
+        out_.loop_led(loop_state_);
     }
 }
 

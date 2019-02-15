@@ -1,7 +1,6 @@
 
 #pragma once
 
-#include "../lcd.h"
 #include "graphic.h"
 #include "hero.h"
 #include "block.h"

@@ -1,7 +1,7 @@
 
 #pragma once
 
-#define PATCH_MATE_LITE 1
+// # define PATCH_MATE_LITE 1
 
 namespace patch_mate {
     enum {
