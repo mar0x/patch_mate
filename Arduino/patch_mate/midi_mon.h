@@ -238,7 +238,7 @@ midi_mon::render(char *dst, uint8_t pos, bool &sep) const {
         }
 
         pos = data_.prev(pos);
-        if (valid_pos(pos) && known_midi_cmd(data_[pos])) {
+        if (valid_pos(pos) && (data_[pos] & 0xF0U) == midi_cmd::CMD_PROG_CHANGE) {
             b++;
         }
 
