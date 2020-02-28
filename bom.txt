@@ -71,6 +71,7 @@ A38 black      11
 
 #    PCB Panel Mount MIDI Female DIN5 DIN 5-Pin Jack D501
 #    https://ru.aliexpress.com/item/10Pcs-PCB-Panel-Mount-MIDI-Female-DIN5-DIN-5-Pin-Jack-D501/32791217703.html
+#    или https://www.aliexpress.com/item/32820176757.html
 D501 5-pin     3
 
 #    Pro Micro ATmega32U4 5v
