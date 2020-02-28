@@ -61,8 +61,8 @@ GNL-3014SRD   8
 #    https://ru.aliexpress.com/item/LED-Locking-16mm-Waterproof-Metal-Push-Button-Switch-maintained-metal-switch-Latching-push-button-5V-12V/32800996847.html
 # ELECAPITAL Metal button switch
 
-#    6x6x12MM Right Angle 4PIN Tactile Tact Push Button Micro Switch Direct Plug-in Self-reset DIP
-#    https://ru.aliexpress.com/item/20pcs-lot-6x6x12MM-Right-Angle-4PIN-Tactile-Tact-Push-Button-Micro-Switch-Direct-Plug-in-Self/32785193513.html
+#    Momentary Tactile Tact Push Button Switch 6*6*12mm Right Angle With stent 6x6x12mm Tact switch ON/OFF For PCB
+#    https://www.aliexpress.com/item/33038124684.html
 # SHWB 6*6 DIP  11
 
 #    A38 3*2mm Tactile Push Button Switch Cap for 5.8mm 7mm 8mm 8.5mm Micro Tact Switchs black
@@ -72,6 +72,10 @@ A38 black      11
 #    PCB Panel Mount MIDI Female DIN5 DIN 5-Pin Jack D501
 #    https://ru.aliexpress.com/item/10Pcs-PCB-Panel-Mount-MIDI-Female-DIN5-DIN-5-Pin-Jack-D501/32791217703.html
 D501 5-pin     3
+
+#    Pro Micro ATmega32U4 5v
+#    https://www.aliexpress.ru/item/32775200720.html
+# Arduino Pro Micro
 
 
 # Relay Board
@@ -140,7 +144,7 @@ BC337-40RL1G
 # DS2Y-S-DC5V   18
 
 #    Dual Ports TRS 1/4" 6.35 mm stereo Audio phone Jack Headphone socket 6 conductor 12 contact 6 switch right angle
-#    https://ru.aliexpress.com/item/2pcs-Screw-Dual-Ports-TRS-1-4-6-35-mm-stereo-Audio-phone-Jack-Headphone-socket/32757660442.html
+#    https://www.aliexpress.com/item/32756961680.html
 CK635-037      9
 
 #    1/4" 6.35 mm stereo phone Jack socket Headphone Connector 3 conductor 6 contact through hole right angle 3 switch bushing
