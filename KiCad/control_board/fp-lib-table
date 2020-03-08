@@ -1,0 +1,3 @@
+(fp_lib_table
+  (lib (name bg)(type KiCad)(uri ${KIPRJMOD}/bg.pretty)(options "")(descr ""))
+)

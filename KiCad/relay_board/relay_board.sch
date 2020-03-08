@@ -1,0 +1,2601 @@
+EESchema Schematic File Version 4
+EELAYER 30 0
+EELAYER END
+$Descr A3 16535 11693
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L relay_omron_g6k-2:G6K-2 K_SEND4
+U 1 1 5E80A914
+P 8150 2850
+F 0 "K_SEND4" V 7400 2850 50  0000 C CNN
+F 1 "G6K-2" V 7474 2850 50  0000 C CNN
+F 2 "Relay_SMD:Relay_DPDT_Omron_G6K-2F-Y" H 8800 2800 50  0001 L CNN
+F 3 "http://omronfs.omron.com/en_US/ecb/products/pdf/en-g6k.pdf" H 7950 2850 50  0001 C CNN
+	1    8150 2850
+	0    1    1    0   
+$EndComp
+$Comp
+L relay_omron_g6k-2:G6K-2 K_RET4
+U 1 1 5E80E5E4
+P 9000 2850
+F 0 "K_RET4" V 8250 2800 50  0000 C CNN
+F 1 "G6K-2" V 8324 2850 50  0000 C CNN
+F 2 "Relay_SMD:Relay_DPDT_Omron_G6K-2F-Y" H 9650 2800 50  0001 L CNN
+F 3 "http://omronfs.omron.com/en_US/ecb/products/pdf/en-g6k.pdf" H 8800 2850 50  0001 C CNN
+	1    9000 2850
+	0    -1   1    0   
+$EndComp
+$Comp
+L Connector:AudioJack3_Dual_Switch LOOP4
+U 1 1 5E813857
+P 8950 1600
+F 0 "LOOP4" H 8950 1950 50  0000 R CNN
+F 1 "AudioJack3_Dual_Switch" H 8620 1509 50  0001 R CNN
+F 2 "CK635-037:CK635-037" H 8900 1600 50  0001 C CNN
+F 3 "~" H 8900 1600 50  0001 C CNN
+	1    8950 1600
+	-1   0    0    -1  
+$EndComp
+$Comp
+L Connector:AudioJack3_Dual_Switch LOOP4
+U 2 1 5E81804B
+P 8200 1600
+F 0 "LOOP4" H 8100 1950 50  0000 C CNN
+F 1 "AudioJack3_Dual_Switch" H 8157 1934 50  0001 C CNN
+F 2 "CK635-037:CK635-037" H 8150 1600 50  0001 C CNN
+F 3 "~" H 8150 1600 50  0001 C CNN
+	2    8200 1600
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8400 1800 8500 1800
+Wire Wire Line
+	8500 1800 8500 2950
+Wire Wire Line
+	8500 2950 8450 2950
+Wire Wire Line
+	8400 1600 8550 1600
+Wire Wire Line
+	8550 1600 8550 3350
+Wire Wire Line
+	8550 3350 8450 3350
+Wire Wire Line
+	8750 1800 8650 1800
+Wire Wire Line
+	8650 2950 8700 2950
+Wire Wire Line
+	8750 1600 8600 1600
+Wire Wire Line
+	8600 1600 8600 3350
+Wire Wire Line
+	8600 3350 8700 3350
+Wire Wire Line
+	8700 3150 8450 3150
+Wire Wire Line
+	8650 1800 8650 2950
+Wire Wire Line
+	8700 2750 8450 2750
+$Comp
+L power:+5V #PWR0101
+U 1 1 5E8220D3
+P 8450 2150
+F 0 "#PWR0101" H 8450 2000 50  0001 C CNN
+F 1 "+5V" H 8350 2250 50  0000 C CNN
+F 2 "" H 8450 2150 50  0001 C CNN
+F 3 "" H 8450 2150 50  0001 C CNN
+	1    8450 2150
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8450 2150 8450 2450
+$Comp
+L power:+5V #PWR0102
+U 1 1 5E822A24
+P 8700 2150
+F 0 "#PWR0102" H 8700 2000 50  0001 C CNN
+F 1 "+5V" H 8800 2250 50  0000 C CNN
+F 2 "" H 8700 2150 50  0001 C CNN
+F 3 "" H 8700 2150 50  0001 C CNN
+	1    8700 2150
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8700 2150 8700 2450
+Wire Wire Line
+	8400 1400 8550 1400
+$Comp
+L relay_omron_g6k-2:G6K-2 K_SEND3
+U 1 1 5E82E16E
+P 6450 2850
+F 0 "K_SEND3" V 5700 2850 50  0000 C CNN
+F 1 "G6K-2" V 5774 2850 50  0000 C CNN
+F 2 "Relay_SMD:Relay_DPDT_Omron_G6K-2F-Y" H 7100 2800 50  0001 L CNN
+F 3 "http://omronfs.omron.com/en_US/ecb/products/pdf/en-g6k.pdf" H 6250 2850 50  0001 C CNN
+	1    6450 2850
+	0    1    1    0   
+$EndComp
+$Comp
+L relay_omron_g6k-2:G6K-2 K_RET3
+U 1 1 5E82E178
+P 7300 2850
+F 0 "K_RET3" V 6550 2800 50  0000 C CNN
+F 1 "G6K-2" V 6624 2850 50  0000 C CNN
+F 2 "Relay_SMD:Relay_DPDT_Omron_G6K-2F-Y" H 7950 2800 50  0001 L CNN
+F 3 "http://omronfs.omron.com/en_US/ecb/products/pdf/en-g6k.pdf" H 7100 2850 50  0001 C CNN
+	1    7300 2850
+	0    -1   1    0   
+$EndComp
+$Comp
+L Connector:AudioJack3_Dual_Switch LOOP3
+U 1 1 5E82E182
+P 7250 1600
+F 0 "LOOP3" H 7250 1950 50  0000 R CNN
+F 1 "AudioJack3_Dual_Switch" H 6920 1509 50  0001 R CNN
+F 2 "CK635-037:CK635-037" H 7200 1600 50  0001 C CNN
+F 3 "~" H 7200 1600 50  0001 C CNN
+	1    7250 1600
+	-1   0    0    -1  
+$EndComp
+$Comp
+L Connector:AudioJack3_Dual_Switch LOOP3
+U 2 1 5E82E18C
+P 6500 1600
+F 0 "LOOP3" H 6400 1950 50  0000 C CNN
+F 1 "AudioJack3_Dual_Switch" H 6457 1934 50  0001 C CNN
+F 2 "CK635-037:CK635-037" H 6450 1600 50  0001 C CNN
+F 3 "~" H 6450 1600 50  0001 C CNN
+	2    6500 1600
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6700 1800 6800 1800
+Wire Wire Line
+	6800 1800 6800 2950
+Wire Wire Line
+	6800 2950 6750 2950
+Wire Wire Line
+	6700 1600 6850 1600
+Wire Wire Line
+	6850 1600 6850 3350
+Wire Wire Line
+	6850 3350 6750 3350
+Wire Wire Line
+	7050 1800 6950 1800
+Wire Wire Line
+	6950 2950 7000 2950
+Wire Wire Line
+	7050 1600 6900 1600
+Wire Wire Line
+	6900 1600 6900 3350
+Wire Wire Line
+	6900 3350 7000 3350
+Wire Wire Line
+	7000 3150 6750 3150
+Wire Wire Line
+	6950 1800 6950 2950
+Wire Wire Line
+	7000 2750 6750 2750
+$Comp
+L power:+5V #PWR0103
+U 1 1 5E82E1A4
+P 6750 2150
+F 0 "#PWR0103" H 6750 2000 50  0001 C CNN
+F 1 "+5V" H 6650 2250 50  0000 C CNN
+F 2 "" H 6750 2150 50  0001 C CNN
+F 3 "" H 6750 2150 50  0001 C CNN
+	1    6750 2150
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	6750 2150 6750 2450
+$Comp
+L power:+5V #PWR0104
+U 1 1 5E82E1AF
+P 7000 2150
+F 0 "#PWR0104" H 7000 2000 50  0001 C CNN
+F 1 "+5V" H 7100 2250 50  0000 C CNN
+F 2 "" H 7000 2150 50  0001 C CNN
+F 3 "" H 7000 2150 50  0001 C CNN
+	1    7000 2150
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7000 2150 7000 2450
+Wire Wire Line
+	6700 1400 6850 1400
+$Comp
+L relay_omron_g6k-2:G6K-2 K_SEND2
+U 1 1 5E837CA0
+P 4750 2850
+F 0 "K_SEND2" V 4000 2850 50  0000 C CNN
+F 1 "G6K-2" V 4074 2850 50  0000 C CNN
+F 2 "Relay_SMD:Relay_DPDT_Omron_G6K-2F-Y" H 5400 2800 50  0001 L CNN
+F 3 "http://omronfs.omron.com/en_US/ecb/products/pdf/en-g6k.pdf" H 4550 2850 50  0001 C CNN
+	1    4750 2850
+	0    1    1    0   
+$EndComp
+$Comp
+L relay_omron_g6k-2:G6K-2 K_RET2
+U 1 1 5E837CAA
+P 5600 2850
+F 0 "K_RET2" V 4850 2800 50  0000 C CNN
+F 1 "G6K-2" V 4924 2850 50  0000 C CNN
+F 2 "Relay_SMD:Relay_DPDT_Omron_G6K-2F-Y" H 6250 2800 50  0001 L CNN
+F 3 "http://omronfs.omron.com/en_US/ecb/products/pdf/en-g6k.pdf" H 5400 2850 50  0001 C CNN
+	1    5600 2850
+	0    -1   1    0   
+$EndComp
+$Comp
+L Connector:AudioJack3_Dual_Switch LOOP2
+U 1 1 5E837CB4
+P 5550 1600
+F 0 "LOOP2" H 5550 1950 50  0000 R CNN
+F 1 "AudioJack3_Dual_Switch" H 5220 1509 50  0001 R CNN
+F 2 "CK635-037:CK635-037" H 5500 1600 50  0001 C CNN
+F 3 "~" H 5500 1600 50  0001 C CNN
+	1    5550 1600
+	-1   0    0    -1  
+$EndComp
+$Comp
+L Connector:AudioJack3_Dual_Switch LOOP2
+U 2 1 5E837CBE
+P 4800 1600
+F 0 "LOOP2" H 4700 1950 50  0000 C CNN
+F 1 "AudioJack3_Dual_Switch" H 4757 1934 50  0001 C CNN
+F 2 "CK635-037:CK635-037" H 4750 1600 50  0001 C CNN
+F 3 "~" H 4750 1600 50  0001 C CNN
+	2    4800 1600
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5000 1800 5100 1800
+Wire Wire Line
+	5100 1800 5100 2950
+Wire Wire Line
+	5100 2950 5050 2950
+Wire Wire Line
+	5000 1600 5150 1600
+Wire Wire Line
+	5150 1600 5150 3350
+Wire Wire Line
+	5150 3350 5050 3350
+Wire Wire Line
+	5350 1800 5250 1800
+Wire Wire Line
+	5250 2950 5300 2950
+Wire Wire Line
+	5350 1600 5200 1600
+Wire Wire Line
+	5200 1600 5200 3350
+Wire Wire Line
+	5200 3350 5300 3350
+Wire Wire Line
+	5300 3150 5050 3150
+Wire Wire Line
+	5250 1800 5250 2950
+Wire Wire Line
+	5300 2750 5050 2750
+$Comp
+L power:+5V #PWR0105
+U 1 1 5E837CD6
+P 5050 2150
+F 0 "#PWR0105" H 5050 2000 50  0001 C CNN
+F 1 "+5V" H 4950 2250 50  0000 C CNN
+F 2 "" H 5050 2150 50  0001 C CNN
+F 3 "" H 5050 2150 50  0001 C CNN
+	1    5050 2150
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5050 2150 5050 2450
+$Comp
+L power:+5V #PWR0106
+U 1 1 5E837CE1
+P 5300 2150
+F 0 "#PWR0106" H 5300 2000 50  0001 C CNN
+F 1 "+5V" H 5400 2250 50  0000 C CNN
+F 2 "" H 5300 2150 50  0001 C CNN
+F 3 "" H 5300 2150 50  0001 C CNN
+	1    5300 2150
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5300 2150 5300 2450
+Wire Wire Line
+	5000 1400 5150 1400
+$Comp
+L relay_omron_g6k-2:G6K-2 K_SEND1
+U 1 1 5E837CED
+P 3050 2850
+F 0 "K_SEND1" V 2300 2850 50  0000 C CNN
+F 1 "G6K-2" V 2374 2850 50  0000 C CNN
+F 2 "Relay_SMD:Relay_DPDT_Omron_G6K-2F-Y" H 3700 2800 50  0001 L CNN
+F 3 "http://omronfs.omron.com/en_US/ecb/products/pdf/en-g6k.pdf" H 2850 2850 50  0001 C CNN
+	1    3050 2850
+	0    1    1    0   
+$EndComp
+$Comp
+L relay_omron_g6k-2:G6K-2 K_RET1
+U 1 1 5E837CF7
+P 3900 2850
+F 0 "K_RET1" V 3150 2800 50  0000 C CNN
+F 1 "G6K-2" V 3224 2850 50  0000 C CNN
+F 2 "Relay_SMD:Relay_DPDT_Omron_G6K-2F-Y" H 4550 2800 50  0001 L CNN
+F 3 "http://omronfs.omron.com/en_US/ecb/products/pdf/en-g6k.pdf" H 3700 2850 50  0001 C CNN
+	1    3900 2850
+	0    -1   1    0   
+$EndComp
+$Comp
+L Connector:AudioJack3_Dual_Switch LOOP1
+U 1 1 5E837D01
+P 3850 1600
+F 0 "LOOP1" H 3850 1950 50  0000 R CNN
+F 1 "AudioJack3_Dual_Switch" H 3520 1509 50  0001 R CNN
+F 2 "CK635-037:CK635-037" H 3800 1600 50  0001 C CNN
+F 3 "~" H 3800 1600 50  0001 C CNN
+	1    3850 1600
+	-1   0    0    -1  
+$EndComp
+$Comp
+L Connector:AudioJack3_Dual_Switch LOOP1
+U 2 1 5E837D0B
+P 3100 1600
+F 0 "LOOP1" H 3000 1950 50  0000 C CNN
+F 1 "AudioJack3_Dual_Switch" H 3057 1934 50  0001 C CNN
+F 2 "CK635-037:CK635-037" H 3050 1600 50  0001 C CNN
+F 3 "~" H 3050 1600 50  0001 C CNN
+	2    3100 1600
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3300 1800 3400 1800
+Wire Wire Line
+	3400 1800 3400 2950
+Wire Wire Line
+	3400 2950 3350 2950
+Wire Wire Line
+	3300 1600 3450 1600
+Wire Wire Line
+	3450 1600 3450 3350
+Wire Wire Line
+	3450 3350 3350 3350
+Wire Wire Line
+	3650 1800 3550 1800
+Wire Wire Line
+	3550 2950 3600 2950
+Wire Wire Line
+	3650 1600 3500 1600
+Wire Wire Line
+	3500 1600 3500 3350
+Wire Wire Line
+	3500 3350 3600 3350
+Wire Wire Line
+	3600 3150 3350 3150
+Wire Wire Line
+	3550 1800 3550 2950
+Wire Wire Line
+	3600 2750 3350 2750
+$Comp
+L power:+5V #PWR0107
+U 1 1 5E837D23
+P 3350 2150
+F 0 "#PWR0107" H 3350 2000 50  0001 C CNN
+F 1 "+5V" H 3250 2250 50  0000 C CNN
+F 2 "" H 3350 2150 50  0001 C CNN
+F 3 "" H 3350 2150 50  0001 C CNN
+	1    3350 2150
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3350 2150 3350 2450
+$Comp
+L power:+5V #PWR0108
+U 1 1 5E837D2E
+P 3600 2150
+F 0 "#PWR0108" H 3600 2000 50  0001 C CNN
+F 1 "+5V" H 3700 2250 50  0000 C CNN
+F 2 "" H 3600 2150 50  0001 C CNN
+F 3 "" H 3600 2150 50  0001 C CNN
+	1    3600 2150
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3600 2150 3600 2450
+Wire Wire Line
+	3300 1400 3450 1400
+$Comp
+L relay_omron_g6k-2:G6K-2 K_SEND8
+U 1 1 5E867D5A
+P 12150 5700
+F 0 "K_SEND8" V 11400 5700 50  0000 C CNN
+F 1 "G6K-2" V 11474 5700 50  0000 C CNN
+F 2 "Relay_SMD:Relay_DPDT_Omron_G6K-2F-Y" H 12800 5650 50  0001 L CNN
+F 3 "http://omronfs.omron.com/en_US/ecb/products/pdf/en-g6k.pdf" H 11950 5700 50  0001 C CNN
+	1    12150 5700
+	0    1    1    0   
+$EndComp
+$Comp
+L relay_omron_g6k-2:G6K-2 K_RET8
+U 1 1 5E867D64
+P 13000 5700
+F 0 "K_RET8" V 12250 5650 50  0000 C CNN
+F 1 "G6K-2" V 12324 5700 50  0000 C CNN
+F 2 "Relay_SMD:Relay_DPDT_Omron_G6K-2F-Y" H 13650 5650 50  0001 L CNN
+F 3 "http://omronfs.omron.com/en_US/ecb/products/pdf/en-g6k.pdf" H 12800 5700 50  0001 C CNN
+	1    13000 5700
+	0    -1   1    0   
+$EndComp
+$Comp
+L Connector:AudioJack3_Dual_Switch LOOP8
+U 1 1 5E867D6E
+P 12950 4450
+F 0 "LOOP8" H 12950 4800 50  0000 R CNN
+F 1 "AudioJack3_Dual_Switch" H 12620 4359 50  0001 R CNN
+F 2 "CK635-037:CK635-037" H 12900 4450 50  0001 C CNN
+F 3 "~" H 12900 4450 50  0001 C CNN
+	1    12950 4450
+	-1   0    0    -1  
+$EndComp
+$Comp
+L Connector:AudioJack3_Dual_Switch LOOP8
+U 2 1 5E867D78
+P 12200 4450
+F 0 "LOOP8" H 12100 4800 50  0000 C CNN
+F 1 "AudioJack3_Dual_Switch" H 12157 4784 50  0001 C CNN
+F 2 "CK635-037:CK635-037" H 12150 4450 50  0001 C CNN
+F 3 "~" H 12150 4450 50  0001 C CNN
+	2    12200 4450
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	12400 4650 12500 4650
+Wire Wire Line
+	12500 4650 12500 5800
+Wire Wire Line
+	12500 5800 12450 5800
+Wire Wire Line
+	12400 4450 12550 4450
+Wire Wire Line
+	12550 4450 12550 6200
+Wire Wire Line
+	12550 6200 12450 6200
+Wire Wire Line
+	12750 4650 12650 4650
+Wire Wire Line
+	12650 5800 12700 5800
+Wire Wire Line
+	12750 4450 12600 4450
+Wire Wire Line
+	12600 4450 12600 6200
+Wire Wire Line
+	12600 6200 12700 6200
+Wire Wire Line
+	12700 6000 12450 6000
+Wire Wire Line
+	12650 4650 12650 5800
+Wire Wire Line
+	12700 5600 12450 5600
+$Comp
+L power:+5V #PWR0109
+U 1 1 5E867D90
+P 12450 5000
+F 0 "#PWR0109" H 12450 4850 50  0001 C CNN
+F 1 "+5V" H 12350 5100 50  0000 C CNN
+F 2 "" H 12450 5000 50  0001 C CNN
+F 3 "" H 12450 5000 50  0001 C CNN
+	1    12450 5000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	12450 5000 12450 5300
+$Comp
+L power:+5V #PWR0110
+U 1 1 5E867D9B
+P 12700 5000
+F 0 "#PWR0110" H 12700 4850 50  0001 C CNN
+F 1 "+5V" H 12800 5100 50  0000 C CNN
+F 2 "" H 12700 5000 50  0001 C CNN
+F 3 "" H 12700 5000 50  0001 C CNN
+	1    12700 5000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	12700 5000 12700 5300
+Wire Wire Line
+	12400 4250 12550 4250
+$Comp
+L relay_omron_g6k-2:G6K-2 K_SEND7
+U 1 1 5E867DA7
+P 10450 5700
+F 0 "K_SEND7" V 9700 5700 50  0000 C CNN
+F 1 "G6K-2" V 9774 5700 50  0000 C CNN
+F 2 "Relay_SMD:Relay_DPDT_Omron_G6K-2F-Y" H 11100 5650 50  0001 L CNN
+F 3 "http://omronfs.omron.com/en_US/ecb/products/pdf/en-g6k.pdf" H 10250 5700 50  0001 C CNN
+	1    10450 5700
+	0    1    1    0   
+$EndComp
+$Comp
+L relay_omron_g6k-2:G6K-2 K_RET7
+U 1 1 5E867DB1
+P 11300 5700
+F 0 "K_RET7" V 10550 5650 50  0000 C CNN
+F 1 "G6K-2" V 10624 5700 50  0000 C CNN
+F 2 "Relay_SMD:Relay_DPDT_Omron_G6K-2F-Y" H 11950 5650 50  0001 L CNN
+F 3 "http://omronfs.omron.com/en_US/ecb/products/pdf/en-g6k.pdf" H 11100 5700 50  0001 C CNN
+	1    11300 5700
+	0    -1   1    0   
+$EndComp
+$Comp
+L Connector:AudioJack3_Dual_Switch LOOP7
+U 1 1 5E867DBB
+P 11250 4450
+F 0 "LOOP7" H 11250 4800 50  0000 R CNN
+F 1 "AudioJack3_Dual_Switch" H 10920 4359 50  0001 R CNN
+F 2 "CK635-037:CK635-037" H 11200 4450 50  0001 C CNN
+F 3 "~" H 11200 4450 50  0001 C CNN
+	1    11250 4450
+	-1   0    0    -1  
+$EndComp
+$Comp
+L Connector:AudioJack3_Dual_Switch LOOP7
+U 2 1 5E867DC5
+P 10500 4450
+F 0 "LOOP7" H 10400 4800 50  0000 C CNN
+F 1 "AudioJack3_Dual_Switch" H 10457 4784 50  0001 C CNN
+F 2 "CK635-037:CK635-037" H 10450 4450 50  0001 C CNN
+F 3 "~" H 10450 4450 50  0001 C CNN
+	2    10500 4450
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	10700 4650 10800 4650
+Wire Wire Line
+	10800 4650 10800 5800
+Wire Wire Line
+	10800 5800 10750 5800
+Wire Wire Line
+	10700 4450 10850 4450
+Wire Wire Line
+	10850 4450 10850 6200
+Wire Wire Line
+	10850 6200 10750 6200
+Wire Wire Line
+	11050 4650 10950 4650
+Wire Wire Line
+	10950 5800 11000 5800
+Wire Wire Line
+	11050 4450 10900 4450
+Wire Wire Line
+	10900 4450 10900 6200
+Wire Wire Line
+	10900 6200 11000 6200
+Wire Wire Line
+	11000 6000 10750 6000
+Wire Wire Line
+	10950 4650 10950 5800
+Wire Wire Line
+	11000 5600 10750 5600
+$Comp
+L power:+5V #PWR0111
+U 1 1 5E867DDD
+P 10750 5000
+F 0 "#PWR0111" H 10750 4850 50  0001 C CNN
+F 1 "+5V" H 10650 5100 50  0000 C CNN
+F 2 "" H 10750 5000 50  0001 C CNN
+F 3 "" H 10750 5000 50  0001 C CNN
+	1    10750 5000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	10750 5000 10750 5300
+$Comp
+L power:+5V #PWR0112
+U 1 1 5E867DE8
+P 11000 5000
+F 0 "#PWR0112" H 11000 4850 50  0001 C CNN
+F 1 "+5V" H 11100 5100 50  0000 C CNN
+F 2 "" H 11000 5000 50  0001 C CNN
+F 3 "" H 11000 5000 50  0001 C CNN
+	1    11000 5000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	11000 5000 11000 5300
+Wire Wire Line
+	10700 4250 10850 4250
+$Comp
+L relay_omron_g6k-2:G6K-2 K_SEND6
+U 1 1 5E867DF4
+P 8750 5700
+F 0 "K_SEND6" V 8000 5700 50  0000 C CNN
+F 1 "G6K-2" V 8074 5700 50  0000 C CNN
+F 2 "Relay_SMD:Relay_DPDT_Omron_G6K-2F-Y" H 9400 5650 50  0001 L CNN
+F 3 "http://omronfs.omron.com/en_US/ecb/products/pdf/en-g6k.pdf" H 8550 5700 50  0001 C CNN
+	1    8750 5700
+	0    1    1    0   
+$EndComp
+$Comp
+L relay_omron_g6k-2:G6K-2 K_RET6
+U 1 1 5E867DFE
+P 9600 5700
+F 0 "K_RET6" V 8850 5650 50  0000 C CNN
+F 1 "G6K-2" V 8924 5700 50  0000 C CNN
+F 2 "Relay_SMD:Relay_DPDT_Omron_G6K-2F-Y" H 10250 5650 50  0001 L CNN
+F 3 "http://omronfs.omron.com/en_US/ecb/products/pdf/en-g6k.pdf" H 9400 5700 50  0001 C CNN
+	1    9600 5700
+	0    -1   1    0   
+$EndComp
+$Comp
+L Connector:AudioJack3_Dual_Switch LOOP6
+U 1 1 5E867E08
+P 9550 4450
+F 0 "LOOP6" H 9550 4800 50  0000 R CNN
+F 1 "AudioJack3_Dual_Switch" H 9220 4359 50  0001 R CNN
+F 2 "CK635-037:CK635-037" H 9500 4450 50  0001 C CNN
+F 3 "~" H 9500 4450 50  0001 C CNN
+	1    9550 4450
+	-1   0    0    -1  
+$EndComp
+$Comp
+L Connector:AudioJack3_Dual_Switch LOOP6
+U 2 1 5E867E12
+P 8800 4450
+F 0 "LOOP6" H 8700 4800 50  0000 C CNN
+F 1 "AudioJack3_Dual_Switch" H 8757 4784 50  0001 C CNN
+F 2 "CK635-037:CK635-037" H 8750 4450 50  0001 C CNN
+F 3 "~" H 8750 4450 50  0001 C CNN
+	2    8800 4450
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	9000 4650 9100 4650
+Wire Wire Line
+	9100 4650 9100 5800
+Wire Wire Line
+	9100 5800 9050 5800
+Wire Wire Line
+	9000 4450 9150 4450
+Wire Wire Line
+	9150 4450 9150 6200
+Wire Wire Line
+	9150 6200 9050 6200
+Wire Wire Line
+	9350 4650 9250 4650
+Wire Wire Line
+	9250 5800 9300 5800
+Wire Wire Line
+	9350 4450 9200 4450
+Wire Wire Line
+	9200 4450 9200 6200
+Wire Wire Line
+	9200 6200 9300 6200
+Wire Wire Line
+	9300 6000 9050 6000
+Wire Wire Line
+	9250 4650 9250 5800
+Wire Wire Line
+	9300 5600 9050 5600
+$Comp
+L power:+5V #PWR0113
+U 1 1 5E867E2A
+P 9050 5000
+F 0 "#PWR0113" H 9050 4850 50  0001 C CNN
+F 1 "+5V" H 8950 5100 50  0000 C CNN
+F 2 "" H 9050 5000 50  0001 C CNN
+F 3 "" H 9050 5000 50  0001 C CNN
+	1    9050 5000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	9050 5000 9050 5300
+$Comp
+L power:+5V #PWR0114
+U 1 1 5E867E35
+P 9300 5000
+F 0 "#PWR0114" H 9300 4850 50  0001 C CNN
+F 1 "+5V" H 9400 5100 50  0000 C CNN
+F 2 "" H 9300 5000 50  0001 C CNN
+F 3 "" H 9300 5000 50  0001 C CNN
+	1    9300 5000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	9300 5000 9300 5300
+Wire Wire Line
+	9000 4250 9150 4250
+$Comp
+L relay_omron_g6k-2:G6K-2 K_SEND5
+U 1 1 5E867E41
+P 7050 5700
+F 0 "K_SEND5" V 6300 5700 50  0000 C CNN
+F 1 "G6K-2" V 6374 5700 50  0000 C CNN
+F 2 "Relay_SMD:Relay_DPDT_Omron_G6K-2F-Y" H 7700 5650 50  0001 L CNN
+F 3 "http://omronfs.omron.com/en_US/ecb/products/pdf/en-g6k.pdf" H 6850 5700 50  0001 C CNN
+	1    7050 5700
+	0    1    1    0   
+$EndComp
+$Comp
+L relay_omron_g6k-2:G6K-2 K_RET5
+U 1 1 5E867E4B
+P 7900 5700
+F 0 "K_RET5" V 7150 5650 50  0000 C CNN
+F 1 "G6K-2" V 7224 5700 50  0000 C CNN
+F 2 "Relay_SMD:Relay_DPDT_Omron_G6K-2F-Y" H 8550 5650 50  0001 L CNN
+F 3 "http://omronfs.omron.com/en_US/ecb/products/pdf/en-g6k.pdf" H 7700 5700 50  0001 C CNN
+	1    7900 5700
+	0    -1   1    0   
+$EndComp
+$Comp
+L Connector:AudioJack3_Dual_Switch LOOP5
+U 1 1 5E867E55
+P 7850 4450
+F 0 "LOOP5" H 7850 4800 50  0000 R CNN
+F 1 "AudioJack3_Dual_Switch" H 7520 4359 50  0001 R CNN
+F 2 "CK635-037:CK635-037" H 7800 4450 50  0001 C CNN
+F 3 "~" H 7800 4450 50  0001 C CNN
+	1    7850 4450
+	-1   0    0    -1  
+$EndComp
+$Comp
+L Connector:AudioJack3_Dual_Switch LOOP5
+U 2 1 5E867E5F
+P 7100 4450
+F 0 "LOOP5" H 7000 4800 50  0000 C CNN
+F 1 "AudioJack3_Dual_Switch" H 7057 4784 50  0001 C CNN
+F 2 "CK635-037:CK635-037" H 7050 4450 50  0001 C CNN
+F 3 "~" H 7050 4450 50  0001 C CNN
+	2    7100 4450
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7300 4650 7400 4650
+Wire Wire Line
+	7400 4650 7400 5800
+Wire Wire Line
+	7400 5800 7350 5800
+Wire Wire Line
+	7300 4450 7450 4450
+Wire Wire Line
+	7450 4450 7450 6200
+Wire Wire Line
+	7450 6200 7350 6200
+Wire Wire Line
+	7650 4650 7550 4650
+Wire Wire Line
+	7550 5800 7600 5800
+Wire Wire Line
+	7650 4450 7500 4450
+Wire Wire Line
+	7500 4450 7500 6200
+Wire Wire Line
+	7500 6200 7600 6200
+Wire Wire Line
+	7600 6000 7350 6000
+Wire Wire Line
+	7550 4650 7550 5800
+Wire Wire Line
+	7600 5600 7350 5600
+$Comp
+L power:+5V #PWR0115
+U 1 1 5E867E77
+P 7350 5000
+F 0 "#PWR0115" H 7350 4850 50  0001 C CNN
+F 1 "+5V" H 7250 5100 50  0000 C CNN
+F 2 "" H 7350 5000 50  0001 C CNN
+F 3 "" H 7350 5000 50  0001 C CNN
+	1    7350 5000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7350 5000 7350 5300
+$Comp
+L power:+5V #PWR0116
+U 1 1 5E867E82
+P 7600 5000
+F 0 "#PWR0116" H 7600 4850 50  0001 C CNN
+F 1 "+5V" H 7700 5100 50  0000 C CNN
+F 2 "" H 7600 5000 50  0001 C CNN
+F 3 "" H 7600 5000 50  0001 C CNN
+	1    7600 5000
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7600 5000 7600 5300
+$Comp
+L Connector:AudioJack3_Dual_Switch INOUT5
+U 1 1 5E88D5D6
+P 4400 4450
+F 0 "INOUT5" H 4300 4800 50  0000 C CNN
+F 1 "AudioJack3_Dual_Switch" H 4357 4784 50  0001 C CNN
+F 2 "CK635-037:CK635-037" H 4350 4450 50  0001 C CNN
+F 3 "~" H 4350 4450 50  0001 C CNN
+	1    4400 4450
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector:AudioJack3_Dual_Switch INOUT5
+U 2 1 5E88FE6D
+P 5750 4450
+F 0 "INOUT5" H 5750 4800 50  0000 R CNN
+F 1 "AudioJack3_Dual_Switch" H 5420 4359 50  0001 R CNN
+F 2 "CK635-037:CK635-037" H 5700 4450 50  0001 C CNN
+F 3 "~" H 5700 4450 50  0001 C CNN
+	2    5750 4450
+	-1   0    0    -1  
+$EndComp
+$Comp
+L Connector:AudioJack3_Switch MAIN_IN1
+U 1 1 5E892403
+P 1600 1600
+F 0 "MAIN_IN1" H 1750 2050 50  0000 R CNN
+F 1 "CK635-041A" H 1850 1950 50  0000 R CNN
+F 2 "CK635-041A:CK635-041A" H 1600 1600 50  0001 C CNN
+F 3 "~" H 1600 1600 50  0001 C CNN
+	1    1600 1600
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector:AudioJack3_Switch MAIN_OUT1
+U 1 1 5E894AF5
+P 14700 3600
+F 0 "MAIN_OUT1" H 14800 4100 50  0000 R CNN
+F 1 "CK635-041A" H 14800 4000 50  0000 R CNN
+F 2 "CK635-041A:CK635-041A" H 14700 3600 50  0001 C CNN
+F 3 "~" H 14700 3600 50  0001 C CNN
+	1    14700 3600
+	-1   0    0    -1  
+$EndComp
+Wire Wire Line
+	4200 2850 4450 2850
+Wire Wire Line
+	4200 3250 4450 3250
+Wire Wire Line
+	5900 2850 6150 2850
+Wire Wire Line
+	5900 3250 6150 3250
+Wire Wire Line
+	7600 2850 7850 2850
+Wire Wire Line
+	7600 3250 7850 3250
+Wire Wire Line
+	8200 5700 8450 5700
+Wire Wire Line
+	8200 6100 8450 6100
+Wire Wire Line
+	9900 5700 10150 5700
+Wire Wire Line
+	9900 6100 10150 6100
+Wire Wire Line
+	11600 5700 11850 5700
+Wire Wire Line
+	11600 6100 11850 6100
+$Comp
+L relay_omron_g6k-2:G6K-2 K_MUTE2
+U 1 1 5E8FB33C
+P 14650 5700
+F 0 "K_MUTE2" V 13900 5650 50  0000 C CNN
+F 1 "G6K-2" V 13974 5700 50  0000 C CNN
+F 2 "Relay_SMD:Relay_DPDT_Omron_G6K-2F-Y" H 15300 5650 50  0001 L CNN
+F 3 "http://omronfs.omron.com/en_US/ecb/products/pdf/en-g6k.pdf" H 14450 5700 50  0001 C CNN
+	1    14650 5700
+	0    -1   1    0   
+$EndComp
+$Comp
+L relay_omron_g6k-2:G6K-2 K_MUTE1
+U 1 1 5E8FD055
+P 5100 5700
+F 0 "K_MUTE1" V 4350 5650 50  0000 C CNN
+F 1 "G6K-2" V 4424 5700 50  0000 C CNN
+F 2 "Relay_SMD:Relay_DPDT_Omron_G6K-2F-Y" H 5750 5650 50  0001 L CNN
+F 3 "http://omronfs.omron.com/en_US/ecb/products/pdf/en-g6k.pdf" H 4900 5700 50  0001 C CNN
+	1    5100 5700
+	0    -1   1    0   
+$EndComp
+$Comp
+L Transistor_Array:ULN2803A U1
+U 1 1 5E96E173
+P 13700 7850
+F 0 "U1" H 13700 8350 50  0000 C CNN
+F 1 "ULN2803A" H 14000 7150 50  0000 C CNN
+F 2 "Package_SO:SOIC-18W_7.5x11.6mm_P1.27mm" H 13750 7200 50  0001 L CNN
+F 3 "http://www.ti.com/lit/ds/symlink/uln2803a.pdf" H 13800 7650 50  0001 C CNN
+	1    13700 7850
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:+5V #PWR0117
+U 1 1 5E975877
+P 14200 7400
+F 0 "#PWR0117" H 14200 7250 50  0001 C CNN
+F 1 "+5V" H 14215 7573 50  0000 C CNN
+F 2 "" H 14200 7400 50  0001 C CNN
+F 3 "" H 14200 7400 50  0001 C CNN
+	1    14200 7400
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0118
+U 1 1 5E976A1F
+P 13700 8550
+F 0 "#PWR0118" H 13700 8300 50  0001 C CNN
+F 1 "GND" H 13705 8377 50  0000 C CNN
+F 2 "" H 13700 8550 50  0001 C CNN
+F 3 "" H 13700 8550 50  0001 C CNN
+	1    13700 8550
+	1    0    0    -1  
+$EndComp
+Text GLabel 14100 8350 2    50   Output ~ 0
+REL8
+Text GLabel 14100 8250 2    50   Output ~ 0
+REL7
+Text GLabel 14100 8150 2    50   Output ~ 0
+REL6
+Text GLabel 14100 8050 2    50   Output ~ 0
+REL5
+Text GLabel 14100 7950 2    50   Output ~ 0
+REL4
+Text GLabel 14100 7850 2    50   Output ~ 0
+REL3
+Text GLabel 14100 7750 2    50   Output ~ 0
+REL2
+Text GLabel 14100 7650 2    50   Output ~ 0
+REL1
+Text GLabel 2750 2450 0    50   Input ~ 0
+REL1
+Text GLabel 4250 2450 1    50   Input ~ 0
+REL1
+Wire Wire Line
+	4200 2450 4250 2450
+Text GLabel 4400 2450 1    50   Input ~ 0
+REL2
+Wire Wire Line
+	4400 2450 4450 2450
+Text GLabel 5950 2450 1    50   Input ~ 0
+REL2
+Text GLabel 6100 2450 1    50   Input ~ 0
+REL3
+Text GLabel 7650 2450 1    50   Input ~ 0
+REL3
+Text GLabel 7800 2450 1    50   Input ~ 0
+REL4
+Text GLabel 9300 2450 2    50   Input ~ 0
+REL4
+Wire Wire Line
+	7800 2450 7850 2450
+Wire Wire Line
+	7600 2450 7650 2450
+Wire Wire Line
+	6150 2450 6100 2450
+Wire Wire Line
+	5950 2450 5900 2450
+Wire Wire Line
+	14100 7550 14200 7550
+Wire Wire Line
+	14200 7550 14200 7400
+Text GLabel 6750 5300 0    50   Input ~ 0
+REL5
+Text GLabel 8250 5300 1    50   Input ~ 0
+REL5
+Text GLabel 8400 5300 1    50   Input ~ 0
+REL6
+Text GLabel 9950 5300 1    50   Input ~ 0
+REL6
+Text GLabel 10100 5300 1    50   Input ~ 0
+REL7
+Text GLabel 11650 5300 1    50   Input ~ 0
+REL7
+Text GLabel 11800 5300 1    50   Input ~ 0
+REL8
+Text GLabel 13350 5300 1    50   Input ~ 0
+REL8
+Wire Wire Line
+	13300 5300 13350 5300
+Wire Wire Line
+	11800 5300 11850 5300
+Wire Wire Line
+	11650 5300 11600 5300
+Wire Wire Line
+	10100 5300 10150 5300
+Wire Wire Line
+	9950 5300 9900 5300
+Wire Wire Line
+	8200 5300 8250 5300
+Wire Wire Line
+	8400 5300 8450 5300
+Text GLabel 9300 2850 2    50   Output ~ 0
+LOOP4_T
+Text GLabel 9300 3250 2    50   Output ~ 0
+LOOP4_R
+Wire Wire Line
+	3300 1500 3450 1500
+Wire Wire Line
+	3450 1500 3450 1400
+Connection ~ 3450 1500
+Wire Wire Line
+	3450 1500 3650 1500
+Connection ~ 3450 1400
+Wire Wire Line
+	3450 1400 3650 1400
+Wire Wire Line
+	5000 1500 5150 1500
+Wire Wire Line
+	5150 1500 5150 1400
+Connection ~ 5150 1500
+Wire Wire Line
+	5150 1500 5350 1500
+Connection ~ 5150 1400
+Wire Wire Line
+	5150 1400 5350 1400
+Wire Wire Line
+	6700 1500 6850 1500
+Wire Wire Line
+	6850 1500 6850 1400
+Connection ~ 6850 1500
+Wire Wire Line
+	6850 1500 7050 1500
+Connection ~ 6850 1400
+Wire Wire Line
+	6850 1400 7050 1400
+$Comp
+L power:GNDA #PWR0119
+U 1 1 5EAC9702
+P 3450 1400
+F 0 "#PWR0119" H 3450 1150 50  0001 C CNN
+F 1 "GNDA" H 3455 1227 50  0000 C CNN
+F 2 "" H 3450 1400 50  0001 C CNN
+F 3 "" H 3450 1400 50  0001 C CNN
+	1    3450 1400
+	-1   0    0    1   
+$EndComp
+$Comp
+L power:GNDA #PWR0120
+U 1 1 5EAC9C45
+P 5150 1400
+F 0 "#PWR0120" H 5150 1150 50  0001 C CNN
+F 1 "GNDA" H 5155 1227 50  0000 C CNN
+F 2 "" H 5150 1400 50  0001 C CNN
+F 3 "" H 5150 1400 50  0001 C CNN
+	1    5150 1400
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	8400 1500 8550 1500
+Wire Wire Line
+	8550 1500 8550 1400
+Connection ~ 8550 1500
+Wire Wire Line
+	8550 1500 8750 1500
+Connection ~ 8550 1400
+Wire Wire Line
+	8550 1400 8750 1400
+$Comp
+L power:GNDA #PWR0121
+U 1 1 5EAE6DE2
+P 6850 1400
+F 0 "#PWR0121" H 6850 1150 50  0001 C CNN
+F 1 "GNDA" H 6855 1227 50  0000 C CNN
+F 2 "" H 6850 1400 50  0001 C CNN
+F 3 "" H 6850 1400 50  0001 C CNN
+	1    6850 1400
+	-1   0    0    1   
+$EndComp
+$Comp
+L power:GNDA #PWR0122
+U 1 1 5EAE714B
+P 8550 1400
+F 0 "#PWR0122" H 8550 1150 50  0001 C CNN
+F 1 "GNDA" H 8555 1227 50  0000 C CNN
+F 2 "" H 8550 1400 50  0001 C CNN
+F 3 "" H 8550 1400 50  0001 C CNN
+	1    8550 1400
+	-1   0    0    1   
+$EndComp
+$Comp
+L power:GNDA #PWR0123
+U 1 1 5EAE820F
+P 4650 4200
+F 0 "#PWR0123" H 4650 3950 50  0001 C CNN
+F 1 "GNDA" H 4655 4027 50  0000 C CNN
+F 2 "" H 4650 4200 50  0001 C CNN
+F 3 "" H 4650 4200 50  0001 C CNN
+	1    4650 4200
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	7300 4350 7450 4350
+Wire Wire Line
+	7450 4350 7450 4250
+Wire Wire Line
+	7300 4250 7450 4250
+Connection ~ 7450 4350
+Wire Wire Line
+	7450 4350 7650 4350
+Connection ~ 7450 4250
+Wire Wire Line
+	7450 4250 7650 4250
+Wire Wire Line
+	9000 4350 9150 4350
+Wire Wire Line
+	9150 4350 9150 4250
+Connection ~ 9150 4350
+Wire Wire Line
+	9150 4350 9350 4350
+Connection ~ 9150 4250
+Wire Wire Line
+	9150 4250 9350 4250
+Wire Wire Line
+	10700 4350 10850 4350
+Wire Wire Line
+	10850 4350 10850 4250
+Connection ~ 10850 4350
+Wire Wire Line
+	10850 4350 11050 4350
+Connection ~ 10850 4250
+Wire Wire Line
+	10850 4250 11050 4250
+Wire Wire Line
+	12400 4350 12550 4350
+Wire Wire Line
+	12550 4350 12550 4250
+Connection ~ 12550 4350
+Wire Wire Line
+	12550 4350 12750 4350
+Connection ~ 12550 4250
+Wire Wire Line
+	12550 4250 12750 4250
+Text GLabel 4600 4450 2    50   Input ~ 0
+LOOP4_R
+Text GLabel 4600 4650 2    50   Input ~ 0
+LOOP4_T
+$Comp
+L power:GNDA #PWR0124
+U 1 1 5EBBE5A9
+P 7450 4250
+F 0 "#PWR0124" H 7450 4000 50  0001 C CNN
+F 1 "GNDA" H 7455 4077 50  0000 C CNN
+F 2 "" H 7450 4250 50  0001 C CNN
+F 3 "" H 7450 4250 50  0001 C CNN
+	1    7450 4250
+	-1   0    0    1   
+$EndComp
+$Comp
+L power:GNDA #PWR0125
+U 1 1 5EBBEA00
+P 9150 4250
+F 0 "#PWR0125" H 9150 4000 50  0001 C CNN
+F 1 "GNDA" H 9155 4077 50  0000 C CNN
+F 2 "" H 9150 4250 50  0001 C CNN
+F 3 "" H 9150 4250 50  0001 C CNN
+	1    9150 4250
+	-1   0    0    1   
+$EndComp
+$Comp
+L power:GNDA #PWR0126
+U 1 1 5EBBED9C
+P 10850 4250
+F 0 "#PWR0126" H 10850 4000 50  0001 C CNN
+F 1 "GNDA" H 10855 4077 50  0000 C CNN
+F 2 "" H 10850 4250 50  0001 C CNN
+F 3 "" H 10850 4250 50  0001 C CNN
+	1    10850 4250
+	-1   0    0    1   
+$EndComp
+$Comp
+L power:GNDA #PWR0127
+U 1 1 5EBBF1AF
+P 5700 6400
+F 0 "#PWR0127" H 5700 6150 50  0001 C CNN
+F 1 "GNDA" H 5705 6227 50  0000 C CNN
+F 2 "" H 5700 6400 50  0001 C CNN
+F 3 "" H 5700 6400 50  0001 C CNN
+	1    5700 6400
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R2
+U 1 1 5EBC1345
+P 5550 6100
+F 0 "R2" V 5450 6100 50  0000 C CNN
+F 1 "470" V 5550 6100 50  0000 C CNN
+F 2 "Resistor_SMD:R_0805_2012Metric" V 5480 6100 50  0001 C CNN
+F 3 "~" H 5550 6100 50  0001 C CNN
+	1    5550 6100
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R R1
+U 1 1 5EBC1FF8
+P 5550 5700
+F 0 "R1" V 5450 5700 50  0000 C CNN
+F 1 "470" V 5550 5700 50  0000 C CNN
+F 2 "Resistor_SMD:R_0805_2012Metric" V 5480 5700 50  0001 C CNN
+F 3 "~" H 5550 5700 50  0001 C CNN
+	1    5550 5700
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	5700 5700 5700 6100
+Connection ~ 5700 6100
+Wire Wire Line
+	5700 6100 5700 6400
+Text GLabel 4800 5600 0    50   Input ~ 0
+LOOP4_T
+Text GLabel 4800 6000 0    50   Input ~ 0
+LOOP4_R
+$Comp
+L power:+5V #PWR0128
+U 1 1 5EBD24AC
+P 4700 5100
+F 0 "#PWR0128" H 4700 4950 50  0001 C CNN
+F 1 "+5V" H 4600 5200 50  0000 C CNN
+F 2 "" H 4700 5100 50  0001 C CNN
+F 3 "" H 4700 5100 50  0001 C CNN
+	1    4700 5100
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4700 5100 4700 5300
+Wire Wire Line
+	4700 5300 4800 5300
+Text GLabel 5400 5300 2    50   Input ~ 0
+REL_MUTE
+Text GLabel 5550 4550 0    50   Input ~ 0
+LOOP4_R
+Text GLabel 5550 4750 0    50   Input ~ 0
+LOOP4_T
+Text GLabel 5550 4650 0    50   Input ~ 0
+LOOP5_T
+Text GLabel 5550 4450 0    50   Input ~ 0
+LOOP5_R
+$Comp
+L power:GNDA #PWR0129
+U 1 1 5ECE8E0C
+P 5500 4200
+F 0 "#PWR0129" H 5500 3950 50  0001 C CNN
+F 1 "GNDA" H 5505 4027 50  0000 C CNN
+F 2 "" H 5500 4200 50  0001 C CNN
+F 3 "" H 5500 4200 50  0001 C CNN
+	1    5500 4200
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	4600 4250 4650 4250
+Wire Wire Line
+	4650 4250 4650 4200
+Wire Wire Line
+	4600 4350 4650 4350
+Wire Wire Line
+	4650 4350 4650 4250
+Connection ~ 4650 4250
+Wire Wire Line
+	5550 4350 5500 4350
+Wire Wire Line
+	5500 4350 5500 4250
+Wire Wire Line
+	5550 4250 5500 4250
+Connection ~ 5500 4250
+Wire Wire Line
+	5500 4250 5500 4200
+Text GLabel 6750 5700 0    50   Input ~ 0
+LOOP5_T
+Text GLabel 6750 6100 0    50   Input ~ 0
+LOOP5_R
+Text GLabel 14350 5600 0    50   Input ~ 0
+LOOP8_T
+Text GLabel 14350 6000 0    50   Input ~ 0
+LOOP8_R
+$Comp
+L Device:R R3
+U 1 1 5ED2A322
+P 15100 5700
+F 0 "R3" V 15000 5700 50  0000 C CNN
+F 1 "470" V 15100 5700 39  0000 C CNN
+F 2 "Resistor_SMD:R_0805_2012Metric" V 15030 5700 50  0001 C CNN
+F 3 "~" H 15100 5700 50  0001 C CNN
+	1    15100 5700
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R R4
+U 1 1 5ED2A816
+P 15100 6100
+F 0 "R4" V 15000 6100 50  0000 C CNN
+F 1 "470" V 15100 6100 39  0000 C CNN
+F 2 "Resistor_SMD:R_0805_2012Metric" V 15030 6100 50  0001 C CNN
+F 3 "~" H 15100 6100 50  0001 C CNN
+	1    15100 6100
+	0    1    1    0   
+$EndComp
+Text GLabel 14950 5300 2    50   Input ~ 0
+REL_MUTE
+$Comp
+L power:+5V #PWR0130
+U 1 1 5ED2B89D
+P 14300 5100
+F 0 "#PWR0130" H 14300 4950 50  0001 C CNN
+F 1 "+5V" H 14200 5200 50  0000 C CNN
+F 2 "" H 14300 5100 50  0001 C CNN
+F 3 "" H 14300 5100 50  0001 C CNN
+	1    14300 5100
+	1    0    0    -1  
+$EndComp
+Text GLabel 14500 3800 0    50   Input ~ 0
+LOOP8_T
+Text GLabel 14500 3600 0    50   Input ~ 0
+LOOP8_R
+$Comp
+L power:GNDA #PWR0131
+U 1 1 5ED3C906
+P 14250 3300
+F 0 "#PWR0131" H 14250 3050 50  0001 C CNN
+F 1 "GNDA" H 14255 3127 50  0000 C CNN
+F 2 "" H 14250 3300 50  0001 C CNN
+F 3 "" H 14250 3300 50  0001 C CNN
+	1    14250 3300
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	14250 3300 14250 3400
+Wire Wire Line
+	14250 3400 14500 3400
+Wire Wire Line
+	14500 3500 14250 3500
+Wire Wire Line
+	14250 3500 14250 3400
+Connection ~ 14250 3400
+$Comp
+L power:GNDA #PWR0132
+U 1 1 5EDC0BB9
+P 15250 6300
+F 0 "#PWR0132" H 15250 6050 50  0001 C CNN
+F 1 "GNDA" H 15255 6127 50  0000 C CNN
+F 2 "" H 15250 6300 50  0001 C CNN
+F 3 "" H 15250 6300 50  0001 C CNN
+	1    15250 6300
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	15250 5700 15250 6100
+Connection ~ 15250 6100
+Wire Wire Line
+	15250 6100 15250 6300
+Wire Wire Line
+	14300 5100 14300 5300
+Wire Wire Line
+	14300 5300 14350 5300
+$Comp
+L Connector:DIN-5_180degree J1
+U 1 1 5EF621E9
+P 1500 7750
+F 0 "J1" H 1500 7383 50  0000 C CNN
+F 1 "DIN-5-OOTDTY" H 1500 7474 50  0000 C CNN
+F 2 "Connectors:DIN5MIDI-OOTDTY" H 1500 7750 50  0001 C CNN
+F 3 "http://www.mouser.com/ds/2/18/40_c091_abd_e-75918.pdf" H 1500 7750 50  0001 C CNN
+	1    1500 7750
+	-1   0    0    1   
+$EndComp
+$Comp
+L Connector:DIN-5_180degree J2
+U 1 1 5EF63CEC
+P 5000 7800
+F 0 "J2" H 5000 7433 50  0000 C CNN
+F 1 "DIN-5-OOTDTY" H 5000 7524 50  0000 C CNN
+F 2 "Connectors:DIN5MIDI-OOTDTY" H 5000 7800 50  0001 C CNN
+F 3 "http://www.mouser.com/ds/2/18/40_c091_abd_e-75918.pdf" H 5000 7800 50  0001 C CNN
+	1    5000 7800
+	-1   0    0    1   
+$EndComp
+$Comp
+L Connector:DIN-5_180degree J3
+U 1 1 5EF64B3B
+P 6650 7800
+F 0 "J3" H 6650 7433 50  0000 C CNN
+F 1 "DIN-5-OOTDTY" H 6650 7524 50  0000 C CNN
+F 2 "Connectors:DIN5MIDI-OOTDTY" H 6650 7800 50  0001 C CNN
+F 3 "http://www.mouser.com/ds/2/18/40_c091_abd_e-75918.pdf" H 6650 7800 50  0001 C CNN
+	1    6650 7800
+	-1   0    0    1   
+$EndComp
+$Comp
+L Connector:Barrel_Jack_Switch J4
+U 1 1 5EF661D2
+P 1350 9750
+F 0 "J4" H 1407 10067 50  0000 C CNN
+F 1 "DS-210" H 1407 9976 50  0000 C CNN
+F 2 "Connector_BarrelJack:BarrelJack_Wuerth_6941xx301002" H 1400 9710 50  0001 C CNN
+F 3 "~" H 1400 9710 50  0001 C CNN
+	1    1350 9750
+	1    0    0    -1  
+$EndComp
+$Comp
+L Transistor_BJT:BC817 Q1
+U 1 1 5EF6873F
+P 10100 7550
+F 0 "Q1" H 10291 7596 50  0000 L CNN
+F 1 "BC817" H 10291 7505 50  0000 L CNN
+F 2 "Package_TO_SOT_SMD:SOT-23" H 10300 7475 50  0001 L CIN
+F 3 "http://www.fairchildsemi.com/ds/BC/BC817.pdf" H 10100 7550 50  0001 L CNN
+	1    10100 7550
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R5
+U 1 1 5EF68ECD
+P 9750 7550
+F 0 "R5" V 9650 7550 50  0000 C CNN
+F 1 "220" V 9750 7550 39  0000 C CNN
+F 2 "Resistor_SMD:R_0805_2012Metric" V 9680 7550 50  0001 C CNN
+F 3 "~" H 9750 7550 50  0001 C CNN
+	1    9750 7550
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:D D1
+U 1 1 5EF6A1BE
+P 5000 6700
+F 0 "D1" H 5000 6916 50  0000 C CNN
+F 1 "D" H 5000 6825 50  0000 C CNN
+F 2 "Diode_SMD:D_SMA" H 5000 6700 50  0001 C CNN
+F 3 "~" H 5000 6700 50  0001 C CNN
+	1    5000 6700
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0134
+U 1 1 5EF6B063
+P 10200 7750
+F 0 "#PWR0134" H 10200 7500 50  0001 C CNN
+F 1 "GND" H 10205 7577 50  0000 C CNN
+F 2 "" H 10200 7750 50  0001 C CNN
+F 3 "" H 10200 7750 50  0001 C CNN
+	1    10200 7750
+	1    0    0    -1  
+$EndComp
+Text GLabel 10250 7200 2    50   Input ~ 0
+REL_MUTE
+Wire Wire Line
+	10250 7200 10200 7200
+Wire Wire Line
+	10200 7200 10200 7350
+$Comp
+L power:+5V #PWR0135
+U 1 1 5EF7E3E0
+P 4850 6600
+F 0 "#PWR0135" H 4850 6450 50  0001 C CNN
+F 1 "+5V" H 4750 6700 50  0000 C CNN
+F 2 "" H 4850 6600 50  0001 C CNN
+F 3 "" H 4850 6600 50  0001 C CNN
+	1    4850 6600
+	1    0    0    -1  
+$EndComp
+Text GLabel 5150 6700 2    50   Input ~ 0
+REL_MUTE
+Wire Wire Line
+	4850 6600 4850 6700
+$Comp
+L Device:D D2
+U 1 1 5EF902A5
+P 14600 6700
+F 0 "D2" H 14600 6916 50  0000 C CNN
+F 1 "D" H 14600 6825 50  0000 C CNN
+F 2 "Diode_SMD:D_SMA" H 14600 6700 50  0001 C CNN
+F 3 "~" H 14600 6700 50  0001 C CNN
+	1    14600 6700
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:+5V #PWR0136
+U 1 1 5EF902AF
+P 14450 6600
+F 0 "#PWR0136" H 14450 6450 50  0001 C CNN
+F 1 "+5V" H 14350 6700 50  0000 C CNN
+F 2 "" H 14450 6600 50  0001 C CNN
+F 3 "" H 14450 6600 50  0001 C CNN
+	1    14450 6600
+	1    0    0    -1  
+$EndComp
+Text GLabel 14750 6700 2    50   Input ~ 0
+REL_MUTE
+Wire Wire Line
+	14450 6600 14450 6700
+$Comp
+L Regulator_Switching:LM2575-5.0BU U2
+U 1 1 5EFC632E
+P 4400 9800
+F 0 "U2" H 4400 10167 50  0000 C CNN
+F 1 "LM2575-5.0BU" H 4400 10076 50  0000 C CNN
+F 2 "Package_TO_SOT_SMD:TO-263-5_TabPin3" H 4400 9550 50  0001 L CIN
+F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/lm2575.pdf" H 4400 9800 50  0001 C CNN
+	1    4400 9800
+	1    0    0    -1  
+$EndComp
+$Comp
+L Regulator_Switching:LM2575-5.0BT U3
+U 1 1 5EFC8793
+P 6650 9800
+F 0 "U3" H 6650 10167 50  0000 C CNN
+F 1 "LM2575-5.0BT" H 6650 10076 50  0000 C CNN
+F 2 "Package_TO_SOT_THT:TO-220-5_Vertical" H 6650 9550 50  0001 L CIN
+F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/lm2575.pdf" H 6650 9800 50  0001 C CNN
+	1    6650 9800
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector:AudioJack3 MAIN_OUT2
+U 1 1 5EFCB0BA
+P 14700 4500
+F 0 "MAIN_OUT2" H 14750 4850 50  0000 R CNN
+F 1 "HLJ0544*" H 14750 4750 50  0000 R CNN
+F 2 "Connectors:phone-jack-6.3" H 14700 4500 50  0001 C CNN
+F 3 "~" H 14700 4500 50  0001 C CNN
+	1    14700 4500
+	-1   0    0    -1  
+$EndComp
+$Comp
+L power:GNDA #PWR0137
+U 1 1 5EFCC8F7
+P 14350 4250
+F 0 "#PWR0137" H 14350 4000 50  0001 C CNN
+F 1 "GNDA" H 14355 4077 50  0000 C CNN
+F 2 "" H 14350 4250 50  0001 C CNN
+F 3 "" H 14350 4250 50  0001 C CNN
+	1    14350 4250
+	-1   0    0    1   
+$EndComp
+Text GLabel 14500 4500 0    50   Input ~ 0
+LOOP8_R
+Text GLabel 14500 4600 0    50   Input ~ 0
+LOOP8_T
+Wire Wire Line
+	14350 4250 14350 4400
+Wire Wire Line
+	14350 4400 14500 4400
+$Comp
+L Connector:AudioJack3 MAIN_IN2
+U 1 1 5EFDF39F
+P 1600 2600
+F 0 "MAIN_IN2" H 1700 2950 50  0000 R CNN
+F 1 "HLJ0544*" H 1700 2850 50  0000 R CNN
+F 2 "Connectors:phone-jack-6.3" H 1600 2600 50  0001 C CNN
+F 3 "~" H 1600 2600 50  0001 C CNN
+	1    1600 2600
+	1    0    0    -1  
+$EndComp
+Text GLabel 1800 2600 2    50   Input ~ 0
+LOOP1_R
+Text GLabel 1800 2700 2    50   Input ~ 0
+LOOP1_T
+$Comp
+L power:GNDA #PWR0138
+U 1 1 5F003D40
+P 1900 2350
+F 0 "#PWR0138" H 1900 2100 50  0001 C CNN
+F 1 "GNDA" H 1905 2177 50  0000 C CNN
+F 2 "" H 1900 2350 50  0001 C CNN
+F 3 "" H 1900 2350 50  0001 C CNN
+	1    1900 2350
+	-1   0    0    1   
+$EndComp
+Text GLabel 2750 3250 0    50   Input ~ 0
+LOOP1_R
+Text GLabel 2750 2850 0    50   Input ~ 0
+LOOP1_T
+$Comp
+L Isolator:6N138 U4
+U 1 1 5F040CD7
+P 2850 7950
+F 0 "U4" H 2850 8417 50  0000 C CNN
+F 1 "6N138" H 2850 8326 50  0000 C CNN
+F 2 "Package_DIP:DIP-8_W8.89mm_SMDSocket_LongPads" H 3140 7650 50  0001 C CNN
+F 3 "http://www.onsemi.com/pub/Collateral/HCPL2731-D.pdf" H 3140 7650 50  0001 C CNN
+	1    2850 7950
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R6
+U 1 1 5F044D59
+P 2000 7850
+F 0 "R6" V 1900 7850 50  0000 C CNN
+F 1 "220" V 2000 7850 50  0000 C CNN
+F 2 "Resistor_SMD:R_0805_2012Metric" V 1930 7850 50  0001 C CNN
+F 3 "~" H 2000 7850 50  0001 C CNN
+	1    2000 7850
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:D D4
+U 1 1 5F046020
+P 2250 8000
+F 0 "D4" V 2204 8079 50  0000 L CNN
+F 1 "D" V 2295 8079 50  0000 L CNN
+F 2 "Diode_SMD:D_SMA" H 2250 8000 50  0001 C CNN
+F 3 "~" H 2250 8000 50  0001 C CNN
+	1    2250 8000
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R R9
+U 1 1 5F047473
+P 3450 8000
+F 0 "R9" V 3350 8000 50  0000 C CNN
+F 1 "10k" V 3450 8000 50  0000 C CNN
+F 2 "Resistor_SMD:R_0805_2012Metric" V 3380 8000 50  0001 C CNN
+F 3 "~" H 3450 8000 50  0001 C CNN
+	1    3450 8000
+	-1   0    0    1   
+$EndComp
+$Comp
+L Device:R R8
+U 1 1 5F0471CD
+P 3300 7500
+F 0 "R8" V 3200 7500 50  0000 C CNN
+F 1 "470" V 3300 7500 50  0000 C CNN
+F 2 "Resistor_SMD:R_0805_2012Metric" V 3230 7500 50  0001 C CNN
+F 3 "~" H 3300 7500 50  0001 C CNN
+	1    3300 7500
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	3150 8150 3450 8150
+Wire Wire Line
+	3150 7850 3450 7850
+$Comp
+L power:GND #PWR0133
+U 1 1 5F0A68B3
+P 3450 8250
+F 0 "#PWR0133" H 3450 8000 50  0001 C CNN
+F 1 "GND" H 3455 8077 50  0000 C CNN
+F 2 "" H 3450 8250 50  0001 C CNN
+F 3 "" H 3450 8250 50  0001 C CNN
+	1    3450 8250
+	1    0    0    -1  
+$EndComp
+Connection ~ 3450 8150
+Wire Wire Line
+	3150 8050 3300 8050
+Wire Wire Line
+	3300 8050 3300 7700
+Wire Wire Line
+	3150 7750 3150 7350
+Wire Wire Line
+	3150 7350 3300 7350
+$Comp
+L power:+5V #PWR0139
+U 1 1 5F0CD369
+P 3300 7300
+F 0 "#PWR0139" H 3300 7150 50  0001 C CNN
+F 1 "+5V" H 3200 7400 50  0000 C CNN
+F 2 "" H 3300 7300 50  0001 C CNN
+F 3 "" H 3300 7300 50  0001 C CNN
+	1    3300 7300
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3300 7300 3300 7350
+Connection ~ 3300 7350
+Wire Wire Line
+	1800 7850 1850 7850
+Wire Wire Line
+	2150 7850 2250 7850
+Connection ~ 2250 7850
+Wire Wire Line
+	2250 7850 2550 7850
+Wire Wire Line
+	1200 7850 1200 8150
+Wire Wire Line
+	1200 8150 2250 8150
+Wire Wire Line
+	2450 8150 2450 8050
+Wire Wire Line
+	2450 8050 2550 8050
+Connection ~ 2250 8150
+Wire Wire Line
+	2250 8150 2450 8150
+Text GLabel 3450 7700 2    50   Output ~ 0
+RX
+$Comp
+L Device:R R12
+U 1 1 5F124640
+P 6200 7900
+F 0 "R12" V 6100 7900 50  0000 C CNN
+F 1 "220" V 6200 7900 50  0000 C CNN
+F 2 "Resistor_SMD:R_0805_2012Metric" V 6130 7900 50  0001 C CNN
+F 3 "~" H 6200 7900 50  0001 C CNN
+	1    6200 7900
+	0    1    1    0   
+$EndComp
+Text GLabel 6050 7900 0    50   Input ~ 0
+TX
+Wire Wire Line
+	3450 7700 3300 7700
+Connection ~ 3300 7700
+Wire Wire Line
+	3300 7700 3300 7650
+$Comp
+L Device:R R13
+U 1 1 5F13A22A
+P 7100 7900
+F 0 "R13" V 7000 7900 50  0000 C CNN
+F 1 "220" V 7100 7900 50  0000 C CNN
+F 2 "Resistor_SMD:R_0805_2012Metric" V 7030 7900 50  0001 C CNN
+F 3 "~" H 7100 7900 50  0001 C CNN
+	1    7100 7900
+	0    1    1    0   
+$EndComp
+$Comp
+L power:+5V #PWR0140
+U 1 1 5F13AA90
+P 7300 7600
+F 0 "#PWR0140" H 7300 7450 50  0001 C CNN
+F 1 "+5V" H 7200 7700 50  0000 C CNN
+F 2 "" H 7300 7600 50  0001 C CNN
+F 3 "" H 7300 7600 50  0001 C CNN
+	1    7300 7600
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7300 7600 7300 7900
+Wire Wire Line
+	7300 7900 7250 7900
+$Comp
+L power:GND #PWR0141
+U 1 1 5F151361
+P 6650 8250
+F 0 "#PWR0141" H 6650 8000 50  0001 C CNN
+F 1 "GND" H 6655 8077 50  0000 C CNN
+F 2 "" H 6650 8250 50  0001 C CNN
+F 3 "" H 6650 8250 50  0001 C CNN
+	1    6650 8250
+	1    0    0    -1  
+$EndComp
+$Comp
+L 74xGxx:74AUC1G125 U5
+U 1 1 5F155E08
+P 4150 7900
+F 0 "U5" H 4125 7725 50  0000 C CNN
+F 1 "74AUC1G125" H 4125 7634 50  0000 C CNN
+F 2 "Package_TO_SOT_SMD:SOT-23-5" H 4150 7900 50  0001 C CNN
+F 3 "http://www.ti.com/lit/sg/scyt129e/scyt129e.pdf" H 4150 7900 50  0001 C CNN
+	1    4150 7900
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R10
+U 1 1 5F15730A
+P 4550 7900
+F 0 "R10" V 4450 7900 50  0000 C CNN
+F 1 "220" V 4550 7900 50  0000 C CNN
+F 2 "Resistor_SMD:R_0805_2012Metric" V 4480 7900 50  0001 C CNN
+F 3 "~" H 4550 7900 50  0001 C CNN
+	1    4550 7900
+	0    1    1    0   
+$EndComp
+Text GLabel 3850 7900 0    50   Input ~ 0
+RX
+$Comp
+L power:GND #PWR0142
+U 1 1 5F1581E7
+P 5000 8250
+F 0 "#PWR0142" H 5000 8000 50  0001 C CNN
+F 1 "GND" H 5005 8077 50  0000 C CNN
+F 2 "" H 5000 8250 50  0001 C CNN
+F 3 "" H 5000 8250 50  0001 C CNN
+	1    5000 8250
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R11
+U 1 1 5F15877A
+P 5450 7900
+F 0 "R11" V 5350 7900 50  0000 C CNN
+F 1 "220" V 5450 7900 50  0000 C CNN
+F 2 "Resistor_SMD:R_0805_2012Metric" V 5380 7900 50  0001 C CNN
+F 3 "~" H 5450 7900 50  0001 C CNN
+	1    5450 7900
+	0    1    1    0   
+$EndComp
+$Comp
+L power:+5V #PWR0143
+U 1 1 5F158C6E
+P 5700 7700
+F 0 "#PWR0143" H 5700 7550 50  0001 C CNN
+F 1 "+5V" H 5600 7800 50  0000 C CNN
+F 2 "" H 5700 7700 50  0001 C CNN
+F 3 "" H 5700 7700 50  0001 C CNN
+	1    5700 7700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5600 7900 5700 7900
+Wire Wire Line
+	5700 7900 5700 7700
+$Comp
+L Device:D_Bridge_+-AA D3
+U 1 1 5F172096
+P 2200 9700
+F 0 "D3" H 2350 9500 50  0000 L CNN
+F 1 "D_Bridge_+-AA" H 1950 9300 50  0000 L CNN
+F 2 "Diode_SMD:Diode_Bridge_Vishay_DFS" H 2200 9700 50  0001 C CNN
+F 3 "~" H 2200 9700 50  0001 C CNN
+	1    2200 9700
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1650 9650 1750 9650
+Wire Wire Line
+	1750 9650 1750 9400
+Wire Wire Line
+	1750 9400 2200 9400
+Wire Wire Line
+	1650 9850 1750 9850
+Wire Wire Line
+	1750 9850 1750 10000
+Wire Wire Line
+	1750 10000 2200 10000
+$Comp
+L power:GND #PWR0144
+U 1 1 5F1CD170
+P 1900 10150
+F 0 "#PWR0144" H 1900 9900 50  0001 C CNN
+F 1 "GND" H 1905 9977 50  0000 C CNN
+F 2 "" H 1900 10150 50  0001 C CNN
+F 3 "" H 1900 10150 50  0001 C CNN
+	1    1900 10150
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1900 9700 1900 10150
+$Comp
+L power:+9V #PWR0146
+U 1 1 5F1FDDE1
+P 2750 9400
+F 0 "#PWR0146" H 2750 9250 50  0001 C CNN
+F 1 "+9V" H 2765 9573 50  0000 C CNN
+F 2 "" H 2750 9400 50  0001 C CNN
+F 3 "" H 2750 9400 50  0001 C CNN
+	1    2750 9400
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R7
+U 1 1 5F1FE51F
+P 2750 10000
+F 0 "R7" H 2650 10000 50  0000 C CNN
+F 1 "100k" V 2750 10000 39  0000 C CNN
+F 2 "Resistor_SMD:R_0805_2012Metric" V 2680 10000 50  0001 C CNN
+F 3 "~" H 2750 10000 50  0001 C CNN
+	1    2750 10000
+	-1   0    0    1   
+$EndComp
+$Comp
+L Transistor_FET:BSS84 Q2
+U 1 1 5F200809
+P 3150 9600
+F 0 "Q2" V 3399 9600 50  0000 C CNN
+F 1 "BSS84" V 3490 9600 50  0000 C CNN
+F 2 "Package_TO_SOT_SMD:SOT-23" H 3350 9525 50  0001 L CIN
+F 3 "http://assets.nexperia.com/documents/data-sheet/BSS84.pdf" H 3150 9600 50  0001 L CNN
+	1    3150 9600
+	0    -1   1    0   
+$EndComp
+Wire Wire Line
+	2750 9700 2950 9700
+$Comp
+L power:GND #PWR0148
+U 1 1 5F234007
+P 2750 10300
+F 0 "#PWR0148" H 2750 10050 50  0001 C CNN
+F 1 "GND" H 2755 10127 50  0000 C CNN
+F 2 "" H 2750 10300 50  0001 C CNN
+F 3 "" H 2750 10300 50  0001 C CNN
+	1    2750 10300
+	1    0    0    -1  
+$EndComp
+Connection ~ 2750 9700
+$Comp
+L Device:CP_Small C1
+U 1 1 5F27E6AA
+P 3500 9950
+F 0 "C1" H 3588 9996 50  0000 L CNN
+F 1 "100uF" H 3588 9905 50  0000 L CNN
+F 2 "Capacitor_THT:CP_Radial_D6.3mm_P2.50mm" H 3500 9950 50  0001 C CNN
+F 3 "~" H 3500 9950 50  0001 C CNN
+	1    3500 9950
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:CP_Small C2
+U 1 1 5F27F41B
+P 5600 10150
+F 0 "C2" H 5688 10196 50  0000 L CNN
+F 1 "1000uF" H 5688 10105 50  0000 L CNN
+F 2 "Capacitor_THT:CP_Radial_D10.0mm_P5.00mm" H 5600 10150 50  0001 C CNN
+F 3 "~" H 5600 10150 50  0001 C CNN
+	1    5600 10150
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:L L1
+U 1 1 5F3463DE
+P 5300 9900
+F 0 "L1" V 5400 9900 50  0000 C CNN
+F 1 "100uH" V 5250 9900 50  0000 C CNN
+F 2 "Inductor_SMD:L_10.4x10.4_H4.8" H 5300 9900 50  0001 C CNN
+F 3 "~" H 5300 9900 50  0001 C CNN
+	1    5300 9900
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Device:D_Schottky D5
+U 1 1 5F349F2A
+P 5100 10150
+F 0 "D5" V 5054 10229 50  0000 L CNN
+F 1 "1N5819" V 5145 10229 50  0000 L CNN
+F 2 "Diode_THT:D_DO-41_SOD81_P7.62mm_Horizontal" H 5100 10150 50  0001 C CNN
+F 3 "~" H 5100 10150 50  0001 C CNN
+	1    5100 10150
+	0    1    1    0   
+$EndComp
+$Comp
+L power:GND #PWR0149
+U 1 1 5F3651FE
+P 5100 10300
+F 0 "#PWR0149" H 5100 10050 50  0001 C CNN
+F 1 "GND" H 5105 10127 50  0000 C CNN
+F 2 "" H 5100 10300 50  0001 C CNN
+F 3 "" H 5100 10300 50  0001 C CNN
+	1    5100 10300
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0150
+U 1 1 5F365896
+P 3500 10300
+F 0 "#PWR0150" H 3500 10050 50  0001 C CNN
+F 1 "GND" H 3505 10127 50  0000 C CNN
+F 2 "" H 3500 10300 50  0001 C CNN
+F 3 "" H 3500 10300 50  0001 C CNN
+	1    3500 10300
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0151
+U 1 1 5F365E96
+P 5600 10300
+F 0 "#PWR0151" H 5600 10050 50  0001 C CNN
+F 1 "GND" H 5605 10127 50  0000 C CNN
+F 2 "" H 5600 10300 50  0001 C CNN
+F 3 "" H 5600 10300 50  0001 C CNN
+	1    5600 10300
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0152
+U 1 1 5F3665FB
+P 4400 10300
+F 0 "#PWR0152" H 4400 10050 50  0001 C CNN
+F 1 "GND" H 4405 10127 50  0000 C CNN
+F 2 "" H 4400 10300 50  0001 C CNN
+F 3 "" H 4400 10300 50  0001 C CNN
+	1    4400 10300
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0153
+U 1 1 5F367312
+P 3900 10300
+F 0 "#PWR0153" H 3900 10050 50  0001 C CNN
+F 1 "GND" H 3905 10127 50  0000 C CNN
+F 2 "" H 3900 10300 50  0001 C CNN
+F 3 "" H 3900 10300 50  0001 C CNN
+	1    3900 10300
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2750 9700 2750 9850
+Wire Wire Line
+	2750 10150 2750 10300
+Wire Wire Line
+	3350 9700 3500 9700
+Wire Wire Line
+	3500 9850 3500 9700
+Connection ~ 3500 9700
+Wire Wire Line
+	3500 9700 3800 9700
+Wire Wire Line
+	3500 10050 3500 10300
+Wire Wire Line
+	3900 10300 3900 9900
+Wire Wire Line
+	4400 10100 4400 10300
+Wire Wire Line
+	5100 10000 5100 9900
+Connection ~ 5100 9900
+Wire Wire Line
+	5100 9900 5150 9900
+Wire Wire Line
+	5450 9900 5600 9900
+Wire Wire Line
+	5600 9900 5600 10050
+Wire Wire Line
+	5600 9700 5600 9900
+Connection ~ 5600 9900
+Wire Wire Line
+	5600 9900 5700 9900
+Wire Wire Line
+	5600 10250 5600 10300
+Text GLabel 1800 1800 2    50   Input ~ 0
+LOOP1_T
+Text GLabel 1800 1600 2    50   Input ~ 0
+LOOP1_R
+$Comp
+L power:GNDA #PWR0155
+U 1 1 5F62B192
+P 1950 1300
+F 0 "#PWR0155" H 1950 1050 50  0001 C CNN
+F 1 "GNDA" H 1955 1127 50  0000 C CNN
+F 2 "" H 1950 1300 50  0001 C CNN
+F 3 "" H 1950 1300 50  0001 C CNN
+	1    1950 1300
+	-1   0    0    1   
+$EndComp
+Wire Wire Line
+	1900 2350 1900 2500
+Wire Wire Line
+	1900 2500 1800 2500
+Wire Wire Line
+	1800 1400 1950 1400
+Wire Wire Line
+	1950 1400 1950 1300
+Text GLabel 13300 5700 2    50   Output ~ 0
+LOOP8_T
+Text GLabel 13300 6100 2    50   Output ~ 0
+LOOP8_R
+Wire Wire Line
+	1800 1500 1950 1500
+Wire Wire Line
+	1950 1500 1950 1400
+Connection ~ 1950 1400
+Wire Notes Line
+	2250 1000 2250 2950
+Wire Notes Line
+	2250 2950 1200 2950
+Wire Notes Line
+	14000 2950 15250 2950
+Wire Notes Line
+	15250 2950 15250 4850
+Wire Notes Line
+	15250 4850 14000 4850
+Wire Notes Line
+	14000 4850 14000 2950
+Text GLabel 9500 7550 0    50   Input ~ 0
+MUTE
+Wire Wire Line
+	9500 7550 9600 7550
+Wire Wire Line
+	3450 8250 3450 8150
+Wire Wire Line
+	6650 8100 6650 8250
+Wire Wire Line
+	5000 8100 5000 8250
+Wire Wire Line
+	2750 9400 2750 9700
+Wire Notes Line
+	1050 7150 7450 7150
+Wire Notes Line
+	7450 8550 1050 8550
+Wire Notes Line
+	1050 8550 1050 7150
+Text GLabel 3700 9500 0    50   Input ~ 0
+VR_IN
+Text GLabel 4900 10150 0    50   Output ~ 0
+VR_OUT
+Wire Wire Line
+	3700 9500 3800 9500
+Wire Wire Line
+	3800 9500 3800 9700
+Connection ~ 3800 9700
+Wire Wire Line
+	3800 9700 3900 9700
+Wire Wire Line
+	4900 9700 5600 9700
+Wire Wire Line
+	4900 9900 4950 9900
+Wire Wire Line
+	4900 10150 4950 10150
+Wire Wire Line
+	4950 10150 4950 9900
+Connection ~ 4950 9900
+Wire Wire Line
+	4950 9900 5100 9900
+$Comp
+L power:GND #PWR0156
+U 1 1 5FF8C1FE
+P 6650 10300
+F 0 "#PWR0156" H 6650 10050 50  0001 C CNN
+F 1 "GND" H 6655 10127 50  0000 C CNN
+F 2 "" H 6650 10300 50  0001 C CNN
+F 3 "" H 6650 10300 50  0001 C CNN
+	1    6650 10300
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0157
+U 1 1 5FF8C6DD
+P 6100 10300
+F 0 "#PWR0157" H 6100 10050 50  0001 C CNN
+F 1 "GND" H 6105 10127 50  0000 C CNN
+F 2 "" H 6100 10300 50  0001 C CNN
+F 3 "" H 6100 10300 50  0001 C CNN
+	1    6100 10300
+	1    0    0    -1  
+$EndComp
+Text GLabel 6150 9700 0    50   Input ~ 0
+VR_IN
+Text GLabel 7150 9900 2    50   Output ~ 0
+VR_OUT
+Wire Wire Line
+	5700 9400 5700 9900
+Wire Wire Line
+	7200 9400 7200 9700
+Wire Wire Line
+	7200 9700 7150 9700
+Wire Wire Line
+	6100 10300 6100 9900
+Wire Wire Line
+	6100 9900 6150 9900
+Wire Wire Line
+	6650 10300 6650 10100
+Wire Notes Line
+	7450 7150 7450 8550
+Wire Notes Line
+	1050 9050 7650 9050
+Wire Notes Line
+	7650 9050 7650 10600
+Wire Notes Line
+	7650 10600 1050 10600
+Wire Notes Line
+	1050 10600 1050 9050
+Wire Notes Line
+	1200 1000 2250 1000
+Wire Notes Line
+	1200 1000 1200 2950
+$Comp
+L 74xx:74HC595 U6
+U 1 1 60322EF8
+P 11950 8050
+F 0 "U6" H 11750 8650 50  0000 C CNN
+F 1 "74HC595" H 12250 7350 50  0000 C CNN
+F 2 "Package_SO:SOIC-16_3.9x9.9mm_P1.27mm" H 11950 8050 50  0001 C CNN
+F 3 "http://www.ti.com/lit/ds/symlink/sn74hc595.pdf" H 11950 8050 50  0001 C CNN
+	1    11950 8050
+	1    0    0    -1  
+$EndComp
+Text GLabel 11550 7650 0    50   Input ~ 0
+REL_SER
+Text GLabel 11550 7850 0    50   Input ~ 0
+REL_CS
+Text GLabel 11550 8150 0    50   Input ~ 0
+SCK
+$Comp
+L Device:C_Small C4
+U 1 1 6032663A
+P 14500 7550
+F 0 "C4" V 14271 7550 50  0000 C CNN
+F 1 "0.1u" V 14362 7550 50  0000 C CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric" H 14500 7550 50  0001 C CNN
+F 3 "~" H 14500 7550 50  0001 C CNN
+	1    14500 7550
+	0    1    1    0   
+$EndComp
+$Comp
+L power:GND #PWR0159
+U 1 1 603273B2
+P 14700 7550
+F 0 "#PWR0159" H 14700 7300 50  0001 C CNN
+F 1 "GND" H 14705 7377 50  0000 C CNN
+F 2 "" H 14700 7550 50  0001 C CNN
+F 3 "" H 14700 7550 50  0001 C CNN
+	1    14700 7550
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	14400 7550 14200 7550
+Connection ~ 14200 7550
+Wire Wire Line
+	14600 7550 14700 7550
+$Comp
+L power:+5V #PWR0160
+U 1 1 603612FE
+P 11950 7300
+F 0 "#PWR0160" H 11950 7150 50  0001 C CNN
+F 1 "+5V" H 11965 7473 50  0000 C CNN
+F 2 "" H 11950 7300 50  0001 C CNN
+F 3 "" H 11950 7300 50  0001 C CNN
+	1    11950 7300
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:C_Small C3
+U 1 1 60361A5D
+P 12400 7350
+F 0 "C3" V 12171 7350 50  0000 C CNN
+F 1 "0.1u" V 12262 7350 50  0000 C CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric" H 12400 7350 50  0001 C CNN
+F 3 "~" H 12400 7350 50  0001 C CNN
+	1    12400 7350
+	0    1    1    0   
+$EndComp
+$Comp
+L power:GND #PWR0161
+U 1 1 6036266D
+P 12600 7350
+F 0 "#PWR0161" H 12600 7100 50  0001 C CNN
+F 1 "GND" H 12605 7177 50  0000 C CNN
+F 2 "" H 12600 7350 50  0001 C CNN
+F 3 "" H 12600 7350 50  0001 C CNN
+	1    12600 7350
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	11950 7300 11950 7350
+Wire Wire Line
+	12300 7350 11950 7350
+Connection ~ 11950 7350
+Wire Wire Line
+	11950 7350 11950 7450
+Wire Wire Line
+	12500 7350 12600 7350
+$Comp
+L power:GND #PWR0162
+U 1 1 603ED232
+P 11950 8750
+F 0 "#PWR0162" H 11950 8500 50  0001 C CNN
+F 1 "GND" H 11955 8577 50  0000 C CNN
+F 2 "" H 11950 8750 50  0001 C CNN
+F 3 "" H 11950 8750 50  0001 C CNN
+	1    11950 8750
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:+5V #PWR0163
+U 1 1 603ED60B
+P 11050 7300
+F 0 "#PWR0163" H 11050 7150 50  0001 C CNN
+F 1 "+5V" H 11065 7473 50  0000 C CNN
+F 2 "" H 11050 7300 50  0001 C CNN
+F 3 "" H 11050 7300 50  0001 C CNN
+	1    11050 7300
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	11050 7950 11550 7950
+Wire Wire Line
+	11550 8250 11050 8250
+Wire Wire Line
+	11050 7300 11050 7950
+Connection ~ 11050 7950
+Wire Wire Line
+	11050 7950 11050 8250
+Text GLabel 12350 7750 2    50   Output ~ 0
+LOOP1
+Text GLabel 13300 7650 0    50   Input ~ 0
+LOOP1
+Text GLabel 13300 7750 0    50   Input ~ 0
+LOOP2
+Text GLabel 13300 7850 0    50   Input ~ 0
+LOOP3
+Text GLabel 13300 7950 0    50   Input ~ 0
+LOOP4
+Text GLabel 13300 8050 0    50   Input ~ 0
+LOOP5
+Text GLabel 13300 8150 0    50   Input ~ 0
+LOOP6
+Text GLabel 13300 8250 0    50   Input ~ 0
+LOOP7
+Text GLabel 13300 8350 0    50   Input ~ 0
+LOOP8
+Text GLabel 12350 7850 2    50   Output ~ 0
+LOOP2
+Text GLabel 12350 7950 2    50   Output ~ 0
+LOOP3
+Text GLabel 12350 8050 2    50   Output ~ 0
+LOOP4
+Text GLabel 12350 8150 2    50   Output ~ 0
+LOOP5
+Text GLabel 12350 8250 2    50   Output ~ 0
+LOOP6
+Text GLabel 12350 8350 2    50   Output ~ 0
+LOOP7
+Text GLabel 12350 7650 2    50   Output ~ 0
+LOOP8
+NoConn ~ 12350 8550
+NoConn ~ 10150 8500
+$Comp
+L Connector:Conn_01x05_Male J6
+U 1 1 607955AA
+P 8050 8150
+F 0 "J6" H 8158 8439 50  0000 C CNN
+F 1 "Conn_01x05_Male" H 8158 8440 50  0001 C CNN
+F 2 "Connector_JST:JST_EH_B5B-EH-A_1x05_P2.50mm_Vertical" H 8050 8150 50  0001 C CNN
+F 3 "~" H 8050 8150 50  0001 C CNN
+	1    8050 8150
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:+9V #PWR0164
+U 1 1 60797BC7
+P 8400 7050
+F 0 "#PWR0164" H 8400 6900 50  0001 C CNN
+F 1 "+9V" H 8415 7223 50  0000 C CNN
+F 2 "" H 8400 7050 50  0001 C CNN
+F 3 "" H 8400 7050 50  0001 C CNN
+	1    8400 7050
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0165
+U 1 1 6079832F
+P 8600 7150
+F 0 "#PWR0165" H 8600 6900 50  0001 C CNN
+F 1 "GND" H 8605 6977 50  0000 C CNN
+F 2 "" H 8600 7150 50  0001 C CNN
+F 3 "" H 8600 7150 50  0001 C CNN
+	1    8600 7150
+	-1   0    0    1   
+$EndComp
+$Comp
+L power:+5V #PWR0166
+U 1 1 60798800
+P 8800 7250
+F 0 "#PWR0166" H 8800 7100 50  0001 C CNN
+F 1 "+5V" H 8815 7423 50  0000 C CNN
+F 2 "" H 8800 7250 50  0001 C CNN
+F 3 "" H 8800 7250 50  0001 C CNN
+	1    8800 7250
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8250 7100 8400 7100
+Wire Wire Line
+	8400 7100 8400 7050
+Wire Wire Line
+	8250 7200 8600 7200
+Wire Wire Line
+	8600 7200 8600 7150
+Wire Wire Line
+	8250 7300 8800 7300
+Wire Wire Line
+	8800 7300 8800 7250
+Text GLabel 8250 7400 2    50   Input ~ 0
+RX
+Text GLabel 8250 7500 2    50   Output ~ 0
+TX
+Text GLabel 8250 7600 2    50   Output ~ 0
+MUTE
+$Comp
+L power:GND #PWR0168
+U 1 1 608111A8
+P 8550 8350
+F 0 "#PWR0168" H 8550 8100 50  0001 C CNN
+F 1 "GND" H 8555 8177 50  0000 C CNN
+F 2 "" H 8550 8350 50  0001 C CNN
+F 3 "" H 8550 8350 50  0001 C CNN
+	1    8550 8350
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:+5V #PWR0169
+U 1 1 60811599
+P 8550 7950
+F 0 "#PWR0169" H 8550 7800 50  0001 C CNN
+F 1 "+5V" H 8565 8123 50  0000 C CNN
+F 2 "" H 8550 7950 50  0001 C CNN
+F 3 "" H 8550 7950 50  0001 C CNN
+	1    8550 7950
+	1    0    0    -1  
+$EndComp
+Text GLabel 8250 8050 2    50   Output ~ 0
+SCK
+Text GLabel 8250 8150 2    50   Output ~ 0
+REL_SER
+Text GLabel 8250 8250 2    50   Output ~ 0
+REL_CS
+Wire Wire Line
+	8250 7950 8550 7950
+Wire Wire Line
+	8250 8350 8550 8350
+$Comp
+L Connector:Conn_01x06_Male J5
+U 1 1 60A3DA35
+P 8050 7300
+F 0 "J5" H 8158 7589 50  0000 C CNN
+F 1 "Conn_01x06_Male" H 8158 7590 50  0001 C CNN
+F 2 "Connector_JST:JST_EH_B6B-EH-A_1x06_P2.50mm_Vertical" H 8050 7300 50  0001 C CNN
+F 3 "~" H 8050 7300 50  0001 C CNN
+	1    8050 7300
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector:Conn_01x04_Male J7
+U 1 1 60B8DE9E
+P 8100 8900
+F 0 "J7" H 8208 9089 50  0000 C CNN
+F 1 "Conn_01x04_Male" H 8208 9090 50  0001 C CNN
+F 2 "Connector_JST:JST_EH_B4B-EH-A_1x04_P2.50mm_Vertical" H 8100 8900 50  0001 C CNN
+F 3 "~" H 8100 8900 50  0001 C CNN
+	1    8100 8900
+	1    0    0    -1  
+$EndComp
+Text GLabel 8500 9500 2    50   Input ~ 0
+PWR
+Wire Wire Line
+	8300 9400 8550 9400
+Wire Wire Line
+	8300 9500 8500 9500
+$Comp
+L Connector:USB_B J9
+U 1 1 60BD1429
+P 10100 9050
+F 0 "J9" H 9870 9039 50  0000 R CNN
+F 1 "USB_B" H 9870 8948 50  0000 R CNN
+F 2 "Connector_USB:USB_B_OST_USB-B1HSxx_Horizontal" H 10250 9000 50  0001 C CNN
+F 3 " ~" H 10250 9000 50  0001 C CNN
+	1    10100 9050
+	-1   0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0145
+U 1 1 60BF0A6A
+P 10150 9550
+F 0 "#PWR0145" H 10150 9300 50  0001 C CNN
+F 1 "GND" H 10155 9377 50  0000 C CNN
+F 2 "" H 10150 9550 50  0001 C CNN
+F 3 "" H 10150 9550 50  0001 C CNN
+	1    10150 9550
+	1    0    0    -1  
+$EndComp
+Text GLabel 8300 8900 2    50   Input ~ 0
+VBUS
+$Comp
+L power:GND #PWR0147
+U 1 1 60C0FB89
+P 8550 8800
+F 0 "#PWR0147" H 8550 8550 50  0001 C CNN
+F 1 "GND" H 8555 8627 50  0000 C CNN
+F 2 "" H 8550 8800 50  0001 C CNN
+F 3 "" H 8550 8800 50  0001 C CNN
+	1    8550 8800
+	-1   0    0    1   
+$EndComp
+Text GLabel 8300 9000 2    50   Input ~ 0
+D-
+Text GLabel 8300 9100 2    50   Input ~ 0
+D+
+Text GLabel 9800 9050 0    50   Input ~ 0
+D+
+Text GLabel 9800 9150 0    50   Input ~ 0
+D-
+Text GLabel 9800 8850 0    50   Input ~ 0
+VBUS
+Wire Wire Line
+	10100 9450 10100 9550
+Wire Wire Line
+	10100 9550 10150 9550
+Wire Wire Line
+	10150 9550 10200 9550
+Wire Wire Line
+	10200 9550 10200 9450
+Connection ~ 10150 9550
+$Comp
+L power:+9V #PWR0154
+U 1 1 60C8EB56
+P 2500 9400
+F 0 "#PWR0154" H 2500 9250 50  0001 C CNN
+F 1 "+9V" H 2515 9573 50  0000 C CNN
+F 2 "" H 2500 9400 50  0001 C CNN
+F 3 "" H 2500 9400 50  0001 C CNN
+	1    2500 9400
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2500 9400 2500 9700
+Text GLabel 5700 9400 1    50   Output ~ 0
+PWR
+Text GLabel 7200 9400 1    50   Output ~ 0
+PWR
+Text GLabel 8200 10400 0    50   Input ~ 0
+VBUS
+$Comp
+L Transistor_FET:BSS84 Q3
+U 1 1 60CEE4CC
+P 8550 10300
+F 0 "Q3" V 8799 10300 50  0000 C CNN
+F 1 "BSS84" V 8890 10300 50  0000 C CNN
+F 2 "Package_TO_SOT_SMD:SOT-23" H 8750 10225 50  0001 L CIN
+F 3 "http://assets.nexperia.com/documents/data-sheet/BSS84.pdf" H 8550 10300 50  0001 L CNN
+	1    8550 10300
+	0    -1   1    0   
+$EndComp
+$Comp
+L power:+9V #PWR0158
+U 1 1 60CEFE9D
+P 8550 10100
+F 0 "#PWR0158" H 8550 9950 50  0001 C CNN
+F 1 "+9V" H 8565 10273 50  0000 C CNN
+F 2 "" H 8550 10100 50  0001 C CNN
+F 3 "" H 8550 10100 50  0001 C CNN
+	1    8550 10100
+	1    0    0    -1  
+$EndComp
+Text GLabel 8900 10400 2    50   Output ~ 0
+PWR
+Wire Wire Line
+	8200 10400 8350 10400
+Wire Wire Line
+	8750 10400 8900 10400
+Text GLabel 3150 9400 1    50   Input ~ 0
+PWR
+Wire Wire Line
+	8300 8800 8550 8800
+$Comp
+L power:+5V #PWR0167
+U 1 1 60CAEF94
+P 8550 9400
+F 0 "#PWR0167" H 8550 9250 50  0001 C CNN
+F 1 "+5V" H 8565 9573 50  0000 C CNN
+F 2 "" H 8550 9400 50  0001 C CNN
+F 3 "" H 8550 9400 50  0001 C CNN
+	1    8550 9400
+	1    0    0    -1  
+$EndComp
+$Comp
+L Connector:Conn_01x03_Male J8
+U 1 1 60FA7D1B
+P 8100 9500
+F 0 "J8" H 8250 9250 50  0000 R CNN
+F 1 "Conn_01x03_Male" H 8208 9690 50  0001 C CNN
+F 2 "Connector_JST:JST_EH_B3B-EH-A_1x03_P2.50mm_Vertical" H 8100 9500 50  0001 C CNN
+F 3 "~" H 8100 9500 50  0001 C CNN
+	1    8100 9500
+	1    0    0    1   
+$EndComp
+$Comp
+L power:GND #PWR0170
+U 1 1 60FC9AC1
+P 8550 9600
+F 0 "#PWR0170" H 8550 9350 50  0001 C CNN
+F 1 "GND" H 8555 9427 50  0000 C CNN
+F 2 "" H 8550 9600 50  0001 C CNN
+F 3 "" H 8550 9600 50  0001 C CNN
+	1    8550 9600
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	8300 9600 8550 9600
+$Comp
+L Device:L L2
+U 1 1 60FF2EAC
+P 5100 9350
+F 0 "L2" V 5200 9350 50  0000 C CNN
+F 1 "100uH" V 5050 9350 50  0000 C CNN
+F 2 "Inductor_THT:L_Axial_L7.0mm_D3.3mm_P10.16mm_Horizontal_Fastron_MICC" H 5100 9350 50  0001 C CNN
+F 3 "~" H 5100 9350 50  0001 C CNN
+	1    5100 9350
+	0    -1   -1   0   
+$EndComp
+Text GLabel 4950 9350 0    50   Output ~ 0
+VR_OUT
+Text GLabel 5250 9350 2    50   Output ~ 0
+PWR
+$EndSCHEMATC
