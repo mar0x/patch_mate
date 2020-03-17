@@ -4,4 +4,5 @@
   (lib (name bg)(type KiCad)(uri ${KIPRJMOD}/bg.pretty)(options "")(descr ""))
   (lib (name CK635-041A)(type KiCad)(uri ${KIPRJMOD}/../lib/CK635-041A.pretty)(options "")(descr ""))
   (lib (name Connectors)(type KiCad)(uri ${KIPRJMOD}/../lib/Connectors.pretty)(options "")(descr ""))
+  (lib (name DiodeBridge)(type KiCad)(uri ${KIPRJMOD}/../lib/DiodeBridge.pretty)(options "")(descr ""))
 )
