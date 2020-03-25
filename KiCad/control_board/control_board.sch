@@ -162,9 +162,10 @@ L Device:Rotary_Encoder SW14
 U 1 1 5E5AABAE
 P 8400 5750
 F 0 "SW14" V 8650 5650 50  0000 L CNN
-F 1 "Rotary_Encoder" H 8630 5705 50  0001 L CNN
+F 1 "PEC16-2215F-N0024" H 8630 5705 50  0001 L CNN
 F 2 "PEC16:RotaryEncoder_Bourns_PEC16-2215F-N0024_Vertical" H 8250 5910 50  0001 C CNN
-F 3 "~" H 8400 6010 50  0001 C CNN
+F 3 "https://www.bourns.com/docs/Product-Datasheets/pec16.pdf" H 8400 6010 50  0001 C CNN
+F 4 "https://www.chipdip.ru/product/pec16-2215f-n0024" V 8400 5750 50  0001 C CNN "URL"
 	1    8400 5750
 	0    -1   -1   0   
 $EndComp
@@ -550,17 +551,6 @@ F 3 "~" H 8350 4100 50  0001 C CNN
 	1    8350 4100
 	0    1    1    0   
 $EndComp
-$Comp
-L power:GND #PWR0111
-U 1 1 5E5FB39A
-P 8500 4200
-F 0 "#PWR0111" H 8500 3950 50  0001 C CNN
-F 1 "GND" H 8505 4027 50  0000 C CNN
-F 2 "" H 8500 4200 50  0001 C CNN
-F 3 "" H 8500 4200 50  0001 C CNN
-	1    8500 4200
-	1    0    0    -1  
-$EndComp
 Wire Wire Line
 	3200 1600 3200 1650
 Wire Wire Line
@@ -761,8 +751,6 @@ Wire Wire Line
 Connection ~ 8500 2850
 Wire Wire Line
 	8500 2850 8500 3150
-Wire Wire Line
-	8500 4100 8500 4200
 $Comp
 L Device:R R31
 U 1 1 5E656F25
@@ -1172,10 +1160,10 @@ $Comp
 L Connector:Conn_01x06_Male J6
 U 1 1 5E74548D
 P 1100 3900
-F 0 "J6" H 1208 4189 50  0000 C CNN
-F 1 "OLED" V 1000 4050 50  0000 C CNN
+F 0 "J6" H 1200 4250 50  0000 C CNN
+F 1 "JST B6B-PH-K-S" V 1000 3850 39  0000 C CNN
 F 2 "Connector_JST:JST_PH_B6B-PH-K_1x06_P2.00mm_Vertical" H 1100 3900 50  0001 C CNN
-F 3 "~" H 1100 3900 50  0001 C CNN
+F 3 "https://www.jst-mfg.com/product/pdf/eng/ePH.pdf" H 1100 3900 50  0001 C CNN
 	1    1100 3900
 	1    0    0    -1  
 $EndComp
@@ -1251,9 +1239,9 @@ L Connector:Conn_01x04_Male J3
 U 1 1 5E7729B3
 P 1000 6900
 F 0 "J3" H 1050 6600 50  0000 C CNN
-F 1 "GND VBUS USB" V 900 6750 50  0000 C CNN
+F 1 "JST B4B-PH-K-S" V 900 6750 39  0000 C CNN
 F 2 "Connector_JST:JST_PH_B4B-PH-K_1x04_P2.00mm_Vertical" H 1000 6900 50  0001 C CNN
-F 3 "~" H 1000 6900 50  0001 C CNN
+F 3 "https://www.jst-mfg.com/product/pdf/eng/ePH.pdf" H 1000 6900 50  0001 C CNN
 	1    1000 6900
 	1    0    0    1   
 $EndComp
@@ -1681,7 +1669,7 @@ Text GLabel 5900 6850 0    50   Input ~ 0
 SW_CS
 Text GLabel 5900 7050 0    50   Input ~ 0
 SCK
-Text GLabel 7200 5850 2    50   Output ~ 0
+Text GLabel 7450 5850 2    50   Output ~ 0
 MISO
 $Comp
 L power:GND #PWR0147
@@ -1870,9 +1858,9 @@ L Connector:Conn_01x11_Male J2
 U 1 1 5E8CFE9F
 P 1100 2700
 F 0 "J2" H 1200 3350 50  0000 C CNN
-F 1 "REL" V 1000 3150 50  0000 C CNN
+F 1 "JST B11B-PH-K-S" V 1000 2750 39  0000 C CNN
 F 2 "Connector_JST:JST_PH_B11B-PH-K_1x11_P2.00mm_Vertical" H 1100 2700 50  0001 C CNN
-F 3 "~" H 1100 2700 50  0001 C CNN
+F 3 "https://www.jst-mfg.com/product/pdf/eng/ePH.pdf" H 1100 2700 50  0001 C CNN
 	1    1100 2700
 	1    0    0    -1  
 $EndComp
@@ -1897,9 +1885,9 @@ L Connector:Conn_01x02_Male J1
 U 1 1 5E94EE56
 P 1100 1700
 F 0 "J1" H 1208 1881 50  0000 C CNN
-F 1 "+5V GND" V 1000 1650 50  0000 C CNN
-F 2 "Connector_JST:JST_EH_B2B-EH-A_1x02_P2.50mm_Vertical" H 1100 1700 50  0001 C CNN
-F 3 "~" H 1100 1700 50  0001 C CNN
+F 1 "JST B2B-XH-A" V 1000 1650 39  0000 C CNN
+F 2 "Connector_JST:JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical" H 1100 1700 50  0001 C CNN
+F 3 "http://www.jst-mfg.com/product/pdf/eng/eXH.pdf" H 1100 1700 50  0001 C CNN
 	1    1100 1700
 	1    0    0    -1  
 $EndComp
@@ -2040,7 +2028,7 @@ L Device:Crystal_Small Y1
 U 1 1 5E740582
 P 2850 1750
 F 0 "Y1" V 2850 1838 50  0000 L CNN
-F 1 "Crystal_Small" V 2895 1838 50  0001 L CNN
+F 1 "HC-49SM" V 2950 1800 39  0000 L CNN
 F 2 "Crystal:Crystal_SMD_HC49-SD" H 2850 1750 50  0001 C CNN
 F 3 "~" H 2850 1750 50  0001 C CNN
 	1    2850 1750
@@ -2069,9 +2057,9 @@ L Connector:Conn_01x05_Male J4
 U 1 1 5E7D7459
 P 1100 1050
 F 0 "J4" H 1208 1431 50  0000 C CNN
-F 1 "RX TX MUTE MIDI GND" V 1000 1050 50  0000 C CNN
+F 1 "JST B5B-PH-K-S" V 1000 1050 39  0000 C CNN
 F 2 "Connector_JST:JST_PH_B5B-PH-K_1x05_P2.00mm_Vertical" H 1100 1050 50  0001 C CNN
-F 3 "~" H 1100 1050 50  0001 C CNN
+F 3 "https://www.jst-mfg.com/product/pdf/eng/ePH.pdf" H 1100 1050 50  0001 C CNN
 	1    1100 1050
 	1    0    0    -1  
 $EndComp
@@ -2189,10 +2177,10 @@ $Comp
 L Connector:Conn_01x07_Male J7
 U 1 1 5ECDA8CC
 P 2150 4000
-F 0 "J7" H 2258 4481 50  0000 C CNN
-F 1 "EXT" V 2050 4250 50  0000 C CNN
+F 0 "J7" H 2250 4450 50  0000 C CNN
+F 1 "JST B7B-PH-K-S" V 2050 4000 39  0000 C CNN
 F 2 "Connector_JST:JST_PH_B7B-PH-K_1x07_P2.00mm_Vertical" H 2150 4000 50  0001 C CNN
-F 3 "~" H 2150 4000 50  0001 C CNN
+F 3 "https://www.jst-mfg.com/product/pdf/eng/ePH.pdf" H 2150 4000 50  0001 C CNN
 	1    2150 4000
 	1    0    0    -1  
 $EndComp
@@ -2238,15 +2226,130 @@ Wire Wire Line
 	2350 3800 2650 3800
 Wire Wire Line
 	2650 3800 2650 3750
+Text GLabel 4550 3350 2    50   Output ~ 0
+D_MIDI
 $Comp
-L Device:R R16
-U 1 1 5ECEFBBF
-P 7050 5850
-F 0 "R16" V 6950 5850 50  0000 C CNN
-F 1 "2k" V 7050 5850 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 6980 5850 50  0001 C CNN
-F 3 "~" H 7050 5850 50  0001 C CNN
-	1    7050 5850
+L Device:LED D13
+U 1 1 5ED1EFBB
+P 8050 4750
+F 0 "D13" H 8050 4650 50  0000 C CNN
+F 1 "LED" H 8043 4875 50  0001 C CNN
+F 2 "LED_THT:LED_D3.0mm_Horizontal_O6.35mm_Z10.0mm" H 8050 4750 50  0001 C CNN
+F 3 "~" H 8050 4750 50  0001 C CNN
+	1    8050 4750
+	-1   0    0    1   
+$EndComp
+Text GLabel 7900 4750 0    50   Input ~ 0
+D_MIDI
+$Comp
+L Device:R R18
+U 1 1 5ED1EFC6
+P 8350 4750
+F 0 "R18" V 8250 4750 50  0000 C CNN
+F 1 "1k" V 8350 4750 50  0000 C CNN
+F 2 "Resistor_SMD:R_0805_2012Metric" V 8280 4750 50  0001 C CNN
+F 3 "~" H 8350 4750 50  0001 C CNN
+	1    8350 4750
 	0    1    1    0   
 $EndComp
+$Comp
+L power:GND #PWR0111
+U 1 1 5ED1EFD0
+P 8500 4900
+F 0 "#PWR0111" H 8500 4650 50  0001 C CNN
+F 1 "GND" H 8505 4727 50  0000 C CNN
+F 2 "" H 8500 4900 50  0001 C CNN
+F 3 "" H 8500 4900 50  0001 C CNN
+	1    8500 4900
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:LED D12
+U 1 1 5ED1EFDB
+P 8050 4450
+F 0 "D12" H 8050 4350 50  0000 C CNN
+F 1 "LED" H 8043 4575 50  0001 C CNN
+F 2 "LED_THT:LED_D3.0mm_Horizontal_O6.35mm_Z10.0mm" H 8050 4450 50  0001 C CNN
+F 3 "~" H 8050 4450 50  0001 C CNN
+	1    8050 4450
+	-1   0    0    1   
+$EndComp
+Text GLabel 7900 4450 0    50   Input ~ 0
+D_MIDI
+$Comp
+L Device:R R17
+U 1 1 5ED1EFE6
+P 8350 4450
+F 0 "R17" V 8250 4450 50  0000 C CNN
+F 1 "1k" V 8350 4450 50  0000 C CNN
+F 2 "Resistor_SMD:R_0805_2012Metric" V 8280 4450 50  0001 C CNN
+F 3 "~" H 8350 4450 50  0001 C CNN
+	1    8350 4450
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	8500 4450 8500 4750
+Connection ~ 8500 4750
+Wire Wire Line
+	8500 4750 8500 4900
+Wire Wire Line
+	8500 4100 8500 4450
+Connection ~ 8500 4450
+$Comp
+L 74xGxx:74LVC1G125 U9
+U 1 1 5F26218E
+P 7200 5850
+F 0 "U9" H 7175 5675 50  0000 C CNN
+F 1 "SN74LVC1G125DBVR" H 7175 5584 50  0000 C CNN
+F 2 "Package_TO_SOT_SMD:SOT-23-5" H 7200 5850 50  0001 C CNN
+F 3 "http://www.ti.com/lit/sg/scyt129e/scyt129e.pdf" H 7200 5850 50  0001 C CNN
+	1    7200 5850
+	1    0    0    -1  
+$EndComp
+Text GLabel 7200 5650 1    50   Input ~ 0
+SW_CS
+$Comp
+L power:+5V #PWR0160
+U 1 1 5F2640F5
+P 7350 5450
+F 0 "#PWR0160" H 7350 5300 50  0001 C CNN
+F 1 "+5V" H 7365 5623 50  0000 C CNN
+F 2 "" H 7350 5450 50  0001 C CNN
+F 3 "" H 7350 5450 50  0001 C CNN
+	1    7350 5450
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7350 5450 7350 5500
+Wire Wire Line
+	7350 5800 7250 5800
+$Comp
+L Device:C_Small C12
+U 1 1 5F27B2A5
+P 7550 5500
+F 0 "C12" V 7779 5500 50  0000 C CNN
+F 1 "0.1u" V 7688 5500 50  0000 C CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric" H 7550 5500 50  0001 C CNN
+F 3 "~" H 7550 5500 50  0001 C CNN
+	1    7550 5500
+	0    -1   -1   0   
+$EndComp
+$Comp
+L power:GND #PWR0161
+U 1 1 5F27B899
+P 7750 5500
+F 0 "#PWR0161" H 7750 5250 50  0001 C CNN
+F 1 "GND" H 7755 5327 50  0000 C CNN
+F 2 "" H 7750 5500 50  0001 C CNN
+F 3 "" H 7750 5500 50  0001 C CNN
+	1    7750 5500
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7450 5500 7350 5500
+Connection ~ 7350 5500
+Wire Wire Line
+	7350 5500 7350 5800
+Wire Wire Line
+	7650 5500 7750 5500
 $EndSCHEMATC
