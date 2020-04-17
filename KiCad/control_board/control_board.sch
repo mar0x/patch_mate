@@ -1281,12 +1281,12 @@ $EndComp
 $Comp
 L power:+5V #PWR0134
 U 1 1 5E78933B
-P 1800 4700
-F 0 "#PWR0134" H 1800 4550 50  0001 C CNN
-F 1 "+5V" H 1800 4900 50  0000 C CNN
-F 2 "" H 1800 4700 50  0001 C CNN
-F 3 "" H 1800 4700 50  0001 C CNN
-	1    1800 4700
+P 1400 5400
+F 0 "#PWR0134" H 1400 5250 50  0001 C CNN
+F 1 "+5V" H 1400 5600 50  0000 C CNN
+F 2 "" H 1400 5400 50  0001 C CNN
+F 3 "" H 1400 5400 50  0001 C CNN
+	1    1400 5400
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -1312,10 +1312,6 @@ Wire Wire Line
 	1650 4950 1800 4950
 Wire Wire Line
 	1800 4950 1800 5000
-Wire Wire Line
-	1650 4750 1800 4750
-Wire Wire Line
-	1800 4750 1800 4700
 Text GLabel 1300 850  2    50   Output ~ 0
 RX
 Text GLabel 1300 950  2    50   Input ~ 0
@@ -2352,4 +2348,23 @@ Wire Wire Line
 	7350 5500 7350 5800
 Wire Wire Line
 	7650 5500 7750 5500
+$Comp
+L Connector:Conn_01x02_Male J8
+U 1 1 5EF149FB
+P 1050 5450
+F 0 "J8" H 1158 5631 50  0000 C CNN
+F 1 "Conn_01x02_Male" H 950 5550 50  0000 C CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical" H 1050 5450 50  0001 C CNN
+F 3 "~" H 1050 5450 50  0001 C CNN
+	1    1050 5450
+	1    0    0    -1  
+$EndComp
+Text GLabel 1650 4750 2    50   Output ~ 0
+ISCP_5V
+Text GLabel 1250 5550 2    50   Input ~ 0
+ISCP_5V
+Wire Wire Line
+	1250 5450 1400 5450
+Wire Wire Line
+	1400 5450 1400 5400
 $EndSCHEMATC
