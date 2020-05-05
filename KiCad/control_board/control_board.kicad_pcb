@@ -2,7 +2,7 @@
 
   (general
     (thickness 1.6)
-    (drawings 54)
+    (drawings 55)
     (tracks 827)
     (zones 0)
     (modules 107)
@@ -17765,6 +17765,18 @@
     )
   )
 
+  (dimension 20 (width 0.15) (layer Dwgs.User)
+    (gr_text "20.000 mm" (at 104 159.3) (layer Dwgs.User)
+      (effects (font (size 1 1) (thickness 0.15)))
+    )
+    (feature1 (pts (xy 114 150) (xy 114 158.586421)))
+    (feature2 (pts (xy 94 150) (xy 94 158.586421)))
+    (crossbar (pts (xy 94 158) (xy 114 158)))
+    (arrow1a (pts (xy 114 158) (xy 112.873496 158.586421)))
+    (arrow1b (pts (xy 114 158) (xy 112.873496 157.413579)))
+    (arrow2a (pts (xy 94 158) (xy 95.126504 158.586421)))
+    (arrow2b (pts (xy 94 158) (xy 95.126504 157.413579)))
+  )
   (dimension 16 (width 0.15) (layer Dwgs.User)
     (gr_text "16.000 mm" (at 124.3 142 270) (layer Dwgs.User)
       (effects (font (size 1 1) (thickness 0.15)))
