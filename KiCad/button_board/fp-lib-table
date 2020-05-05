@@ -1,0 +1,6 @@
+(fp_lib_table
+  (lib (name LED_Button_Switch_THT)(type KiCad)(uri ${KIPRJMOD}/../lib/LED_Button_Switch_THT.pretty)(options "")(descr ""))
+  (lib (name Connectors)(type KiCad)(uri ${KIPRJMOD}/../lib/Connectors.pretty)(options "")(descr ""))
+  (lib (name Castellations)(type KiCad)(uri ${KIPRJMOD}/../lib/Castellations.pretty)(options "")(descr ""))
+  (lib (name bg)(type KiCad)(uri ${KIPRJMOD}/bg.pretty)(options "")(descr ""))
+)
