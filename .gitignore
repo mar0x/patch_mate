@@ -1,7 +1,4 @@
 .DS_Store
 tags
 *.bak
-*.kicad_pcb-bak
-*.net
-*-cache.lib
-__pycache__
+*.zip
