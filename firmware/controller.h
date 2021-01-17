@@ -1677,7 +1677,7 @@ controller_t::show_master(bool master)
         memcpy(lcd_buf[0] + 4, program_master_.title, 12);
         out_.loop_led(program_master_.loop);
         hide_cursor();
-        memcpy(lcd_buf[1], "     master     ", LCD_COLUMNS);
+        memcpy(lcd_buf[1], "    compare     ", LCD_COLUMNS);
     } else {
         memcpy(lcd_buf[0] + 4, program_.title, 12);
         out_.loop_led(program_.loop);
