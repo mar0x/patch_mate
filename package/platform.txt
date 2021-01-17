@@ -1,0 +1,2 @@
+name=PatchMate
+tools.avrdude.path={runtime.tools.avrdude.path}
