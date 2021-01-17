@@ -7,14 +7,12 @@
 
 namespace artl {
 
-template<uint8_t PIN_NO, typename PIN_TRAITS = pin_traits<PIN_NO> >
+template<
+  typename PORT, uint8_t BIT_NO,
+  typename TRAITS = pin::traits<PORT, BIT_NO> >
 struct digital_out {
 
-    enum {
-        pin = PIN_NO
-    };
-
-    using traits = PIN_TRAITS;
+    using traits = TRAITS;
 
     static void setup() { traits::output(); }
 
@@ -25,8 +23,6 @@ struct digital_out {
     static void low() { traits::low(); }
 
     static void write(bool v) { traits::write(v); }
-
-    constexpr operator uint8_t() const { return PIN_NO; }
 };
 
 }

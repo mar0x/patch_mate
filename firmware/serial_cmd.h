@@ -27,8 +27,7 @@ DL [ <L> ]
 MD [ <ms> ]
 HC [ <s> ]
 V
-HEX [ <A> [ <S> [ <v> ] ] ]
-:LLAAAATTDD...CC
+E [ 1/0 ]
 
 FR <V>
 
@@ -58,11 +57,16 @@ struct serial_cmd_t {
         CMD_MUTE_DELAY,         // ML s
         CMD_HIDE_CURSOR_DELAY,  // HC s
         CMD_VERSION,            // V
-        CMD_HEX,                // HEX a s v
+        CMD_ECHO,               // E e
         CMD_FACTORY_RESET,      // FR v
         CMD_MIDI_MON_IN,        // MMI
         CMD_MIDI_MON_OUT,       // MMO
         CMD_HELP,               // ?
+
+        CMD_BTN_PRESS,          // P b
+
+        CMD_SERIAL_NUMBER,      // SN
+        CMD_HARDWARE,           // HW
 
         MAX_SIZE = 50,
         MAX_ARGS = 5,
@@ -306,6 +310,8 @@ serial_cmd_t::parse() {
         switch (a->end - a->start) {
         case 1:
             if (b[0] == 'V') { command_ = CMD_VERSION; }
+            if (b[0] == 'E') { command_ = CMD_ECHO; }
+            if (b[0] == 'B') { command_ = CMD_BTN_PRESS; }
             if (b[0] == '?') { command_ = CMD_HELP; }
             break;
 
@@ -325,12 +331,13 @@ serial_cmd_t::parse() {
             if (b[0] == 'M' && b[1] == 'L') { command_ = CMD_MUTE_DELAY; }
             if (b[0] == 'H' && b[1] == 'C') { command_ = CMD_HIDE_CURSOR_DELAY; }
             if (b[0] == 'F' && b[1] == 'R') { command_ = CMD_FACTORY_RESET; }
+            if (b[0] == 'S' && b[1] == 'N') { command_ = CMD_SERIAL_NUMBER; }
+            if (b[0] == 'H' && b[1] == 'W') { command_ = CMD_HARDWARE; }
             break;
 
         case 3:
             if (b[0] == 'M' && b[1] == 'L' && b[2] == 'I') { command_ = CMD_MIDI_LOOP_IN_CTRL; }
             if (b[0] == 'M' && b[1] == 'L' && b[2] == 'O') { command_ = CMD_MIDI_LOOP_OUT_CTRL; }
-            if (b[0] == 'H' && b[1] == 'E' && b[2] == 'X') { command_ = CMD_HEX; }
             if (b[0] == 'M' && b[1] == 'M' && b[2] == 'I') { command_ = CMD_MIDI_MON_IN; }
             if (b[0] == 'M' && b[1] == 'M' && b[2] == 'O') { command_ = CMD_MIDI_MON_OUT; }
             break;
@@ -353,18 +360,20 @@ RS - restore
 
 PR [<P> [<T> [<NAME>]]]
 
+ Simulation:
+B [L/R/U/D] - button press
+
  Settings:
 MC [<C>] - MIDI channel
 MLI <T> [<C>] - MIDI in loop controller
 MLO <T> [<C>] - MIDI out loop controller
-MO [1/0] - MIDI out program change 
+MO [1/0] - MIDI out program change
 MF [1/0] - MIDI forwarding
 DL [<L>] - debug level
 ML [<s>] - mute delay
 HC [<s>] - hint delay
+E [1/0] - echo
 V - show version
-HEX [<A> [<S> [<v>]]]
-:LLAAAATTDD...CC
 
 FR <V> - factory reset
 )HELP";

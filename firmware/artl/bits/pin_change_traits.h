@@ -4,98 +4,106 @@
 #include <stdint.h>
 #include <avr/io.h>
 
+#include "port.h"
+
 namespace artl {
 
-template<uint8_t N>
-struct pin_change_mask {
-};
+namespace pin {
 
-#ifdef PCMSK
+    template<uint8_t N>
+    struct change_mask {
+    };
 
-template<>
-struct pin_change_mask<0> {
-    static volatile uint8_t& msk() { return PCMSK; }
+#if defined(PCMSK) && defined(PCIE)
 
-    constexpr static uint8_t icr_bit_mask = 1 << PCIE;
-};
+    template<>
+    struct change_mask<0> {
+        static volatile uint8_t& msk() { return PCMSK; }
+
+        constexpr static uint8_t icr_bit_mask = 1 << PCIE;
+    };
 
 #else
 
-#ifdef PCMSK0
+#if defined(PCMSK0) && defined(PCIE0)
 
-template<>
-struct pin_change_mask<0> {
-    static volatile uint8_t& msk() { return PCMSK0; }
+    template<>
+    struct change_mask<0> {
+        static volatile uint8_t& msk() { return PCMSK0; }
 
-    constexpr static uint8_t icr_bit_mask = 1 << PCIE0;
-};
-
-#endif
+        constexpr static uint8_t icr_bit_mask = 1 << PCIE0;
+    };
 
 #endif
 
-#ifdef PCMSK1
+#endif
 
-template<>
-struct pin_change_mask<1> {
-    static volatile uint8_t& msk() { return PCMSK1; }
+#if defined(PCMSK1) && defined(PCIE1)
 
-    constexpr static uint8_t icr_bit_mask = 1 << PCIE1;
-};
+    template<>
+    struct change_mask<1> {
+        static volatile uint8_t& msk() { return PCMSK1; }
+
+        constexpr static uint8_t icr_bit_mask = 1 << PCIE1;
+    };
 
 #endif
 
-#ifdef PCMSK2
+#if defined(PCMSK2) && defined(PCIE2)
 
-template<>
-struct pin_change_mask<2> {
-    static volatile uint8_t& msk() { return PCMSK2; }
+    template<>
+    struct change_mask<2> {
+        static volatile uint8_t& msk() { return PCMSK2; }
 
-    constexpr static uint8_t icr_bit_mask = 1 << PCIE2;
-};
+        constexpr static uint8_t icr_bit_mask = 1 << PCIE2;
+    };
 
 #endif
 
-template<uint8_t PIN_NO>
-struct pin_change_traits {
-};
+    template<typename PORT, uint8_t BIT_NO>
+    struct change_traits {
+    };
 
-template<uint8_t MSK, uint8_t BIT_NO>
-struct base_pin_change_traits {
+    template<uint8_t MSK, uint8_t BIT_NO>
+    struct base_change_traits {
 
-    using mask = pin_change_mask<MSK>;
+        using mask = change_mask<MSK>;
 
-    constexpr static uint8_t icr_bit_mask = mask::icr_bit_mask;
+        constexpr static uint8_t icr_bit_mask = mask::icr_bit_mask;
 
-    constexpr static uint8_t bit_mask = 1 << BIT_NO;
+        constexpr static uint8_t bit_mask = 1 << BIT_NO;
 
-    static void enable() { mask::msk() |= bit_mask; }
+        static void enable() { mask::msk() |= bit_mask; }
 
-    static void disable() { mask::msk() &= ~bit_mask; }
-};
+        static void disable() { mask::msk() &= ~bit_mask; }
+    };
 
-}
+#if defined (__AVR_ATmega32U4__)
+    template<>
+    struct change_traits<port::B, 0> : public base_change_traits<0, PCINT0> { };
 
-#ifdef ARDUINO_AVR_MINI
-#define ARTL_PINOUT_STANDARD
+    template<>
+    struct change_traits<port::B, 1> : public base_change_traits<0, PCINT1> { };
+
+    template<>
+    struct change_traits<port::B, 2> : public base_change_traits<0, PCINT2> { };
+
+    template<>
+    struct change_traits<port::B, 3> : public base_change_traits<0, PCINT3> { };
+
+    template<>
+    struct change_traits<port::B, 4> : public base_change_traits<0, PCINT4> { };
+
+    template<>
+    struct change_traits<port::B, 5> : public base_change_traits<0, PCINT5> { };
+
+    template<>
+    struct change_traits<port::B, 6> : public base_change_traits<0, PCINT6> { };
+
+    template<>
+    struct change_traits<port::B, 7> : public base_change_traits<0, PCINT7> { };
 #endif
 
-#ifdef ARDUINO_AVR_PRO
-#define ARTL_PINOUT_STANDARD
-#endif
+} // namespace pin
 
-#ifdef ARDUINO_AVR_UNO
-#define ARTL_PINOUT_STANDARD
-#endif
-
-#ifdef ARDUINO_AVR_LEONARDO
-#include "variants/leonardo/pin_change_traits.h"
-#endif
-
-#ifdef ARTL_PINOUT_STANDARD
-#include "variants/standard/pin_change_traits.h"
-#endif
-
-#ifdef ARDUINO_attiny
-#include "variants/tiny14/pin_change_traits.h"
-#endif
+} // namespace artl

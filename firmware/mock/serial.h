@@ -8,7 +8,7 @@ struct serial {
 
     int read() { return read_buf[pos++]; }
 
-    int available() { return end - pos; }
+    int available() const { return end - pos; }
 
     void write(const void* data, int s) {
         print("write: ");

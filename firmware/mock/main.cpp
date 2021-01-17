@@ -36,6 +36,7 @@ int random(int) { return 0; }
 WINDOW *log_window::win;
 
 #include "../controller.h"
+#include "nav_panel.h"
 
 int main() {
 /*
@@ -66,6 +67,10 @@ int main() {
 
     pm_win = newwin(4 + LCD_LINES, 82, 4, 1);
     key_win = newwin(3, 5, 6, 10);
+
+    patch_mate::nav_panel np;
+    np.create_window();
+
     lcd_win = newwin(2 + LCD_LINES, 2 + LCD_COLUMNS, 5, 20);
     loop_win = newwin(3, patch_mate::MAX_LOOP * 2 + 2, 5, 26 + LCD_COLUMNS);
 
@@ -113,6 +118,8 @@ int main() {
         }
 
         patch_mate::controller_.loop();
+
+        np.update(0, c);
 
         if (lcd.cur_on) {
             lcd.commit_show_cursor();

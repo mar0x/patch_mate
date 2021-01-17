@@ -6,8 +6,12 @@
 
 namespace artl {
 
-template<uint8_t PIN_NO, typename TRAITS = pin_change_traits<PIN_NO> >
-struct pin_change_int {
+namespace pin {
+
+template<
+  typename PORT, uint8_t BIT_NO,
+  typename TRAITS = change_traits<PORT, BIT_NO> >
+struct change_int {
 
     using traits = TRAITS;
 
@@ -22,5 +26,7 @@ struct pin_change_int {
 
     static void icr_disable() { PCICR &= ~traits::icr_bit_mask; }
 };
+
+}
 
 }

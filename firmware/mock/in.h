@@ -3,6 +3,7 @@
 
 #include "log_window.h"
 #include "button.h"
+#include "../midi_cmd.h"
 
 namespace patch_mate {
 
@@ -18,9 +19,11 @@ struct in {
     void update(unsigned long t, bool slow);
 
     bool midi_available() const { return false; }
-    int midi_read() { return 0; }
+    int midi_read() const { return 0; }
+    bool usb_midi_read(midi_cmd_t &c) const { return false; }
 
-    bool serial_available() { return pts.available(); }
+    bool serial_connected() const { return true; }
+    bool serial_available() const { return pts.available(); }
     int serial_read() { return pts.read(); }
 
     using button_type = button<typename traits::button_handler>;

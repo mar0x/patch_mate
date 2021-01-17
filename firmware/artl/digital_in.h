@@ -7,14 +7,12 @@
 
 namespace artl {
 
-template<uint8_t PIN_NO, typename PIN_TRAITS = pin_traits<PIN_NO> >
+template<
+  typename PORT, uint8_t BIT_NO,
+  typename TRAITS = pin::traits<PORT, BIT_NO> >
 struct digital_in {
 
-    enum {
-        pin = PIN_NO
-    };
-
-    using traits = PIN_TRAITS;
+    using traits = TRAITS;
 
     static void setup() { traits::input(); }
 
@@ -25,8 +23,6 @@ struct digital_in {
     static bool read() { return traits::read(); }
 
     static uint8_t read_bit() { return traits::read_bit(); }
-
-    constexpr operator uint8_t() const { return PIN_NO; }
 };
 
 }

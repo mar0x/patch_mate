@@ -29,7 +29,7 @@ struct midi_mon_t {
     void mode_next(unsigned long t);
     void mode_prev(unsigned long t);
 
-    void show(unsigned long t);
+    void show(unsigned long t, uint8_t prog_start, uint8_t chan_start);
     void hide(unsigned long t);
 
     bool active() const { return active_; }
@@ -48,6 +48,9 @@ private:
 
     line_ring_t lines_;
     data_ring_t data_;
+
+    uint8_t prog_start_;
+    uint8_t chan_start_;
 
     inline bool valid_line(uint8_t l) const {
         return lines_.diff(l) <= lines_.size;
@@ -100,11 +103,13 @@ midi_mon_t::setup(unsigned long t) {
 }
 
 inline void
-midi_mon_t::show(unsigned long t) {
+midi_mon_t::show(unsigned long t, uint8_t prog_start, uint8_t chan_start) {
     lines_.reset();
     col_ = 0;
 
     mode_ = MODE_HR;
+    prog_start_ = prog_start;
+    chan_start_ = chan_start;
 
     scroll_pos_ = lines_.prev();
 
@@ -230,7 +235,7 @@ midi_mon_t::render(char *dst, uint8_t pos, bool &sep) const {
             const static char cstr[] = {
                 'o', 'n', 'k', 'c', 'p', 'h', 't' };
 
-            uint8_t ch = (b & 0x0FU) + 1;
+            uint8_t ch = (b & 0x0FU) + chan_start_;
             uint8_t n = dec2_render(dst, ch);
 
             dst[n] = cstr[ ((b & 0xF0U) - midi_cmd_t::CMD_NOTE_OFF) >> 4 ];
@@ -240,7 +245,7 @@ midi_mon_t::render(char *dst, uint8_t pos, bool &sep) const {
 
         pos = data_.prev(pos);
         if (valid_pos(pos) && (data_[pos] & 0xF0U) == midi_cmd_t::CMD_PROG_CHANGE) {
-            b++;
+            b += prog_start_;
         }
 
         sep = true;

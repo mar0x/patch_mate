@@ -10,6 +10,9 @@ struct ring {
     uint8_t prev(uint8_t i) const { return (i + MAX - 1) % MAX; }
     uint8_t prev() const { return prev(pos); }
 
+    bool empty() const { return size == 0; }
+    bool full() const { return size == MAX; }
+
     uint8_t sum(uint8_t a, uint8_t b) const { return (a + b) % MAX; }
 
     uint8_t diff(uint8_t a, uint8_t b) const { return (a + MAX - b) % MAX; }
@@ -26,16 +29,29 @@ struct ring {
         size++;
     }
 
-    uint8_t operator[](uint8_t i) const {
+    value_t operator[](uint8_t i) const {
         return data[i];
     }
 
-    uint8_t& operator[](uint8_t i) {
+    value_t& operator[](uint8_t i) {
         return data[i];
     }
 
-    uint8_t front() const {
+    const value_t& front() const {
         return data[start];
+    }
+
+    value_t& back() {
+        return data[pos];
+    }
+
+    const value_t& back() const {
+        return data[pos];
+    }
+
+    void push_back(const value_t& v) {
+        back() = v;
+        ++(*this);
     }
 
     void pop_front() {
@@ -53,8 +69,8 @@ struct ring {
         size = diff(pos, start);
     }
 
-    T data[MAX];
-    uint8_t start;
-    uint8_t pos;
-    uint8_t size;
+    value_t data[MAX];
+    uint8_t start = 0;
+    uint8_t pos = 0;
+    uint8_t size = 0;
 };

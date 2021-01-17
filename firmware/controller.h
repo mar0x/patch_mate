@@ -1,9 +1,6 @@
 
 #pragma once
 
-#define HW_VERSION "2020.04.16"
-#define FW_VERSION "2020.07.05"
-
 #include "config.h"
 #include "debug.h"
 
@@ -47,6 +44,9 @@
 #include "lcd.h"
 #include "midi_mon.h"
 #include "edit_value.h"
+#include "version.h"
+#include "serial_num.h"
+#include "hardware_id.h"
 
 namespace patch_mate {
 
@@ -65,8 +65,11 @@ struct controller_t {
     bool read_eeprom();
     void reset_eeprom();
 
-    void process_midi_cmd();
+    void process_midi_cmd(midi_cmd_t& cmd);
     void process_serial_cmd(unsigned long);
+    void print_program(uint8_t p, const program_t& pr);
+    template<typename T>
+    void update_setting(uint8_t mode, T& s, T v);
     void midi_out(const midi_cmd_t& cmd);
 
     void set_program(uint8_t prog);
@@ -102,8 +105,6 @@ struct controller_t {
     void set_dirty(bool dirty);
 
     void show_master(bool master);
-
-    void print_version_line();
 
     struct button_handler : public artl::default_button_handler {
         button_handler(uint8_t id) : id_(id) { }
@@ -175,11 +176,15 @@ struct controller_t {
         MODE_SETTINGS_MIDI_FWD,
         MODE_SETTINGS_MUTE_DELAY,
         MODE_SETTINGS_HIDE_CURSOR,
+        MODE_SETTINGS_PROG_START,
+        MODE_SETTINGS_CHANNEL_START,
 #if defined(DEBUG)
         MODE_SETTINGS_USB_DEBUG,
 #endif
         MODE_SETTINGS_FACTORY_RESET,
         MODE_SETTINGS_LAST = MODE_SETTINGS_FACTORY_RESET,
+        MODE_PROGRAM_SWAP,
+        MODE_PROGRAM_MOVE,
         MODE_MIDI_IN_MONITOR,
         MODE_MIDI_OUT_MONITOR,
         MODE_ABOUT,
@@ -188,11 +193,6 @@ struct controller_t {
         MODE_INPUT_COUNT,
         MODE_PC_COUNT,
         MODE_MAX,
-
-        MODE_LED_IGNORE_LOOP_MASK = (1 << MODE_SETTINGS_CTRL_IN) |
-                                    (1 << MODE_SETTINGS_CTRL_OUT) |
-                                    (1 << MODE_MIDI_IN_MONITOR) |
-                                    (1 << MODE_MIDI_OUT_MONITOR),
     };
 
     in<in_traits> in_;
@@ -212,7 +212,6 @@ struct controller_t {
     edit_value_t edit_;
 
     midi_cmd_t midi_cmd_;
-    midi_cmd_t last_out_cmd_;
 
     serial_cmd_t serial_cmd_;
 
@@ -231,7 +230,6 @@ struct controller_t {
     unsigned long loop_count_ = 0;
     unsigned long pc_count_ = 0;
     unsigned long input_count_ = 0;
-    unsigned long last_out_ms_ = 0;
 
     midi_mon_t midi_mon_[2];
 
@@ -240,18 +238,10 @@ struct controller_t {
 
     bool show_master_;
 
-    static const char version_[];
-
-    uint8_t version_line_ = 0;
+    version_t version_;
 };
 
 controller_t controller_;
-
-const char controller_t::version_[] PROGMEM =
-    "HW " HW_VERSION "\n"
-    "FW " FW_VERSION "\n"
-    "BD " __DATE__ "\n"
-    "BT " __TIME__ "\n";
 
 #if defined(ISR) && defined(PCINT0_vect)
 ISR(PCINT0_vect) {
@@ -326,7 +316,14 @@ controller_t::loop() {
     }
 
     if (midi_cmd_) {
-        process_midi_cmd();
+        process_midi_cmd(midi_cmd_);
+    }
+
+    {
+        midi_cmd_t cmd;
+        if (in_.usb_midi_read(cmd)) {
+            process_midi_cmd(cmd);
+        }
     }
 
     while (!serial_cmd_ && in_.serial_available()) {
@@ -334,8 +331,10 @@ controller_t::loop() {
 
         serial_cmd_.read(b);
 
-        // Serial echo
-        // out_.serial_print((char) b);
+        if (settings_.echo) {
+            // Serial echo
+            out_.serial_print((char) b);
+        }
     }
 
     if (serial_cmd_) {
@@ -407,7 +406,7 @@ controller_t::loop() {
     }
 
     if (!store_blink_timer_.active()) {
-        out_.store_led(dirty_);
+        out_.store_led(dirty_ && !show_master_);
     }
 
     if (out_.relay_changed()) {
@@ -420,11 +419,17 @@ controller_t::loop() {
     artl::yield();
 }
 
-static const char eemagic[4] = { 'M', 'P', 'M', '4' };
+static const char eemagic[4] = { 'M', 'P', 'M', '5' };
 
 inline bool
 controller_t::read_eeprom() {
     char magic_test[sizeof(eemagic)];
+
+    serial_num_t sn; sn.get();
+    version_.sn(sn);
+
+    hardware_id_t hw; hw.get();
+    version_.hw(hw);
 
     EEPROM.get(0, magic_test);
     if (memcmp(eemagic, magic_test, sizeof(eemagic)) != 0) {
@@ -473,26 +478,26 @@ controller_t::reset_eeprom() {
 }
 
 inline void
-controller_t::process_midi_cmd() {
+controller_t::process_midi_cmd(midi_cmd_t& cmd) {
     if (settings_.midi_fwd) {
-        midi_out(midi_cmd_);
+        midi_out(cmd);
     }
 
-    if (midi_cmd_.command() == midi_cmd_t::CMD_PROG_CHANGE &&
-        midi_cmd_.channel() == settings_.midi_channel) {
-        set_program(midi_cmd_.program());
+    if (cmd.command() == midi_cmd_t::CMD_PROG_CHANGE &&
+        cmd.channel() == settings_.midi_channel) {
+        set_program(cmd.program());
     }
 
-    if (midi_cmd_.command() == midi_cmd_t::CMD_CTRL_CHANGE &&
-        midi_cmd_.channel() == settings_.midi_channel) {
+    if (cmd.command() == midi_cmd_t::CMD_CTRL_CHANGE &&
+        cmd.channel() == settings_.midi_channel) {
         for(uint8_t i = 0; i < MAX_LOOP; i++) {
-            if (settings_.midi_loop_ctrl_in[i] == midi_cmd_.controller()) {
-                set_loop(i, midi_cmd_.value() != 0);
+            if (settings_.midi_loop_ctrl_in[i] == cmd.controller()) {
+                set_loop(i, cmd.value() != 0);
             }
         }
     }
 
-    midi_cmd_.reset();
+    cmd.reset();
 }
 
 inline void
@@ -505,10 +510,8 @@ controller_t::process_serial_cmd(unsigned long t) {
 
     switch (serial_cmd_.command()) {
     case serial_cmd_t::CMD_VERSION:
-        for (uint16_t i = 0; i < sizeof(version_); ++i) {
-            char b = pgm_read_byte_near(version_ + i);
-            if (b == '\n') { out_.serial_print('\r'); }
-            out_.serial_print(b);
+        for (uint8_t i = 0; i < version_t::MAX_LINE; ++i) {
+            out_.serial_println(version_.lines[i]);
         }
         break;
 
@@ -522,18 +525,18 @@ controller_t::process_serial_cmd(unsigned long t) {
     }
     case serial_cmd_t::CMD_PROG_CHANGE: {
         uint8_t p;
-        if (serial_cmd_.get_arg(1, p)) { set_program(p); }
+        if (serial_cmd_.get_arg(1, p) && p < MAX_PROGRAMS) { set_program(p); }
 
         out_.serial_println("PC ", prog_id_);
         break;
     }
     case serial_cmd_t::CMD_CTRL_CHANGE: {
         uint8_t c = 0, v = 0;
-        if (serial_cmd_.get_arg(1, c) &&
+        if (serial_cmd_.get_arg(1, c) && c < MAX_CTRL &&
             serial_cmd_.get_arg(2, v)) {
             for(uint8_t i = 0; i < MAX_LOOP; i++) {
                 if (settings_.midi_loop_ctrl_in[i] == c) {
-                    set_loop(i, v);
+                    set_loop(i, v != 0);
                 }
             }
         }
@@ -542,14 +545,16 @@ controller_t::process_serial_cmd(unsigned long t) {
         break;
     }
     case serial_cmd_t::CMD_LOOP: {
-        uint8_t t = 0;
-        uint16_t v = 0;
-        if (serial_cmd_.get_arg(1, t) &&
-            serial_cmd_.get_arg(2, v)) { set_loop(t, v); }
+        uint8_t l = 0;
+        uint8_t v = 0;
+        if (serial_cmd_.get_arg(1, l) && l < MAX_LOOP &&
+            serial_cmd_.get_arg(2, v) && (v == 0 || v == 1)) {
+            set_loop(l, v);
+        }
 
-        if (t >= MAX_LOOP) t = MAX_LOOP - 1;
+        if (l >= MAX_LOOP) l = 0;
 
-        out_.serial_println("LP ", t, " ", program_.loop[t]);
+        out_.serial_println("LP ", l, " ", program_.loop[l]);
         break;
     }
     case serial_cmd_t::CMD_NAME: {
@@ -558,6 +563,7 @@ controller_t::process_serial_cmd(unsigned long t) {
         if (mode_ == MODE_NORMAL) {
             memcpy(lcd_buf[0] + 4, program_.title, 12);
 
+            hide_hint();
             hide_cursor();
 
             lcd_update(0, 0, LCD_COLUMNS);
@@ -567,8 +573,8 @@ controller_t::process_serial_cmd(unsigned long t) {
         break;
     }
     case serial_cmd_t::CMD_MODE: {
-        uint8_t m;
-        if (serial_cmd_.get_arg(1, m)) { set_mode(m, t); }
+        uint8_t m = mode_;
+        if (serial_cmd_.get_arg(1, m) && m < MODE_MAX) { set_mode(m, t); }
 
         out_.serial_println("MD ", mode_);
         break;
@@ -578,22 +584,14 @@ controller_t::process_serial_cmd(unsigned long t) {
         else if (bad_magic_) { out_.serial_println("BAD MAGIC"); }
         else { commit(t); }
 
-        out_.serial_print("PR ", prog_id_, " ", program_.loop[0]);
-        for (uint8_t i = 1; i < MAX_LOOP; i++) {
-            out_.serial_print(",", program_.loop[i]);
-        }
-        out_.serial_println(" \"", program_.title, "\"");
+        print_program(prog_id_, program_);
         break;
     }
     case serial_cmd_t::CMD_RESTORE: {
         if (!dirty_) { out_.serial_println("CLEAR"); }
         else { set_program(prog_id_); }
 
-        out_.serial_print("PR ", prog_id_, " ", program_.loop[0]);
-        for (uint8_t i = 1; i < MAX_LOOP; i++) {
-            out_.serial_print(",", program_.loop[i]);
-        }
-        out_.serial_println(" \"", program_.title, "\"");
+        print_program(prog_id_, program_);
         break;
     }
     case serial_cmd_t::CMD_PROGRAM: {
@@ -619,60 +617,67 @@ controller_t::process_serial_cmd(unsigned long t) {
             }
         }
 
-        out_.serial_print("PR ", p, " ", pr.loop[0]);
-        for (uint8_t i = 1; i < MAX_LOOP; i++) {
-            out_.serial_print(",", pr.loop[i]);
-        }
-        out_.serial_println(" \"", pr.title, "\"");
+        print_program(p, pr);
         break;
     }
     case serial_cmd_t::CMD_MIDI_CHANNEL: {
-        uint8_t c;
-        if (serial_cmd_.get_arg(1, c)) {
-            c = c % 16;
-            if (mode_ == MODE_SETTINGS_CHANNEL) {
-                edit_.value(c);
-                edit_.print(lcd_buf[1] + 13);
-
-                set_dirty(false);
-
-                lcd_update(13, 1, 3);
-            }
-
-            settings_.midi_channel = c;
-            settings_.write(settings_.midi_channel);
+        uint8_t v = settings_.midi_channel;
+        if (serial_cmd_.get_arg(1, v) && v < MAX_CHANNEL) {
+            update_setting(MODE_SETTINGS_CHANNEL, settings_.midi_channel, v);
         }
 
-        out_.serial_println("MC ", settings_.midi_channel);
+        out_.serial_println("MC ", v);
         break;
     }
     case serial_cmd_t::CMD_MIDI_PROG_OUT: {
-        // TODO
-        out_.serial_println("MO ", settings_.midi_out_prog);
+        uint8_t v = settings_.midi_out_prog;
+        if (serial_cmd_.get_arg(1, v)) {
+            v = v != 0;
+            update_setting(MODE_SETTINGS_PROG_OUT, settings_.midi_out_prog, v);
+        }
+
+        out_.serial_println("MO ", v);
         break;
     }
     case serial_cmd_t::CMD_MIDI_FORWARD: {
-        // TODO
-        out_.serial_println("MF ", settings_.midi_fwd);
+        uint8_t v = settings_.midi_fwd;
+        if (serial_cmd_.get_arg(1, v)) {
+            v = v != 0;
+            update_setting(MODE_SETTINGS_MIDI_FWD, settings_.midi_fwd, v);
+        }
+
+        out_.serial_println("MF ", v);
         break;
     }
 #if defined(DEBUG)
     case serial_cmd_t::CMD_DEBUG_LEVEL: {
-        uint8_t c;
-        if (serial_cmd_.get_arg(1, c)) {
-            if (c > 9) c = 9;
-            settings_.usb_debug = c;
-            settings_.write(settings_.usb_debug);
-            debug_level_ = c;
+        uint8_t v = settings_.usb_debug;
+        if (serial_cmd_.get_arg(1, v)) {
+            if (v > 9) v = 9;
+            update_setting(MODE_SETTINGS_USB_DEBUG, settings_.usb_debug, v);
+            debug_level_ = v;
         }
 
-        out_.serial_println("DL ", settings_.usb_debug);
+        out_.serial_println("DL ", v);
         break;
     }
 #endif
+    case serial_cmd_t::CMD_MUTE_DELAY: {
+        uint16_t v = settings_.mute_delay_ms;
+        if (serial_cmd_.get_arg(1, v)) {
+            update_setting(MODE_SETTINGS_HIDE_CURSOR, settings_.mute_delay_ms, v);
+        }
+
+        out_.serial_println("ML ", v);
+        break;
+    }
     case serial_cmd_t::CMD_HIDE_CURSOR_DELAY: {
-        // TODO
-        out_.serial_println("HC ", settings_.hide_cursor_delay_s);
+        uint8_t v = settings_.hide_cursor_delay_s;
+        if (serial_cmd_.get_arg(1, v)) {
+            update_setting(MODE_SETTINGS_HIDE_CURSOR, settings_.hide_cursor_delay_s, v);
+        }
+
+        out_.serial_println("HC ", v);
         break;
     }
     case serial_cmd_t::CMD_FACTORY_RESET: {
@@ -695,8 +700,68 @@ controller_t::process_serial_cmd(unsigned long t) {
         // TODO
         break;
     }
-    case serial_cmd_t::CMD_HEX: {
-        // TODO
+    case serial_cmd_t::CMD_ECHO: {
+        uint8_t v;
+        if (serial_cmd_.get_arg(1, v)) {
+            settings_.echo = v != 0;
+            settings_.write(settings_.echo);
+        }
+
+        out_.serial_println("E ", settings_.echo);
+        break;
+    }
+    case serial_cmd_t::CMD_SERIAL_NUMBER: {
+        struct {
+            serial_num_t sn;
+            char z = 0;
+        } v;
+
+        if (serial_cmd_.get_arg(1, v.sn)) {
+            v.sn.put();
+            version_.sn(v.sn);
+        } else {
+            v.sn.get();
+        }
+
+        out_.serial_println("SN ", v.sn.buf);
+        break;
+    }
+    case serial_cmd_t::CMD_HARDWARE: {
+        struct {
+            hardware_id_t hw;
+            char z = 0;
+        } v;
+
+        if (serial_cmd_.get_arg(1, v.hw)) {
+            v.hw.put();
+            version_.hw(v.hw);
+        } else {
+            v.hw.get();
+        }
+
+        out_.serial_println("HW ", v.hw.buf);
+        break;
+    }
+    case serial_cmd_t::CMD_BTN_PRESS: {
+        struct {
+            char btn[1];
+            char z = 0;
+        } btn;
+
+        if (serial_cmd_.get_arg(1, btn.btn)) {
+            if (btn.btn[0] >= '0' && btn.btn[0] <= '9') {
+                on_down(btn.btn[0] - '0', true, t);
+            } else {
+                switch(btn.btn[0]) {
+                case 'L': on_down(LEFT, true, t); break;
+                case 'R': on_down(RIGHT, true, t); break;
+                case 'U': on_rotate(1, t); break;
+                case 'D': on_rotate(-1, t); break;
+                }
+            }
+        }
+
+        out_.serial_println("B ", btn.btn);
         break;
     }
     }
@@ -715,15 +780,37 @@ controller_t::process_serial_cmd(unsigned long t) {
 }
 
 inline void
+controller_t::print_program(uint8_t p, const program_t& pr) {
+    out_.serial_print("PR ", p, " ", pr.loop[0]);
+    for (uint8_t i = 1; i < MAX_LOOP; i++) {
+        out_.serial_print(",", pr.loop[i]);
+    }
+    out_.serial_println(" \"", pr.title, "\"");
+}
+
+template<typename T>
+inline void
+controller_t::update_setting(uint8_t mode, T& s, T v) {
+    if (mode_ == mode) {
+        edit_.value(v);
+        edit_.print(lcd_buf[1] + 13);
+
+        set_dirty(false);
+
+        lcd_update(13, 1, 3);
+    }
+
+    s = v;
+    settings_.write(s);
+}
+
+inline void
 controller_t::midi_out(const midi_cmd_t& cmd) {
     if (midi_mon_[1].active()) {
         for (uint8_t i = 0; i < cmd.size(); i++) {
             midi_mon_[1].read(cmd[i]);
         }
     }
-
-    last_out_cmd_ = cmd;
-    last_out_ms_ = millis();
 
     out_.midi_write(cmd, cmd.size());
 }
@@ -753,17 +840,18 @@ controller_t::set_program(uint8_t prog) {
     if (mode_ == MODE_NORMAL) {
         set_dirty(false);
 
-        print_number(lcd_buf[0], 3, prog_id_ + 1);
+        print_number(lcd_buf[0], 3, prog_id_ + settings_.prog_start);
         lcd_buf[0][3] = ' ';
         memcpy(lcd_buf[0] + 4, program_.title, 12);
 
+        hide_hint();
         hide_cursor();
 
         lcd_update(0, 0, LCD_COLUMNS);
         lcd_update(0, 1, LCD_COLUMNS);
     }
 
-    // adjust loop led for all modes except MODE_LED_IGNORE_LOOP_MASK
+    // adjust loop led for all modes except MIDI mon and control settings
     if (led4loop()) {
         out_.loop_led(program_.loop);
     }
@@ -778,7 +866,7 @@ controller_t::set_loop(uint8_t i, bool v) {
     // send controller_t change MIDI command if configured
     send_loop(i, v);
 
-    // adjust loop led for all modes except MODE_LED_IGNORE_LOOP_MASK
+    // adjust loop led for all modes except MIDI mon and control settings
     if (led4loop()) {
         out_.loop_led(i, v);
     }
@@ -802,7 +890,10 @@ controller_t::send_loop(uint8_t i, bool v) {
 
 inline bool
 controller_t::led4loop() const {
-    return ((1 << mode_) & MODE_LED_IGNORE_LOOP_MASK) == 0;
+    return (mode_ != MODE_SETTINGS_CTRL_IN) &&
+           (mode_ != MODE_SETTINGS_CTRL_OUT) &&
+           (mode_ != MODE_MIDI_IN_MONITOR) &&
+           (mode_ != MODE_MIDI_OUT_MONITOR);
 }
 
 inline void
@@ -827,9 +918,12 @@ controller_t::on_down(uint8_t i, bool down, unsigned long t) {
             case 2: set_mode(MODE_SETTINGS_CTRL_OUT, t); break;
             case 3: set_mode(MODE_SETTINGS_PROG_OUT, t); break;
             case 4: set_mode(MODE_SETTINGS_MIDI_FWD, t); break;
-            case 6: set_mode(MODE_MIDI_IN_MONITOR, t); break;
+            case 5: set_mode(MODE_SETTINGS_MUTE_DELAY, t); break;
+            case 6: set_mode(MODE_SETTINGS_HIDE_CURSOR, t); break;
+            case 7: set_mode(MODE_SETTINGS_PROG_START, t); break;
+            case 8: set_mode(MODE_SETTINGS_CHANNEL_START, t); break;
 #if defined(DEBUG)
-            case 7: set_mode(MODE_SETTINGS_USB_DEBUG, t); break;
+            case 9: set_mode(MODE_SETTINGS_USB_DEBUG, t); break;
 #endif
         }
         return;
@@ -838,11 +932,11 @@ controller_t::on_down(uint8_t i, bool down, unsigned long t) {
     // change mode ex: hold RIGHT and press LOOP
     if (i < MAX_LOOP && in_.right().down()) {
         switch(i) {
-            case 0: set_mode(MODE_ABOUT, t); break;
-            case 1: set_mode(MODE_UPTIME, t); break;
-            case 4: set_mode(MODE_SETTINGS_MUTE_DELAY, t); break;
-            case 5: set_mode(MODE_SETTINGS_HIDE_CURSOR, t); break;
-            case 6: set_mode(MODE_MIDI_OUT_MONITOR, t); break;
+            case 0: set_mode(MODE_PROGRAM_SWAP, t); break;
+            case 1: set_mode(MODE_PROGRAM_MOVE, t); break;
+            case 2: set_mode(MODE_MIDI_IN_MONITOR, t); break;
+            case 3: set_mode(MODE_MIDI_OUT_MONITOR, t); break;
+            case 9: set_mode(MODE_ABOUT, t); break;
         }
         return;
     }
@@ -928,14 +1022,14 @@ controller_t::on_down(uint8_t i, bool down, unsigned long t) {
 
     if (mode_ == MODE_ABOUT) {
         if (i == LEFT && in_.right().up()) {
-            version_line_ = rotate(version_line_, 0, 4, -1);
-            print_version_line();
+            version_.rotate(-1);
+            version_.print_line();
             lcd_update(0, 1, LCD_COLUMNS);
         }
 
         if (i == RIGHT && in_.left().up()) {
-            version_line_ = rotate(version_line_, 0, 4, 1);
-            print_version_line();
+            version_.rotate(1);
+            version_.print_line();
             lcd_update(0, 1, LCD_COLUMNS);
         }
 
@@ -995,6 +1089,8 @@ controller_t::on_hold(uint8_t i, unsigned long t) {
         }
 
         if (i == RIGHT && in_.left().up()) {
+            if (!dirty_) { return; }
+
             show_master(true);
         }
 
@@ -1038,6 +1134,8 @@ controller_t::on_hold(uint8_t i, unsigned long t) {
         case MODE_SETTINGS_PROG_OUT:
         case MODE_SETTINGS_MIDI_FWD:
         case MODE_SETTINGS_HIDE_CURSOR:
+        case MODE_SETTINGS_PROG_START:
+        case MODE_SETTINGS_CHANNEL_START:
             commit_edit();
             break;
 
@@ -1059,6 +1157,42 @@ controller_t::on_hold(uint8_t i, unsigned long t) {
             debug_level_ = edit_.value();
             break;
 #endif
+
+        case MODE_PROGRAM_SWAP:
+        case MODE_PROGRAM_MOVE:
+            // No changes made - switch back to NORMAL;
+            if (!dirty_) {
+                set_mode(MODE_NORMAL, t);
+                return;
+            }
+
+            // Changes made, but EEPROM not ready - confirm EEPROM Reset first;
+            if (bad_magic_ && mode_ != MODE_SETTINGS_FACTORY_RESET) {
+                set_mode(MODE_SETTINGS_FACTORY_RESET, t);
+                return;
+            }
+
+            {
+                program_t tmp_prog;
+
+                if (mode_ == MODE_PROGRAM_SWAP) {
+                    tmp_prog.read(edit_.value());
+                    tmp_prog.write(prog_id_);
+
+                } else {
+                    int step = edit_.value() > prog_id_ ? 1 : -1;
+
+                    for (uint8_t p = prog_id_; p != edit_.value(); p += step) {
+                        tmp_prog.read(p + step);
+                        tmp_prog.write(p);
+                    }
+                }
+
+                program_master_.write(edit_.value());
+                prog_id_ = edit_.value();
+            }
+
+            break;
         }
 
         set_mode(MODE_NORMAL, t);
@@ -1087,7 +1221,8 @@ controller_t::commit(unsigned long t) {
 }
 
 /* Available alphabet:
-  ABCDEFGHIJKLMNOPRSTUVWXYZ[\]^_
+  ABCDEFGHIJKLMNOPRSTUVWXYZ[\]^_`
+  abcdefghijklmnoprstuvwxyz{|}~
   !"#$%&'()*+,-./
   :;<=>?@
   0123456789
@@ -1096,7 +1231,7 @@ controller_t::commit(unsigned long t) {
 /*
 joints = {
     { ' ', 'A' },
-    { '_', '!' },
+    { '~', '!' },
     { '/', ':' },
     { '@', '0' },
     { '9', ' ' }
@@ -1104,7 +1239,7 @@ joints = {
 
 ranges = {
     { ' ', ' ' },
-    { 'A', '_' },
+    { 'A', '~' },
     { '!', '/' },
     { ':', '@' }
     { '0', '9' },
@@ -1116,7 +1251,7 @@ rotate_char(char c, short dir) {
     if (dir > 0) {
         if (c == ' ') return 'A';
         if (c >= '0' && c < '9') return c + 1;
-        if (c >= 'A' && c < '_') return c + 1;
+        if (c >= 'A' && c < '~') return c + 1;
         if (c >= '!' && c < '/') return c + 1;
         if (c >= ':' && c < '@') return c + 1;
         if (c == '_') return '!';
@@ -1128,7 +1263,7 @@ rotate_char(char c, short dir) {
 
     if (c == ' ') return '9';
     if (c > '0' && c <= '9') return c - 1;
-    if (c > 'A' && c <= '_') return c - 1;
+    if (c > 'A' && c <= '~') return c - 1;
     if (c > '!' && c <= '/') return c - 1;
     if (c > ':' && c <= '@') return c - 1;
     if (c == '0') return '@';
@@ -1182,6 +1317,8 @@ controller_t::on_rotate(short dir, unsigned long t) {
     case MODE_SETTINGS_MIDI_FWD:
     case MODE_SETTINGS_MUTE_DELAY:
     case MODE_SETTINGS_HIDE_CURSOR:
+    case MODE_SETTINGS_PROG_START:
+    case MODE_SETTINGS_CHANNEL_START:
 #if defined(DEBUG)
     case MODE_SETTINGS_USB_DEBUG:
 #endif
@@ -1192,6 +1329,20 @@ controller_t::on_rotate(short dir, unsigned long t) {
 
         lcd_update(13, 1, 3);
         break;
+
+    case MODE_PROGRAM_SWAP:
+    case MODE_PROGRAM_MOVE: {
+        edit_.rotate(dir);
+        set_dirty(edit_.dirty());
+
+        program_t dprog;
+        dprog.read(edit_.value());
+        print_number(lcd_buf[1] + 3, 3, edit_.value() + settings_.prog_start);
+        memcpy(lcd_buf[1] + 7, dprog.title, 9);
+
+        lcd_update(3, 1, 13);
+        break;
+    }
 
     case MODE_MIDI_IN_MONITOR:
     case MODE_MIDI_OUT_MONITOR: {
@@ -1260,10 +1411,10 @@ controller_t::set_edit_loop(uint8_t edit_loop) {
 
     switch (mode_) {
     case MODE_SETTINGS_CTRL_IN:
-        start_edit(settings_.midi_loop_ctrl_in[edit_loop_ - 1], 0, 128, 1, 0, 128);
+        start_edit(settings_.midi_loop_ctrl_in[edit_loop_ - 1], 0, MAX_CTRL, 1, 0, MAX_CTRL);
         break;
     case MODE_SETTINGS_CTRL_OUT:
-        start_edit(settings_.midi_loop_ctrl_out[edit_loop_ - 1], 0, 128, 1, 0, 128);
+        start_edit(settings_.midi_loop_ctrl_out[edit_loop_ - 1], 0, MAX_CTRL, 1, 0,MAX_CTRL);
         break;
     }
 
@@ -1289,6 +1440,10 @@ controller_t::set_mode(uint8_t m, unsigned long t) {
 
     mode_ = m;
 
+    if (show_master_) {
+        show_master(false);
+    }
+
     set_dirty(false);
 
     if (mode_ >= MODE_SETTINGS_FIRST &&
@@ -1303,14 +1458,14 @@ controller_t::set_mode(uint8_t m, unsigned long t) {
     case MODE_NORMAL:
         set_dirty(program_ != program_master_);
 
-        print_number(lcd_buf[0], 3, prog_id_ + 1);
+        print_number(lcd_buf[0], 3, prog_id_ + settings_.prog_start);
         lcd_buf[0][3] = ' ';
         memcpy(lcd_buf[0] + 4, program_.title, 12);
         lcd_buf[1][15] = ' ';
         break;
 
     case MODE_SETTINGS_CHANNEL:
-        start_edit(settings_.midi_channel, 0, 15, 1, 1);
+        start_edit(settings_.midi_channel, 0, MAX_CHANNEL - 1, 1, settings_.chan_start);
         memcpy(lcd_buf[1], "MIDI Channel ", 13);
         break;
 
@@ -1346,6 +1501,16 @@ controller_t::set_mode(uint8_t m, unsigned long t) {
         memcpy(lcd_buf[1], " Hide cursor ", 13);
         break;
 
+    case MODE_SETTINGS_PROG_START:
+        start_edit(settings_.prog_start, 0, 1);
+        memcpy(lcd_buf[1], "Prog Start At ", 14);
+        break;
+
+    case MODE_SETTINGS_CHANNEL_START:
+        start_edit(settings_.chan_start, 0, 1);
+        memcpy(lcd_buf[1], "Chan Start At ", 14);
+        break;
+
     case MODE_SETTINGS_FACTORY_RESET:
         memcpy(lcd_buf[1], " Factory Reset  ", 16);
         set_dirty(true);
@@ -1359,8 +1524,23 @@ controller_t::set_mode(uint8_t m, unsigned long t) {
         break;
 #endif
 
+    case MODE_PROGRAM_SWAP:
+    case MODE_PROGRAM_MOVE:
+        start_edit(prog_id_, 0, MAX_PROGRAMS - 1, 1, settings_.prog_start);
+
+        print_number(lcd_buf[0], 3, prog_id_ + settings_.prog_start);
+        lcd_buf[0][3] = ' ';
+        memcpy(lcd_buf[0] + 4, program_.title, 12);
+
+        print_number(lcd_buf[1] + 3, 3, prog_id_ + settings_.prog_start);
+        lcd_buf[1][6] = ' ';
+        memcpy(lcd_buf[1] + 7, program_.title, 9);
+
+        memcpy(lcd_buf[1], mode_ == MODE_PROGRAM_SWAP ? "<> " : ">> ", 3);
+        break;
+
     case MODE_MIDI_IN_MONITOR:
-        midi_mon_[0].show(t);
+        midi_mon_[0].show(t, settings_.prog_start, settings_.chan_start);
         memcpy(lcd_buf[0], "MIDI IN Monitor ", 16);
         memcpy(lcd_buf[1], "0               ", 16);
         set_dirty(midi_mon_[0].active());  // turn 'STORE' led 'ON', capture enabled
@@ -1369,7 +1549,7 @@ controller_t::set_mode(uint8_t m, unsigned long t) {
         break;
 
     case MODE_MIDI_OUT_MONITOR:
-        midi_mon_[1].show(t);
+        midi_mon_[1].show(t, settings_.prog_start, settings_.chan_start);
         memcpy(lcd_buf[0], "MIDI OUT Monitor", 16);
         memcpy(lcd_buf[1], "0               ", 16);
         set_dirty(midi_mon_[1].active());  // turn 'STORE' led 'ON', capture enabled
@@ -1379,8 +1559,8 @@ controller_t::set_mode(uint8_t m, unsigned long t) {
 
     case MODE_ABOUT:
         memcpy(lcd_buf[0], "About PatchMate ", 16);
-        version_line_ = 0;
-        print_version_line();
+        version_.reset();
+        version_.print_line();
         break;
 
     case MODE_UPTIME:
@@ -1412,11 +1592,12 @@ controller_t::set_mode(uint8_t m, unsigned long t) {
         break;
     }
 
-    // adjust loop led for all modes except MODE_LED_IGNORE_LOOP_MASK
+    // adjust loop led for all modes except MIDI mon and control settings
     if (led4loop()) {
         out_.loop_led(program_.loop);
     }
 
+    hide_hint();
     hide_cursor();
 
     lcd_update();
@@ -1440,7 +1621,6 @@ controller_t::show_cursor(unsigned long t)
 inline void
 controller_t::hide_cursor()
 {
-    hide_hint();
     lcd.noCursor();
     hide_cursor_timer_.cancel();
 }
@@ -1494,37 +1674,18 @@ controller_t::show_master(bool master)
     }
 
     if (master) {
+        memcpy(lcd_buf[0] + 4, program_master_.title, 12);
         out_.loop_led(program_master_.loop);
+        hide_cursor();
+        memcpy(lcd_buf[1], "     master     ", LCD_COLUMNS);
     } else {
+        memcpy(lcd_buf[0] + 4, program_.title, 12);
         out_.loop_led(program_.loop);
-    }
-}
-
-inline void
-controller_t::print_version_line()
-{
-    uint8_t l = 0;
-    uint8_t n = 0;
-    for (uint16_t i = 0; i < sizeof(version_); ++i) {
-        char b = pgm_read_byte_near(version_ + i);
-
-        if (l == version_line_ && b != '\n') {
-            if (n < LCD_COLUMNS) {
-                lcd_buf[1][n++] = b;
-            }
-        }
-
-        if (b == '\n') {
-            ++l;
-            if (l > version_line_) {
-                break;
-            }
-        }
+        memset(lcd_buf[1], ' ', LCD_COLUMNS);
     }
 
-    while(n < LCD_COLUMNS) {
-        lcd_buf[1][n++] = ' ';
-    }
+    lcd_update(0, 0, LCD_COLUMNS);
+    lcd_update(0, 1, LCD_COLUMNS);
 }
 
 inline void
@@ -1554,6 +1715,7 @@ controller_t::mute_timer_callback::operator()(unsigned long t)
 inline void
 controller_t::hide_cursor_timer_callback::operator()(unsigned long)
 {
+    controller_.hide_hint();
     controller_.hide_cursor();
 }
 

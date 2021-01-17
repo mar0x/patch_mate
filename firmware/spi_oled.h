@@ -47,8 +47,8 @@ enum {
 };
 
 struct spi_oled {
-    using cs = artl::digital_out<artl::pin::id::pb6>;
-    using ss = artl::digital_out<artl::pin::id::pb0>;
+    using cs = artl::digital_out< artl::port::B, 6 >;
+    using ss = artl::digital_out< artl::port::B, 0 >;
 
     void begin() {
         ss::setup();

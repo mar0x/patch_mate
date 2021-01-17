@@ -4,168 +4,46 @@
 #include <stdint.h>
 #include <avr/io.h>
 
+#include "port_traits.h"
+
 namespace artl {
 
-struct port {
-    struct A { };
-    struct B { };
-    struct C { };
-    struct D { };
-    struct E { };
-    struct F { };
-};
+namespace pin {
 
-template<typename PORT>
-struct port_traits {
-};
+  template<typename PORT, uint8_t BIT_NO>
+  struct traits {
 
-#ifdef DDRA
+      using port_t = PORT;
+      using port_traits = port::traits<port_t>;
 
-template<>
-struct port_traits<port::A> {
-    static volatile uint8_t& dir() { return DDRA; }
-    static uint8_t in() { return PINA; }
-    static volatile uint8_t& out() { return PORTA; }
-};
+      constexpr static uint8_t bit_mask = 1 << BIT_NO;
+      constexpr static uint8_t bit_no = BIT_NO;
 
-#endif
+      static void input() { port_traits::dir() &= ~bit_mask; }
 
-#ifdef DDRB
+      static void output() { port_traits::dir() |= bit_mask; }
 
-template<>
-struct port_traits<port::B> {
-    static volatile uint8_t& dir() { return DDRB; }
-    static uint8_t in() { return PINB; }
-    static volatile uint8_t& out() { return PORTB; }
-};
+      static bool read() {
+          return read_bit() != 0;
+      }
 
-#endif
+      static uint8_t read_bit() {
+          return port_traits::in() & bit_mask;
+      }
 
-#ifdef DDRC
+      static void write(bool v) {
+          if (v) {
+              high();
+          } else {
+              low();
+          }
+      }
 
-template<>
-struct port_traits<port::C> {
-    static volatile uint8_t& dir() { return DDRC; }
-    static uint8_t in() { return PINC; }
-    static volatile uint8_t& out() { return PORTC; }
-};
+      static void high() { port_traits::out() |= bit_mask; }
 
-#endif
+      static void low() { port_traits::out() &= ~bit_mask; }
+  };
 
-#ifdef DDRD
+} // namespace pin
 
-template<>
-struct port_traits<port::D> {
-    static volatile uint8_t& dir() { return DDRD; }
-    static uint8_t in() { return PIND; }
-    static volatile uint8_t& out() { return PORTD; }
-};
-
-#endif
-
-#ifdef DDRE
-
-template<>
-struct port_traits<port::E> {
-    static volatile uint8_t& dir() { return DDRE; }
-    static uint8_t in() { return PINE; }
-    static volatile uint8_t& out() { return PORTE; }
-};
-
-#endif
-
-#ifdef DDRF
-
-template<>
-struct port_traits<port::F> {
-    static volatile uint8_t& dir() { return DDRF; }
-    static uint8_t in() { return PINF; }
-    static volatile uint8_t& out() { return PORTF; }
-};
-
-#endif
-
-template<uint8_t PIN_NO>
-struct pin_traits {
-};
-
-template<typename PORT, uint8_t BIT_NO>
-struct base_pin_traits {
-
-    using port = port_traits<PORT>;
-
-    constexpr static uint8_t bit_mask = 1 << BIT_NO;
-    constexpr static uint8_t bit_no = BIT_NO;
-
-    static void input() { port::dir() &= ~bit_mask; }
-
-    static void output() { port::dir() |= bit_mask; }
-
-    static bool read() {
-        return read_bit() != 0;
-    }
-
-    static uint8_t read_bit() {
-        return port::in() & bit_mask;
-    }
-
-    static void write(bool v) {
-        if (v) {
-            high();
-        } else {
-            low();
-        }
-    }
-
-    static void high() { port::out() |= bit_mask; }
-
-    static void low() { port::out() &= ~bit_mask; }
-};
-
-}
-
-#ifdef ARDUINO_AVR_MINI
-#define ARTL_PINOUT_STANDARD
-#endif
-
-#ifdef ARDUINO_AVR_LEONARDO
-#include "variants/leonardo/pin_traits.h"
-#endif
-
-#ifdef ARDUINO_AVR_PRO
-#define ARTL_PINOUT_STANDARD
-#endif
-
-#ifdef ARDUINO_AVR_UNO
-#define ARTL_PINOUT_STANDARD
-#endif
-
-#ifdef ARTL_PINOUT_STANDARD
-#include "variants/standard/pin_traits.h"
-#endif
-
-
-#ifdef __AVR_ATtiny24__
-#include "variants/tiny14/pin_traits.h"
-#endif
-
-#ifdef __AVR_ATtiny44__
-#include "variants/tiny14/pin_traits.h"
-#endif
-
-#ifdef __AVR_ATtiny84__
-#include "variants/tiny14/pin_traits.h"
-#endif
-
-
-#ifdef __AVR_ATtiny25__
-#include "variants/tiny8/pin_traits.h"
-#endif
-
-#ifdef __AVR_ATtiny45__
-#include "variants/tiny8/pin_traits.h"
-#endif
-
-#ifdef __AVR_ATtiny85__
-#include "variants/tiny8/pin_traits.h"
-#endif
+} // namespace artl

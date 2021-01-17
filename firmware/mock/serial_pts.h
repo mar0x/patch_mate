@@ -26,7 +26,7 @@ struct serial_pts {
         pollfd pfd;
 
         pfd.fd = pts_;
-        pfd.events = POLLIN;
+        pfd.events = POLLIN | POLLPRI;
         pfd.revents = 0;
 
         int res = poll(&pfd, 1, 0);
@@ -36,9 +36,9 @@ struct serial_pts {
         }
 
         if (res > 0) {
-            log_window::println("poll() res: ", (int) res);
+            // log_window::println("poll() res: ", (int) res, " ", (int) pfd.revents);
             ssize_t rr = ::read(pts_, read_buf, sizeof(read_buf));
-            log_window::println("poll() read: ", (int) rr);
+            // log_window::println("poll() read: ", (int) rr);
             if (rr <= 0) {
                 open_pts();
                 return false;

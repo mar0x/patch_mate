@@ -122,7 +122,7 @@ private:
     };
 
     uint8_t cmd_[MAX_SIZE];
-    uint8_t size_;
+    uint8_t size_ = 0;
 };
 
 }

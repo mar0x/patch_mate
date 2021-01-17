@@ -7,7 +7,7 @@
 #include "artl/yield.h"
 
 class spi_eeprom {
-    using cs = artl::digital_out<artl::pin::id::pd5>;
+    using cs = artl::digital_out< artl::port::D, 5 >;
 
     enum cmd {
         READ  = 0x03,

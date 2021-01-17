@@ -10,6 +10,8 @@
 #include "artl/pin_change_int.h"
 
 #include "config.h"
+#include "usb_midi.h"
+#include "midi_cmd.h"
 
 namespace patch_mate {
 
@@ -24,7 +26,9 @@ struct in {
 
     bool midi_available() const { return Serial1.available(); }
     int midi_read() const { return Serial1.read(); }
+    bool usb_midi_read(midi_cmd_t& c) const;
 
+    bool serial_connected() const { return Serial.dtr() || Serial.rts(); }
     bool serial_available() const { return Serial.available(); }
     int serial_read() const { return Serial.read(); }
 
@@ -78,31 +82,28 @@ private:
         LOOP9 = 1 << 4,
     };
 
-    enum {
-        enc_a_pin = artl::pin::id::pb4,
-        enc_b_pin = artl::pin::id::pb5,
-    };
+    using enc_a_in = artl::digital_in< artl::port::B, 4 >;
+    using enc_b_in = artl::digital_in< artl::port::B, 5 >;
 
-    using enc_a_in = artl::digital_in< enc_a_pin >;
-    using enc_b_in = artl::digital_in< enc_b_pin >;
-
-    using enc_a_int = artl::pin_change_int< enc_a_pin >;
-    using enc_b_int = artl::pin_change_int< enc_a_pin >;
+    using enc_a_int = artl::pin::change_int< artl::port::B, 4 >;
+    using enc_b_int = artl::pin::change_int< artl::port::B, 5 >;
 
     using encoder_type = artl::encoder<typename traits::encoder_handler>;
 
-    using left_in = artl::digital_in< artl::pin::id::pd4 >;
-    using right_in = artl::digital_in< artl::pin::id::pd6 >;
-    using store_in = artl::digital_in< artl::pin::id::pf5 >;
+    using left_in = artl::digital_in< artl::port::D, 4 >;
+    using right_in = artl::digital_in< artl::port::D, 6 >;
+    using store_in = artl::digital_in< artl::port::F, 5 >;
 
-    using sw_cs = artl::digital_out< artl::pin::id::pc6 >;
-    using ext_cs = artl::digital_out< artl::pin::id::pd1 >;
+    using sw_cs = artl::digital_out< artl::port::C, 6 >;
+    using ext_cs = artl::digital_out< artl::port::D, 1 >;
 
     button_type loop_[10];
     button_type left_;
     button_type right_;
     button_type store_;
     encoder_type encoder_;
+
+    usb_midi::port_t usb_midi_;
 };
 
 template<typename T> inline
@@ -175,6 +176,25 @@ in<T>::update(unsigned long t, bool slow)
     loop_[7].update((lo & LOOP7) == 0, t);
     loop_[8].update((lo & LOOP8) == 0, t);
     loop_[9].update((lo & LOOP9) == 0, t);
+}
+
+template<typename T> inline bool
+in<T>::usb_midi_read(midi_cmd_t &c) const {
+    usb_midi::event_t ev;
+    if (!usb_midi_.read(ev)) return false;
+
+    if (!ev.header) return false;
+
+    uint8_t cin = ev.header & 0x0F;
+    if (cin == 0x04 || cin == 0x06 || cin == 0x07) {
+        return false;
+    }
+
+    if (c.read(ev.byte1)) { return true; }
+    if (c.read(ev.byte2)) { return true; }
+    if (c.read(ev.byte3)) { return true; }
+
+    return false;
 }
 
 }

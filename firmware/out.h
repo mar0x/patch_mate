@@ -4,7 +4,6 @@
 #include <SPI.h>
 
 #include "artl/digital_out.h"
-#include "artl/digital_pin.h"
 
 #include "config.h"
 #include "debug.h"
@@ -132,9 +131,9 @@ private:
         LED6 = 1 << 7,
     };
 
-    using mute_out = artl::digital_out< artl::pin::id::pf0 >;
-    using store_out = artl::digital_out< artl::pin::id::pc7 >;
-    using rel_cs = artl::digital_out< artl::pin::id::pb7 >;
+    using mute_out = artl::digital_out< artl::port::F, 0 >;
+    using store_out = artl::digital_out< artl::port::C, 7 >;
+    using rel_cs = artl::digital_out< artl::port::B, 7 >;
 
     void commit(uint16_t led, uint16_t rel);
 
