@@ -72,7 +72,7 @@ struct controller_t {
     void update_setting(uint8_t mode, T& s, T v);
     void midi_out(const midi_cmd_t& cmd);
 
-    void set_program(uint8_t prog);
+    void set_program(uint8_t prog, bool banner = false);
     void set_loop(uint8_t loop, bool val);
     void send_loop(uint8_t loop, bool val);
 
@@ -280,7 +280,7 @@ controller_t::setup() {
 
     if (read_eeprom()) {
         set_mode(MODE_NORMAL, t);
-        set_program(0);
+        set_program(0, true);
     } else {
         set_mode(MODE_SETTINGS_FACTORY_RESET, t);
     }
@@ -566,7 +566,7 @@ controller_t::process_serial_cmd(unsigned long t) {
             hide_hint();
             hide_cursor();
 
-            lcd_update(0, 0, LCD_COLUMNS);
+            lcd_update();
         }
 
         out_.serial_println("NM \"", program_.title, "\"");
@@ -816,7 +816,7 @@ controller_t::midi_out(const midi_cmd_t& cmd) {
 }
 
 inline void
-controller_t::set_program(uint8_t prog) {
+controller_t::set_program(uint8_t prog, bool banner) {
     debug(1, "set_program: ", prog_id_, " -> ", prog);
 
     if (prog >= MAX_PROGRAMS) return;
@@ -847,8 +847,11 @@ controller_t::set_program(uint8_t prog) {
         hide_hint();
         hide_cursor();
 
-        lcd_update(0, 0, LCD_COLUMNS);
-        lcd_update(0, 1, LCD_COLUMNS);
+        if (banner) {
+            memcpy(lcd_buf[1], "  PatchMate X   ", LCD_COLUMNS);
+        }
+
+        lcd_update();
     }
 
     // adjust loop led for all modes except MIDI mon and control settings
@@ -956,6 +959,8 @@ controller_t::on_down(uint8_t i, bool down, unsigned long t) {
         if (i == LEFT && in_.right().up()) {
             cursor_pos_ = rotate(cursor_pos_, MIN_CURSOR_POS, MAX_CURSOR_POS, -1);
             hide_hint();
+            lcd_update(0, 1, LCD_COLUMNS);
+
             show_cursor(t);
 
             return;
@@ -965,6 +970,8 @@ controller_t::on_down(uint8_t i, bool down, unsigned long t) {
         if (i == RIGHT && in_.left().up()) {
             cursor_pos_ = rotate(cursor_pos_, MIN_CURSOR_POS, MAX_CURSOR_POS, 1);
             hide_hint();
+            lcd_update(0, 1, LCD_COLUMNS);
+
             show_cursor(t);
 
             return;
@@ -1147,7 +1154,7 @@ controller_t::on_hold(uint8_t i, unsigned long t) {
         case MODE_SETTINGS_FACTORY_RESET:
             reset_eeprom();
             set_mode(MODE_NORMAL, t);
-            set_program(0);
+            set_program(0, true);
             store_blink_timer_.start(t);
             return;
 
@@ -1650,7 +1657,6 @@ controller_t::hide_hint()
 {
     if (mode_ == MODE_NORMAL) {
         memset(lcd_buf[1], ' ', LCD_COLUMNS);
-        lcd_update(0, 1, LCD_COLUMNS);
     }
 }
 
@@ -1717,6 +1723,8 @@ controller_t::hide_cursor_timer_callback::operator()(unsigned long)
 {
     controller_.hide_hint();
     controller_.hide_cursor();
+
+    lcd_update(0, 1, LCD_COLUMNS);
 }
 
 inline void
