@@ -1,9 +1,9 @@
 
 ##############################################################
 
-patchmate.name=PatchMate X
+patchmate.name=PatchMate
 patchmate.vid.0=0x2341
-patchmate.pid.0=0x803B
+patchmate.pid.0=0x8036
 
 patchmate.upload.tool=arduino:avrdude
 patchmate.upload.protocol=avr109
@@ -25,10 +25,43 @@ patchmate.bootloader.lock_bits=0x2F
 patchmate.build.mcu=atmega32u4
 patchmate.build.f_cpu=16000000L
 patchmate.build.vid=0x2341
-patchmate.build.pid=0x803B
-patchmate.build.usb_product="PatchMate X"
-patchmate.build.board=AVR_PATCHMATE_X
+patchmate.build.pid=0x8036
+patchmate.build.usb_product="PatchMate"
+patchmate.build.board=AVR_PATCHMATE
 patchmate.build.core=arduino:arduino
 patchmate.build.variant=patchmate
 patchmate.build.extra_flags={build.usb_flags}
+
+##############################################################
+
+patchmateX.name=PatchMate X
+patchmateX.vid.0=0x2341
+patchmateX.pid.0=0x803B
+
+patchmateX.upload.tool=arduino:avrdude
+patchmateX.upload.protocol=avr109
+patchmateX.upload.maximum_size=28672
+patchmateX.upload.maximum_data_size=2560
+patchmateX.upload.speed=57600
+patchmateX.upload.disable_flushing=true
+patchmateX.upload.use_1200bps_touch=true
+patchmateX.upload.wait_for_upload_port=true
+
+patchmateX.bootloader.tool=arduino:avrdude
+patchmateX.bootloader.low_fuses=0xff
+patchmateX.bootloader.high_fuses=0xd8
+patchmateX.bootloader.extended_fuses=0xcb
+patchmateX.bootloader.file=Caterina-PatchMateX.hex
+patchmateX.bootloader.unlock_bits=0x3F
+patchmateX.bootloader.lock_bits=0x2F
+
+patchmateX.build.mcu=atmega32u4
+patchmateX.build.f_cpu=16000000L
+patchmateX.build.vid=0x2341
+patchmateX.build.pid=0x803B
+patchmateX.build.usb_product="PatchMate X"
+patchmateX.build.board=AVR_PATCHMATE_X
+patchmateX.build.core=arduino:arduino
+patchmateX.build.variant=patchmateX
+patchmateX.build.extra_flags={build.usb_flags}
 

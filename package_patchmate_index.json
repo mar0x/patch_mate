@@ -64,6 +64,35 @@
               "version": "6.3.0-arduino17"
             }
           ]
+        },
+        {
+          "name": "PatchMate Boards",
+          "architecture": "avr",
+          "version": "1.0.3",
+          "category": "patchmate",
+          "help": {
+            "online": ""
+          },
+          "url": "https://github.com/mar0x/patch_mate/releases/download/package-patchmate-1.0.3/patchmate-1.0.3.tar.gz",
+          "archiveFileName": "patchmate-1.0.3.tar.gz",
+          "checksum": "SHA-256:2a5af12d573bf62c31f312fbf0b20d3bdba89335da7bbe281140e18bdba9d873",
+          "size": "32089",
+          "boards": [
+            {"name": "PatchMate"},
+            {"name": "PatchMate X"}
+          ],
+          "toolsDependencies": [
+            {
+              "packager": "arduino",
+              "name": "avr-gcc",
+              "version": "7.3.0-atmel3.6.1-arduino7"
+            },
+            {
+              "packager": "arduino",
+              "name": "avrdude",
+              "version": "6.3.0-arduino17"
+            }
+          ]
         }
       ],
       "tools": [ ]

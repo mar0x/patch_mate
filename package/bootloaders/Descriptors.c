@@ -199,6 +199,8 @@ const USB_Descriptor_String_t ProductString =
 	.UnicodeString			= L"Arduino Micro   "
 	#elif DEVICE_PID == 0x003C
 	.UnicodeString			= L"Arduino Esplora "
+	#elif DEVICE_PID == 0x8036
+	.UnicodeString			= L"PatchMate       "
 	#elif DEVICE_PID == 0x803B
 	.UnicodeString			= L"PatchMate X     "
 	#else
