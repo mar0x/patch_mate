@@ -2,11 +2,13 @@
 BUILD_PATH = $(abspath ./.build)
 BUILD_CACHE = $(abspath ./.cache)
 
-FQBN = arduino:avr:leonardo
+# FQBN = arduino:avr:leonardo
+FQBN = patchmate:avr:patchmateX
 
 MCU = atmega32u4
 # IDE = 10805
-IDE = 10810
+# IDE = 10810
+IDE = 10813
 
 PORT ?= /dev/cu.usbmodem1421
 
@@ -44,6 +46,8 @@ CORE_INCLUDE = $(ARDUINO_ROOT)/hardware/arduino/avr/cores/arduino
 LEONARDO_INCLUDE = $(ARDUINO_ROOT)/hardware/arduino/avr/variants/leonardo
 EEPROM_INCLUDE = $(ARDUINO_ROOT)/hardware/arduino/avr/libraries/EEPROM/src
 LCD_INCLUDE = $(ARDUINO_ROOT)/libraries/LiquidCrystal/src
+SPI_INCLUDE = $(ARDUINO_ROOT)/hardware/arduino/avr/libraries/SPI/src
+PATCHMATE_X_INCLUDE = $(LOCAL_PACKAGES)/patchmate/hardware/avr/1.0.2/variants/patchmate
 
 ifneq ("$(wildcard $(LOCAL_PACKAGES))", "")
 ARDUINO_HARDWARE = \
@@ -67,7 +71,7 @@ ARDUINO_PREFS = \
     runtime.tools.arduinoOTA.path=$(ARDUINO_OTA_PATH) \
     runtime.tools.arduinoOTA-1.3.0.path=$(ARDUINO_OTA_PATH) \
     runtime.tools.avr-gcc.path=$(AVR_GCC_PATH) \
-    runtime.tools.avr-gcc-7.3.0-atmel3.6.1-arduino5.path=$(AVR_GCC_PATH) \
+    runtime.tools.avr-gcc-7.3.0-atmel3.6.1-arduino7.path=$(AVR_GCC_PATH) \
     runtime.tools.avrdude.path=$(AVRDUDE_PATH) \
     runtime.tools.avrdude-6.3.0-arduino17.path=$(AVRDUDE_PATH) \
 
@@ -138,16 +142,16 @@ csc:
     -mmcu=$(MCU) \
     -DF_CPU=16000000L \
     -DARDUINO=$(IDE) \
-    -DARDUINO_AVR_LEONARDO \
+    -DARDUINO_AVR_PATCHMATE_X \
     -DARDUINO_ARCH_AVR \
     -DUSB_VID=0x2341 \
-    -DUSB_PID=0x8036 \
+    -DUSB_PID=0x803B \
     '-DUSB_MANUFACTURER="Unknown"' \
-    '-DUSB_PRODUCT="Arduino Leonardo"' \
+    '-DUSB_PRODUCT="PatchMate X"' \
     "-I$(CORE_INCLUDE)" \
-    "-I$(LEONARDO_INCLUDE)" \
+    "-I$(PATCHMATE_X_INCLUDE)" \
     "-I$(EEPROM_INCLUDE)" \
-    "-I$(LCD_INCLUDE)" \
+    "-I$(SPI_INCLUDE)" \
     "$(PROJECT_NAME).ino" \
     -o "$(BUILD_PATH)/sketch/$(PROJECT_NAME).ino.o" \
 

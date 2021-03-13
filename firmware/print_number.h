@@ -1,6 +1,8 @@
 
 #pragma once
 
+#include <stdint.h>
+
 namespace patch_mate {
 
 inline void

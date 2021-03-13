@@ -10,7 +10,11 @@ struct serial_num_t {
     operator const char*() const { return buf; }
 
     void get() {
-        EEPROM.get(EEPROM.length() - sizeof(buf), buf);
+        get(buf);
+    }
+
+    static void get(char *b) {
+        EEPROM.get(EEPROM.length() - sizeof(buf), b);
     }
 
     void put() const {

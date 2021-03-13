@@ -23,18 +23,16 @@
     4    snake loose x2
 
     5    on_down (release key)
-    5    snake turn left
-    5    snake turn right
 
     6    loop_state read prog
     6    loop_state write prog
 
-    7    in: piso value
+    7    in:update value
     7    out: mute
     7    out: unmute
     7    out: commit sipo
     7    out: commit_led only
-    7    program::setup x3
+    7    program::setup start
     7    program::read prog
     7    program::write prog
  */
@@ -45,12 +43,16 @@
 static uint8_t debug_level_ = 0;
 
 template<typename T1> void debug__(const T1& a1) {
-    Serial.println(a1);
+    if (Serial.dtr()) {
+        Serial.println(a1);
+    }
 }
 
 template<typename T1, typename ...Args> void debug__(const T1& a1, Args... args) {
-    Serial.print(a1);
-    debug__(args...);
+    if (Serial.dtr()) {
+        Serial.print(a1);
+        debug__(args...);
+    }
 }
 
 template<typename T1, typename ...Args> void debug(uint8_t l, const T1& a1, Args... args) {

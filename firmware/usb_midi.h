@@ -39,40 +39,50 @@ protected:
     }
 
     virtual int getInterface(uint8_t* interfaceNum) override {
-      *interfaceNum += 2; // uses 2 interfaces
+        *interfaceNum += 2; // uses 2 interfaces
 
-      MIDIDescriptor _midiInterface =
-      {
-        D_IAD(pluggedInterface, 2, MIDI_AUDIO, MIDI_AUDIO_CONTROL, 0),
-        D_INTERFACE(pluggedInterface, 0, MIDI_AUDIO, MIDI_AUDIO_CONTROL,0),
-        ACIfcDesc(0x01, pluggedInterface + 1),
-        D_INTERFACE((uint8_t) (pluggedInterface + 1), 2, MIDI_AUDIO, MIDI_STREAMING, 0),
-        ASIfcDesc(),
-        JackInDesc(MIDI_JACK_EMD, 0x01),
-        JackInDesc(MIDI_JACK_EXT, 0x02),
-        JackOutDesc(MIDI_JACK_EMD, 0x03, 2),
-        JackOutDesc(MIDI_JACK_EXT, 0x04, 1),
+        MIDIDescriptor m = {
+          D_IAD(pluggedInterface, 2, AUDIO_CLASS_CODE, SUBCLASS_AUDIOCONTROL, 0),
+          D_INTERFACE(pluggedInterface, 0, AUDIO_CLASS_CODE, SUBCLASS_AUDIOCONTROL, 0),
+          {(uint8_t) (pluggedInterface + 1)},
 
-        D_MIDI_JACK_EP(USB_ENDPOINT_OUT(pluggedEndpoint)),
-        EPACDesc(1),
+          D_INTERFACE((uint8_t) (pluggedInterface + 1), 2, AUDIO_CLASS_CODE, SUBCLASS_MIDISTREAMING, 0),
+          {},
 
-        D_MIDI_JACK_EP(USB_ENDPOINT_IN(pluggedEndpoint + 1)),
-        EPACDesc(3)
-      };
-      return USB_SendControl(0, &_midiInterface, sizeof(_midiInterface));
+          {JACK_TYPE_EMBEDDED, 1},
+          {JACK_TYPE_EMBEDDED, 2},
+          {JACK_TYPE_EXTERNAL, 3},
+
+          {4, 1},
+
+          {JACK_TYPE_EMBEDDED, 5, 4},
+          {JACK_TYPE_EMBEDDED, 6, 3},
+          {JACK_TYPE_EXTERNAL, 7, 2},
+
+          {USB_ENDPOINT_OUT(pluggedEndpoint)},
+          {1, 2},
+
+          {USB_ENDPOINT_IN(pluggedEndpoint + 1)},
+          {5, 6},
+        };
+
+        m.idh2.wTotalLength = sizeof(MIDIDescriptor) - offsetof(MIDIDescriptor, idh2);
+
+        return USB_SendControl(0, &m, sizeof(m));
     }
 
-    virtual int getDescriptor(USBSetup& /* setup */) override {
+    virtual int getDescriptor(USBSetup&) override {
         return 0;
     }
 
     virtual uint8_t getShortName(char* name) override {
-        patch_mate::serial_num_t sn;
-        sn.get();
+        name[0] = 'P';
+        name[1] = 'M';
+        name[2] = 'X';
 
-        memcpy(name, "PMX", 3);
-        memcpy(name + 3, sn, sizeof(sn));
-        return 3 + sizeof(sn);
+        patch_mate::serial_num_t::get(name + 3);
+
+        return 3 + sizeof(patch_mate::serial_num_t);
     }
 
 public:
@@ -87,7 +97,7 @@ public:
         return USB_Available(rx_ep()) / sizeof(event_t);
     }
 
-    int read(event_t& p) const {
+    int recv(event_t& p) const {
         int c = USB_Recv(rx_ep(), &p, sizeof(p));
 
         if (c < (int) sizeof(p)) {
@@ -102,6 +112,9 @@ public:
 
     void send(const event_t& event) {
         USB_Send(tx_ep(), &event, sizeof(event));
+        USB_Flush(tx_ep());
     }
 };
+
+port_t port;
 }

@@ -26,7 +26,7 @@ struct in {
 
     bool midi_available() const { return Serial1.available(); }
     int midi_read() const { return Serial1.read(); }
-    bool usb_midi_read(midi_cmd_t& c) const;
+    bool usb_midi_read(midi_cmd_t& c, uint8_t& jack) const;
 
     bool serial_connected() const { return Serial.dtr() || Serial.rts(); }
     bool serial_available() const { return Serial.available(); }
@@ -75,7 +75,7 @@ private:
         LOOP5 = 1 << 4,
     };
 
-    enum lo_lask {
+    enum lo_mask {
         LOOP6 = 1 << 7,
         LOOP7 = 1 << 6,
         LOOP8 = 1 << 5,
@@ -102,8 +102,6 @@ private:
     button_type right_;
     button_type store_;
     encoder_type encoder_;
-
-    usb_midi::port_t usb_midi_;
 };
 
 template<typename T> inline
@@ -161,7 +159,7 @@ in<T>::update(unsigned long t, bool slow)
     ext_cs::high();
 
     if (last_hi != hi || last_lo != lo) {
-        debug(7, "in::update: ", hi, ":", lo);
+        debug(7, "in:update: ", hi, ":", lo);
         last_hi = hi;
         last_lo = lo;
     }
@@ -179,22 +177,44 @@ in<T>::update(unsigned long t, bool slow)
 }
 
 template<typename T> inline bool
-in<T>::usb_midi_read(midi_cmd_t &c) const {
+in<T>::usb_midi_read(midi_cmd_t &c, uint8_t& jack) const {
     usb_midi::event_t ev;
-    if (!usb_midi_.read(ev)) return false;
+    if (!usb_midi::port.recv(ev)) return false;
 
     if (!ev.header) return false;
 
     uint8_t cin = ev.header & 0x0F;
-    if (cin == 0x04 || cin == 0x06 || cin == 0x07) {
+    switch (cin) {
+    case 0:
+    case 1:
         return false;
+    case 5:
+        c.read(ev.byte1);
+        break;
+    case 2:
+    case 6:
+    case 0xC:
+    case 0xD:
+        c.read(ev.byte1);
+        c.read(ev.byte2);
+        break;
+    case 3:
+    case 4:
+    case 7:
+    case 8:
+    case 9:
+    case 0xA:
+    case 0xB:
+    case 0xE:
+        c.read(ev.byte1);
+        c.read(ev.byte2);
+        c.read(ev.byte3);
+        break;
     }
 
-    if (c.read(ev.byte1)) { return true; }
-    if (c.read(ev.byte2)) { return true; }
-    if (c.read(ev.byte3)) { return true; }
+    jack = (ev.header & 0xF0) >> 4;
 
-    return false;
+    return true;
 }
 
 }

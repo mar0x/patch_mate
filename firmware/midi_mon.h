@@ -210,13 +210,13 @@ inline uint8_t dec_render(char *dst, uint8_t b) {
 
 inline bool known_midi_cmd(uint8_t b) {
     switch (b & 0xF0U) {
-    case midi_cmd_t::CMD_NOTE_OFF:
-    case midi_cmd_t::CMD_NOTE_ON:
-    case midi_cmd_t::CMD_KEY_PRESSURE:
-    case midi_cmd_t::CMD_CTRL_CHANGE:
-    case midi_cmd_t::CMD_PROG_CHANGE:
-    case midi_cmd_t::CMD_CHAN_PRESSURE:
-    case midi_cmd_t::CMD_PITCH_CHANGE:
+    case CMD_NOTE_OFF:
+    case CMD_NOTE_ON:
+    case CMD_KEY_PRESSURE:
+    case CMD_CTRL_CHANGE:
+    case CMD_PROG_CHANGE:
+    case CMD_CHAN_PRESSURE:
+    case CMD_PITCH_CHANGE:
         return true;
     }
 
@@ -238,13 +238,13 @@ midi_mon_t::render(char *dst, uint8_t pos, bool &sep) const {
             uint8_t ch = (b & 0x0FU) + chan_start_;
             uint8_t n = dec2_render(dst, ch);
 
-            dst[n] = cstr[ ((b & 0xF0U) - midi_cmd_t::CMD_NOTE_OFF) >> 4 ];
+            dst[n] = cstr[ ((b & 0xF0U) - CMD_NOTE_OFF) >> 4 ];
 
             return n + 1;
         }
 
         pos = data_.prev(pos);
-        if (valid_pos(pos) && (data_[pos] & 0xF0U) == midi_cmd_t::CMD_PROG_CHANGE) {
+        if (valid_pos(pos) && (data_[pos] & 0xF0U) == CMD_PROG_CHANGE) {
             b += prog_start_;
         }
 

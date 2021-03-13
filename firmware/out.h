@@ -7,6 +7,8 @@
 
 #include "config.h"
 #include "debug.h"
+#include "usb_midi.h"
+#include "midi_cmd.h"
 
 namespace patch_mate {
 
@@ -18,6 +20,7 @@ struct out {
     void loop_led(uint16_t mask);
     void loop(uint8_t i, bool v);
     void store_led(bool v);
+    void data_led(bool v);
 
     void mute();
     void unmute();
@@ -27,17 +30,25 @@ struct out {
 
     bool relay_changed() const;
 
-    void midi_write(const void* buf, int s) { Serial1.write((const char*) buf, s); }
+    void midi_write(uint8_t b) { Serial1.write(&b, 1); }
+    void usb_midi_write(uint8_t b, uint8_t jack);
+    void usb_midi_write(const midi_cmd_t& c, uint8_t jack);
 
 #if 0
 #if defined(DEBUG)
     template<typename T1>
-    static void debug_println(const T1& a1) { Serial.println(a1); }
+    static void debug_println(const T1& a1) {
+      if (Serial.dtr()) {
+        Serial.println(a1);
+      }
+    }
 
     template<typename T1, typename ...Args>
     static void debug_println(const T1& a1, Args... args) {
+      if (Serial.dtr()) {
         Serial.print(a1);
         debug_println(args...);
+      }
     }
 #else
     template<typename ...Args>
@@ -46,21 +57,33 @@ struct out {
 #endif
 
     template<typename T1>
-    void serial_print(const T1& a1) { Serial.print(a1); }
+    void serial_print(const T1& a1) {
+      if (Serial.dtr()) {
+        Serial.print(a1);
+      }
+    }
 
     template<typename T1, typename ...Args>
     void serial_print(const T1& a1, Args... args) {
+      if (Serial.dtr()) {
         Serial.print(a1);
         serial_print(args...);
+      }
     }
 
     template<typename T1>
-    void serial_println(const T1& a1) { Serial.println(a1); }
+    void serial_println(const T1& a1) {
+      if (Serial.dtr()) {
+        Serial.println(a1);
+      }
+    }
 
     template<typename T1, typename ...Args>
     void serial_println(const T1& a1, Args... args) {
+      if (Serial.dtr()) {
         Serial.print(a1);
         serial_println(args...);
+      }
     }
 
 private:
@@ -133,6 +156,7 @@ private:
 
     using mute_out = artl::digital_out< artl::port::F, 0 >;
     using store_out = artl::digital_out< artl::port::C, 7 >;
+    using data_out = artl::digital_out< artl::port::D, 7 >;
     using rel_cs = artl::digital_out< artl::port::B, 7 >;
 
     void commit(uint16_t led, uint16_t rel);
@@ -153,6 +177,7 @@ out::setup()
 
     mute_out::setup();
     store_out::setup();
+    data_out::setup();
 
     rel_cs::setup();
     rel_cs::high();
@@ -208,6 +233,12 @@ out::store_led(bool v)
 }
 
 inline void
+out::data_led(bool v)
+{
+    data_out::write(v);
+}
+
+inline void
 out::mute()
 {
     debug(7, "mute");
@@ -227,6 +258,100 @@ inline bool
 out::relay_changed() const
 {
     return new_rel_ != rel_;
+}
+
+inline void
+out::usb_midi_write(uint8_t b, uint8_t jack)
+{
+    usb_midi::event_t ev{0, b, 0, 0};
+
+    switch (b) {
+    case CMD_SYS_TUNE_REQ:
+    case CMD_SYS_EX_END:
+        ev.header = 0x5;
+        break;
+
+    case CMD_SYS_CLOCK:
+    case CMD_SYS_TICK:
+    case CMD_SYS_START:
+    case CMD_SYS_CONT:
+    case CMD_SYS_STOP:
+    case CMD_SYS_UNDEF:
+    case CMD_SYS_ACTIVE_S:
+    case CMD_SYS_RESET:
+        ev.header = 0xF;
+        break;
+
+    default:
+        return;
+    }
+
+    ev.header |= (jack << 4);
+
+    usb_midi::port.send(ev);
+}
+
+inline void
+out::usb_midi_write(const midi_cmd_t& c, uint8_t jack)
+{
+    usb_midi::event_t ev;
+
+    switch (c.command()) {
+    case 0:
+    case CMD_SYS_EX:
+        if (c.size() == 3) {
+            ev.header = (c[2] == CMD_SYS_EX_END) ? 0x07 : 0x04;
+        } else {
+            ev.header = 0x06;
+        }
+        break;
+
+    case CMD_NOTE_OFF:
+    case CMD_NOTE_ON:
+    case CMD_KEY_PRESSURE:
+    case CMD_CTRL_CHANGE:
+    case CMD_PROG_CHANGE:
+    case CMD_CHAN_PRESSURE:
+    case CMD_PITCH_CHANGE:
+        ev.header = c.command() >> 4;
+        break;
+
+    case CMD_SYS_MTC:
+    case CMD_SYS_SONG_SEL:
+        ev.header = 0x2;
+        break;
+
+    case CMD_SYS_SONG_PP:
+        ev.header = 0x3;
+        break;
+
+    case CMD_SYS_TUNE_REQ:
+    case CMD_SYS_EX_END:
+        ev.header = 0x5;
+        break;
+
+    case CMD_SYS_CLOCK:
+    case CMD_SYS_TICK:
+    case CMD_SYS_START:
+    case CMD_SYS_CONT:
+    case CMD_SYS_STOP:
+    case CMD_SYS_UNDEF:
+    case CMD_SYS_ACTIVE_S:
+    case CMD_SYS_RESET:
+        ev.header = 0xF;
+        break;
+
+    default:
+        ev.header = 0;
+        break;
+    }
+
+    ev.header |= (jack << 4);
+    ev.byte1 = c[0];
+    ev.byte2 = c.size() > 1 ? c[1] : 0;
+    ev.byte3 = c.size() > 2 ? c[2] : 0;
+
+    usb_midi::port.send(ev);
 }
 
 inline void

@@ -2,6 +2,7 @@
 #pragma once
 
 #include "log_window.h"
+#include "../midi_cmd.h"
 
 namespace patch_mate {
 
@@ -13,6 +14,7 @@ struct out {
     void loop_led(uint16_t mask);
     void loop(uint8_t i, bool v);
     void store_led(bool v);
+    void data_led(bool v);
 
     void mute();
     void unmute();
@@ -22,7 +24,10 @@ struct out {
 
     bool relay_changed() const;
 
-    void midi_write(const void* data, int s);
+    void midi_write(uint8_t b);
+    void midi_write(const midi_cmd_t& c);
+    void usb_midi_write(uint8_t b, uint8_t);
+    void usb_midi_write(const midi_cmd_t& c, uint8_t);
 
     template<typename T1>
     void serial_print(const T1& a1) { pts.print(a1); }
@@ -115,6 +120,11 @@ out::store_led(bool v)
 }
 
 inline void
+out::data_led(bool v)
+{
+}
+
+inline void
 out::mute()
 {
     debug(7, "mute");
@@ -150,11 +160,33 @@ out::commit()
 }
 
 inline void
-out::midi_write(const void* data, int s) {
+out::midi_write(uint8_t b) {
+    log_window::print("midi write: ");
+    log_window::print(b);
+    log_window::println("");
+}
+
+inline void
+out::midi_write(const midi_cmd_t& c) {
     log_window::print("midi write: ");
 
-    uint8_t *b = (uint8_t *) data;
-    for (uint8_t i = 0; i < s; i++) {
+    const uint8_t *b = c;
+    for (uint8_t i = 0; i < c.size(); i++) {
+        log_window::print(b[i], " ");
+    }
+    log_window::println("");
+}
+
+inline void
+out::usb_midi_write(uint8_t b, uint8_t) {
+}
+
+inline void
+out::usb_midi_write(const midi_cmd_t& c, uint8_t) {
+    log_window::print("usb midi write: ");
+
+    const uint8_t *b = c;
+    for (uint8_t i = 0; i < c.size(); i++) {
         log_window::print(b[i], " ");
     }
     log_window::println("");

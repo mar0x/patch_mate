@@ -5,6 +5,10 @@ struct ring {
 
     using value_t = T;
 
+    enum {
+        capacity = MAX
+    };
+
     uint8_t next(uint8_t i) const { return (i + 1) % MAX; }
     uint8_t next() const { return next(pos); }
     uint8_t prev(uint8_t i) const { return (i + MAX - 1) % MAX; }

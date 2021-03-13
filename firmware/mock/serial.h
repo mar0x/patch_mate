@@ -20,6 +20,8 @@ struct serial {
         println("");
     }
 
+    bool dtr() const { return true; }
+
     void print(const char* str) { log_window::print(str); }
     void print(int n) { log_window::print(n); }
 

@@ -81,7 +81,7 @@ program_t::setup(uint16_t ee_start) {
 
     ee_end_ = ee_start_ + sizeof(program_t) * MAX_PROGRAMS;
 
-    debug(7, "program_t::setup: start ", ee_start_);
+    debug(7, "program::setup: start ", ee_start_);
 
     return ee_end_;
 }
@@ -113,7 +113,7 @@ program_t::operator!=(const program_t& n) const {
 
 inline bool
 program_t::read(uint8_t prog) {
-    debug(7, "program_t::read: prog ", prog);
+    debug(7, "program::read: prog ", prog);
 
     uint16_t addr = ee_start_ + sizeof(program_t) * prog;
     spi_eeprom::get(addr, *this);
@@ -127,7 +127,7 @@ program_t::write(uint8_t prog) {
         return false;
     }
 
-    debug(7, "program_t::write: prog ", prog);
+    debug(7, "program::write: prog ", prog);
 
     uint16_t addr = ee_start_ + sizeof(program_t) * prog;
     spi_eeprom::put(addr, *this);

@@ -20,7 +20,7 @@ struct in {
 
     bool midi_available() const { return false; }
     int midi_read() const { return 0; }
-    bool usb_midi_read(midi_cmd_t &c) const { return false; }
+    bool usb_midi_read(midi_cmd_t &c, uint8_t &jack) const { return false; }
 
     bool serial_connected() const { return true; }
     bool serial_available() const { return pts.available(); }

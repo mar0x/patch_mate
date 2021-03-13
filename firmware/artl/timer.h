@@ -3,7 +3,11 @@
 
 namespace artl {
 
-template<typename CALLBACK>
+struct default_timer_handler {
+    void operator()(unsigned long) { }
+};
+
+template<typename CALLBACK = default_timer_handler>
 struct timer : public CALLBACK {
 
     using CALLBACK::CALLBACK;
@@ -12,7 +16,7 @@ struct timer : public CALLBACK {
         return ((unsigned long) -1) / 2;
     }
 
-    void schedule(unsigned long t) { at_ = t; }
+    void schedule(unsigned long t) { at_ = t ? t : 1; }
 
     void cancel() { at_ = 0; }
 

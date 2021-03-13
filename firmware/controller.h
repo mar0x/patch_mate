@@ -1,6 +1,10 @@
 
 #pragma once
 
+#if defined(ARDUINO)
+#include <Arduino.h>
+#endif
+
 #include "config.h"
 #include "debug.h"
 
@@ -9,7 +13,6 @@
 
 #if defined(ARDUINO)
 
-#include <Arduino.h>
 #include <EEPROM.h>
 
 #include "spi_eeprom.h"
@@ -65,12 +68,13 @@ struct controller_t {
     bool read_eeprom();
     void reset_eeprom();
 
-    void process_midi_cmd(midi_cmd_t& cmd);
-    void process_serial_cmd(unsigned long);
+    void process_midi_cmd(const midi_cmd_t& cmd);
+    void process_serial_cmd();
     void print_program(uint8_t p, const program_t& pr);
     template<typename T>
     void update_setting(uint8_t mode, T& s, T v);
-    void midi_out(const midi_cmd_t& cmd);
+    void midi_out(uint8_t b);
+    void midi_out_cmd(const midi_cmd_t& cmd);
 
     void set_program(uint8_t prog, bool banner = false);
     void set_loop(uint8_t loop, bool val);
@@ -78,14 +82,20 @@ struct controller_t {
 
     bool led4loop() const;
 
-    void on_down(uint8_t, bool, unsigned long);
-    void on_hold(uint8_t, unsigned long);
-    void on_rotate(short, unsigned long);
+    void on_down(uint8_t, bool);
+    void on_hold(uint8_t);
+    void on_rotate(short);
 
-    void mute(unsigned long t);
-    void on_mute_timer(unsigned long t);
+    void mute();
+    void on_mute_timer();
 
-    void commit(unsigned long);
+    void store_blink_start(uint8_t count = 3, uint16_t period = 100);
+    void on_store_blink_timer();
+
+    void data_blink();
+    void on_data_blink_timer();
+
+    void commit();
 
     template<typename T>
     void start_edit(T& value, unsigned int min, unsigned int max,
@@ -94,9 +104,9 @@ struct controller_t {
         unsigned int on = (unsigned int) -1);
     void commit_edit();
     void set_edit_loop(uint8_t edit_loop);
-    void set_mode(uint8_t m, unsigned long t);
+    void set_mode(uint8_t m);
 
-    void show_cursor(unsigned long t);
+    void show_cursor();
     void hide_cursor();
 
     void show_title_hint();
@@ -137,29 +147,16 @@ struct controller_t {
         RIGHT = in_traits::RIGHT,
     };
 
-    struct mute_timer_callback {
-        void operator ()(unsigned long);
-    };
-
-    using mute_timer = artl::timer<mute_timer_callback>;
-
-
-    struct hide_cursor_timer_callback {
-        void operator ()(unsigned long);
-    };
-
-    using hide_cursor_timer = artl::timer<hide_cursor_timer_callback>;
-
 
     struct store_blink_timer_callback {
-        void operator ()(unsigned long);
+        void operator()(unsigned long) { }
 
-        void start(unsigned long t, uint8_t count = 3, unsigned long period = 100);
+        void start(uint8_t count, uint16_t period);
         void stop();
 
         uint8_t rest_;
         bool led_on_;
-        unsigned long period_;
+        uint16_t period_;
     };
 
     using store_blink_timer = artl::timer<store_blink_timer_callback>;
@@ -189,20 +186,19 @@ struct controller_t {
         MODE_MIDI_OUT_MONITOR,
         MODE_ABOUT,
         MODE_UPTIME,
-        MODE_LOOP_COUNT,
-        MODE_INPUT_COUNT,
-        MODE_PC_COUNT,
         MODE_MAX,
     };
 
     in<in_traits> in_;
     out out_;
 
-    mute_timer mute_timer_;
+    artl::timer<> mute_timer_;
     bool on_mute_ = true;
     bool wait_mute_ = false;
 
     store_blink_timer store_blink_timer_;
+    artl::timer<> data_blink_timer_;
+    unsigned long last_data_blink_ = 0;
 
     uint8_t mode_ = MODE_INITIAL;
     settings_t settings_;
@@ -224,12 +220,9 @@ struct controller_t {
     program_t program_master_;
 
     uint8_t cursor_pos_ = MIN_CURSOR_POS;
-    hide_cursor_timer hide_cursor_timer_;
+    artl::timer<> hide_cursor_timer_;
 
     unsigned long uptime_;
-    unsigned long loop_count_ = 0;
-    unsigned long pc_count_ = 0;
-    unsigned long input_count_ = 0;
 
     midi_mon_t midi_mon_[2];
 
@@ -239,13 +232,13 @@ struct controller_t {
     bool show_master_;
 
     version_t version_;
+    unsigned long t;
 };
 
 controller_t controller_;
 
 #if defined(ISR) && defined(PCINT0_vect)
 ISR(PCINT0_vect) {
-    ++controller_.pc_count_;
 }
 #endif
 
@@ -268,7 +261,7 @@ controller_t::setup() {
 
     spi_eeprom::setup();
 
-    unsigned long t = millis();
+    t = millis();
 
     midi_mon_[0].setup(t);
     midi_mon_[1].setup(t);
@@ -278,14 +271,16 @@ controller_t::setup() {
     out_.mute();
     on_mute_ = true;
 
+    out_.data_led(true);
+
     if (read_eeprom()) {
-        set_mode(MODE_NORMAL, t);
+        set_mode(MODE_NORMAL);
         set_program(0, true);
     } else {
-        set_mode(MODE_SETTINGS_FACTORY_RESET, t);
+        set_mode(MODE_SETTINGS_FACTORY_RESET);
     }
 
-    mute(t);
+    mute();
 
     enable_input_ = true;
 
@@ -301,28 +296,47 @@ controller_t::setup() {
 
 inline void
 controller_t::loop() {
-    unsigned long t = millis();
+    t = millis();
 
-    ++loop_count_;
-
-    while (!midi_cmd_ && in_.midi_available()) {
+    while (!midi_cmd_.ready() && in_.midi_available()) {
         uint8_t b = in_.midi_read();
 
         if (midi_mon_[0].active()) {
             midi_mon_[0].read(b);
         }
 
-        midi_cmd_.read(b);
+        if (settings_.midi_fwd) {
+            midi_out(b);
+        }
+
+        if (is_midi_rt(b)) {
+            out_.usb_midi_write(b, 1);
+        } else {
+            midi_cmd_.read(b);
+        }
     }
 
-    if (midi_cmd_) {
+    if (midi_cmd_.ready()) {
+        out_.usb_midi_write(midi_cmd_, 1);
+
         process_midi_cmd(midi_cmd_);
+
+        midi_cmd_.reset();
     }
 
     {
         midi_cmd_t cmd;
-        if (in_.usb_midi_read(cmd)) {
-            process_midi_cmd(cmd);
+        uint8_t jack;
+
+        if (in_.usb_midi_read(cmd, jack)) {
+            switch (jack) {
+            case 0:
+                process_midi_cmd(cmd);
+                break;
+            case 1:
+                midi_out_cmd(cmd);
+                break;
+            }
         }
     }
 
@@ -338,7 +352,7 @@ controller_t::loop() {
     }
 
     if (serial_cmd_) {
-        process_serial_cmd(t);
+        process_serial_cmd();
     }
 
     in_.update(t, enable_input_);
@@ -352,11 +366,24 @@ controller_t::loop() {
     enable_input_ = false;
 #endif
 
-    ++input_count_;
+    if (mute_timer_.update(t)) {
+        on_mute_timer();
+    }
 
-    mute_timer_.update(t);
-    hide_cursor_timer_.update(t);
-    store_blink_timer_.update(t);
+    if (hide_cursor_timer_.update(t)) {
+        hide_hint();
+        hide_cursor();
+
+        lcd_update(0, 1, LCD_COLUMNS);
+    }
+
+    if (store_blink_timer_.update(t)) {
+        on_store_blink_timer();
+    }
+
+    if (data_blink_timer_.update(t)) {
+        on_data_blink_timer();
+    }
 
     switch (mode_) {
     case MODE_MIDI_IN_MONITOR:
@@ -376,33 +403,6 @@ controller_t::loop() {
         }
         break;
     }
-    case MODE_LOOP_COUNT: {
-        unsigned long s = loop_count_ / 1000;
-        if (uptime_ < s) {
-            uptime_ = s;
-            print_number(lcd_buf[1], 14, uptime_);
-            lcd_update(0, 1, 14);
-        }
-        break;
-    }
-    case MODE_INPUT_COUNT: {
-        unsigned long s = input_count_ / 1000;
-        if (uptime_ < s) {
-            uptime_ = s;
-            print_number(lcd_buf[1], 14, uptime_);
-            lcd_update(0, 1, 14);
-        }
-        break;
-    }
-    case MODE_PC_COUNT: {
-        unsigned long s = pc_count_;
-        if (uptime_ < s) {
-            uptime_ = s;
-            print_number(lcd_buf[1], 14, uptime_);
-            lcd_update(0, 1, 14);
-        }
-        break;
-    }
     }
 
     if (!store_blink_timer_.active()) {
@@ -411,7 +411,7 @@ controller_t::loop() {
 
     if (out_.relay_changed()) {
         out_.commit_led();
-        mute(t);
+        mute();
     } else {
         out_.commit();
     }
@@ -478,17 +478,13 @@ controller_t::reset_eeprom() {
 }
 
 inline void
-controller_t::process_midi_cmd(midi_cmd_t& cmd) {
-    if (settings_.midi_fwd) {
-        midi_out(cmd);
-    }
-
-    if (cmd.command() == midi_cmd_t::CMD_PROG_CHANGE &&
+controller_t::process_midi_cmd(const midi_cmd_t& cmd) {
+    if (cmd.command() == CMD_PROG_CHANGE &&
         cmd.channel() == settings_.midi_channel) {
         set_program(cmd.program());
     }
 
-    if (cmd.command() == midi_cmd_t::CMD_CTRL_CHANGE &&
+    if (cmd.command() == CMD_CTRL_CHANGE &&
         cmd.channel() == settings_.midi_channel) {
         for(uint8_t i = 0; i < MAX_LOOP; i++) {
             if (settings_.midi_loop_ctrl_in[i] == cmd.controller()) {
@@ -496,12 +492,10 @@ controller_t::process_midi_cmd(midi_cmd_t& cmd) {
             }
         }
     }
-
-    cmd.reset();
 }
 
 inline void
-controller_t::process_serial_cmd(unsigned long t) {
+controller_t::process_serial_cmd() {
     out_.serial_println("");
 
     bool old_dirty = dirty_;
@@ -574,7 +568,7 @@ controller_t::process_serial_cmd(unsigned long t) {
     }
     case serial_cmd_t::CMD_MODE: {
         uint8_t m = mode_;
-        if (serial_cmd_.get_arg(1, m) && m < MODE_MAX) { set_mode(m, t); }
+        if (serial_cmd_.get_arg(1, m) && m < MODE_MAX) { set_mode(m); }
 
         out_.serial_println("MD ", mode_);
         break;
@@ -582,7 +576,7 @@ controller_t::process_serial_cmd(unsigned long t) {
     case serial_cmd_t::CMD_STORE: {
         if (!dirty_) { out_.serial_println("CLEAR"); }
         else if (bad_magic_) { out_.serial_println("BAD MAGIC"); }
-        else { commit(t); }
+        else { commit(); }
 
         print_program(prog_id_, program_);
         break;
@@ -681,7 +675,7 @@ controller_t::process_serial_cmd(unsigned long t) {
         break;
     }
     case serial_cmd_t::CMD_FACTORY_RESET: {
-        set_mode(MODE_SETTINGS_FACTORY_RESET, t);
+        set_mode(MODE_SETTINGS_FACTORY_RESET);
         break;
     }
     case serial_cmd_t::CMD_MIDI_LOOP_IN_CTRL: {
@@ -750,13 +744,13 @@ controller_t::process_serial_cmd(unsigned long t) {
 
         if (serial_cmd_.get_arg(1, btn.btn)) {
             if (btn.btn[0] >= '0' && btn.btn[0] <= '9') {
-                on_down(btn.btn[0] - '0', true, t);
+                on_down(btn.btn[0] - '0', true);
             } else {
                 switch(btn.btn[0]) {
-                case 'L': on_down(LEFT, true, t); break;
-                case 'R': on_down(RIGHT, true, t); break;
-                case 'U': on_rotate(1, t); break;
-                case 'D': on_rotate(-1, t); break;
+                case 'L': on_down(LEFT, true); break;
+                case 'R': on_down(RIGHT, true); break;
+                case 'U': on_rotate(1); break;
+                case 'D': on_rotate(-1); break;
                 }
             }
         }
@@ -805,14 +799,19 @@ controller_t::update_setting(uint8_t mode, T& s, T v) {
 }
 
 inline void
-controller_t::midi_out(const midi_cmd_t& cmd) {
+controller_t::midi_out(uint8_t b) {
     if (midi_mon_[1].active()) {
-        for (uint8_t i = 0; i < cmd.size(); i++) {
-            midi_mon_[1].read(cmd[i]);
-        }
+        midi_mon_[1].read(b);
     }
 
-    out_.midi_write(cmd, cmd.size());
+    out_.midi_write(b);
+}
+
+inline void
+controller_t::midi_out_cmd(const midi_cmd_t& cmd) {
+    for (uint8_t i = 0; i < cmd.size(); i++) {
+        midi_out(cmd[i]);
+    }
 }
 
 inline void
@@ -827,9 +826,10 @@ controller_t::set_program(uint8_t prog, bool banner) {
     program_master_ = program_;
 
     if (settings_.midi_out_prog) {
-        midi_cmd_t cmd(settings_.midi_channel, midi_cmd_t::CMD_PROG_CHANGE, prog_id_);
+        midi_cmd_t cmd(settings_.midi_channel, CMD_PROG_CHANGE, prog_id_);
 
-        midi_out(cmd);
+        out_.usb_midi_write(cmd, 0);
+        midi_out_cmd(cmd);
     }
 
     for(uint8_t i = 0; i < MAX_LOOP; i++) {
@@ -884,10 +884,11 @@ controller_t::set_loop(uint8_t i, bool v) {
 inline void
 controller_t::send_loop(uint8_t i, bool v) {
     if (settings_.midi_loop_ctrl_out[i] <= 127) {
-        midi_cmd_t cmd(settings_.midi_channel, midi_cmd_t::CMD_CTRL_CHANGE,
+        midi_cmd_t cmd(settings_.midi_channel, CMD_CTRL_CHANGE,
             settings_.midi_loop_ctrl_out[i], v ? 127 : 0);
 
-        midi_out(cmd);
+        out_.usb_midi_write(cmd, 0);
+        midi_out_cmd(cmd);
     }
 }
 
@@ -900,7 +901,7 @@ controller_t::led4loop() const {
 }
 
 inline void
-controller_t::on_down(uint8_t i, bool down, unsigned long t) {
+controller_t::on_down(uint8_t i, bool down) {
     if (!down) {
         debug(5, "on_down: release ", i);
 
@@ -916,17 +917,17 @@ controller_t::on_down(uint8_t i, bool down, unsigned long t) {
     // change mode: hold LEFT and press LOOP
     if (i < MAX_LOOP && in_.left().down()) {
         switch(i) {
-            case 0: set_mode(MODE_SETTINGS_CHANNEL, t); break;
-            case 1: set_mode(MODE_SETTINGS_CTRL_IN, t); break;
-            case 2: set_mode(MODE_SETTINGS_CTRL_OUT, t); break;
-            case 3: set_mode(MODE_SETTINGS_PROG_OUT, t); break;
-            case 4: set_mode(MODE_SETTINGS_MIDI_FWD, t); break;
-            case 5: set_mode(MODE_SETTINGS_MUTE_DELAY, t); break;
-            case 6: set_mode(MODE_SETTINGS_HIDE_CURSOR, t); break;
-            case 7: set_mode(MODE_SETTINGS_PROG_START, t); break;
-            case 8: set_mode(MODE_SETTINGS_CHANNEL_START, t); break;
+            case 0: set_mode(MODE_SETTINGS_CHANNEL); break;
+            case 1: set_mode(MODE_SETTINGS_CTRL_IN); break;
+            case 2: set_mode(MODE_SETTINGS_CTRL_OUT); break;
+            case 3: set_mode(MODE_SETTINGS_PROG_OUT); break;
+            case 4: set_mode(MODE_SETTINGS_MIDI_FWD); break;
+            case 5: set_mode(MODE_SETTINGS_MUTE_DELAY); break;
+            case 6: set_mode(MODE_SETTINGS_HIDE_CURSOR); break;
+            case 7: set_mode(MODE_SETTINGS_PROG_START); break;
+            case 8: set_mode(MODE_SETTINGS_CHANNEL_START); break;
 #if defined(DEBUG)
-            case 9: set_mode(MODE_SETTINGS_USB_DEBUG, t); break;
+            case 9: set_mode(MODE_SETTINGS_USB_DEBUG); break;
 #endif
         }
         return;
@@ -935,11 +936,11 @@ controller_t::on_down(uint8_t i, bool down, unsigned long t) {
     // change mode ex: hold RIGHT and press LOOP
     if (i < MAX_LOOP && in_.right().down()) {
         switch(i) {
-            case 0: set_mode(MODE_PROGRAM_SWAP, t); break;
-            case 1: set_mode(MODE_PROGRAM_MOVE, t); break;
-            case 2: set_mode(MODE_MIDI_IN_MONITOR, t); break;
-            case 3: set_mode(MODE_MIDI_OUT_MONITOR, t); break;
-            case 9: set_mode(MODE_ABOUT, t); break;
+            case 0: set_mode(MODE_PROGRAM_SWAP); break;
+            case 1: set_mode(MODE_PROGRAM_MOVE); break;
+            case 2: set_mode(MODE_MIDI_IN_MONITOR); break;
+            case 3: set_mode(MODE_MIDI_OUT_MONITOR); break;
+            case 9: set_mode(MODE_ABOUT); break;
         }
         return;
     }
@@ -961,7 +962,7 @@ controller_t::on_down(uint8_t i, bool down, unsigned long t) {
             hide_hint();
             lcd_update(0, 1, LCD_COLUMNS);
 
-            show_cursor(t);
+            show_cursor();
 
             return;
         }
@@ -972,7 +973,7 @@ controller_t::on_down(uint8_t i, bool down, unsigned long t) {
             hide_hint();
             lcd_update(0, 1, LCD_COLUMNS);
 
-            show_cursor(t);
+            show_cursor();
 
             return;
         }
@@ -994,7 +995,7 @@ controller_t::on_down(uint8_t i, bool down, unsigned long t) {
     // hold LEFT then press RIGHT
     if ((i == LEFT && in_.right().hold()) || (i == RIGHT && in_.left().hold()))
     {
-        set_mode(MODE_NORMAL, t);
+        set_mode(MODE_NORMAL);
         return;
     }
 
@@ -1072,11 +1073,11 @@ controller_t::on_down(uint8_t i, bool down, unsigned long t) {
 }
 
 inline void
-controller_t::on_hold(uint8_t i, unsigned long t) {
+controller_t::on_hold(uint8_t i) {
     debug(4, "on_hold: ", i);
 
     if (i == STORE && in_.left().hold() && in_.right().hold()) {
-        set_mode(MODE_SETTINGS_FACTORY_RESET, t);
+        set_mode(MODE_SETTINGS_FACTORY_RESET);
         return;
     }
 
@@ -1086,11 +1087,11 @@ controller_t::on_hold(uint8_t i, unsigned long t) {
             if (!dirty_) { return; }
 
             if (bad_magic_) {
-                set_mode(MODE_SETTINGS_FACTORY_RESET, t);
+                set_mode(MODE_SETTINGS_FACTORY_RESET);
                 return;
             }
 
-            commit(t);
+            commit();
 
             return;
         }
@@ -1114,13 +1115,13 @@ controller_t::on_hold(uint8_t i, unsigned long t) {
             mode_ <= MODE_SETTINGS_LAST) {
             // No changes made - switch back to NORMAL;
             if (!dirty_) {
-                set_mode(MODE_NORMAL, t);
+                set_mode(MODE_NORMAL);
                 return;
             }
 
             // Changes made, but EEPROM not ready - confirm EEPROM Reset first;
             if (bad_magic_ && mode_ != MODE_SETTINGS_FACTORY_RESET) {
-                set_mode(MODE_SETTINGS_FACTORY_RESET, t);
+                set_mode(MODE_SETTINGS_FACTORY_RESET);
                 return;
             }
         }
@@ -1134,7 +1135,7 @@ controller_t::on_hold(uint8_t i, unsigned long t) {
             set_dirty(false);
 
             // stay in same mode for convenience
-            store_blink_timer_.start(t);
+            store_blink_start();
             return;
 
         case MODE_SETTINGS_CHANNEL:
@@ -1153,9 +1154,9 @@ controller_t::on_hold(uint8_t i, unsigned long t) {
 
         case MODE_SETTINGS_FACTORY_RESET:
             reset_eeprom();
-            set_mode(MODE_NORMAL, t);
+            set_mode(MODE_NORMAL);
             set_program(0, true);
-            store_blink_timer_.start(t);
+            store_blink_start();
             return;
 
 #if defined(DEBUG)
@@ -1169,13 +1170,13 @@ controller_t::on_hold(uint8_t i, unsigned long t) {
         case MODE_PROGRAM_MOVE:
             // No changes made - switch back to NORMAL;
             if (!dirty_) {
-                set_mode(MODE_NORMAL, t);
+                set_mode(MODE_NORMAL);
                 return;
             }
 
             // Changes made, but EEPROM not ready - confirm EEPROM Reset first;
             if (bad_magic_ && mode_ != MODE_SETTINGS_FACTORY_RESET) {
-                set_mode(MODE_SETTINGS_FACTORY_RESET, t);
+                set_mode(MODE_SETTINGS_FACTORY_RESET);
                 return;
             }
 
@@ -1202,8 +1203,8 @@ controller_t::on_hold(uint8_t i, unsigned long t) {
             break;
         }
 
-        set_mode(MODE_NORMAL, t);
-        store_blink_timer_.start(t);
+        set_mode(MODE_NORMAL);
+        store_blink_start();
 
         return;
     }
@@ -1212,18 +1213,18 @@ controller_t::on_hold(uint8_t i, unsigned long t) {
     // hold RIGHT then press LEFT or
     // hold LEFT then press RIGHT
     if ((i == LEFT && in_.right().down()) || (i == RIGHT && in_.left().down())) {
-        set_mode(MODE_NORMAL, t);
+        set_mode(MODE_NORMAL);
     }
 }
 
 inline void
-controller_t::commit(unsigned long t) {
+controller_t::commit() {
     // commit program change
     program_.write(prog_id_);
 
     program_master_ = program_;
 
-    store_blink_timer_.start(t);
+    store_blink_start();
     set_dirty(false);
 }
 
@@ -1281,20 +1282,19 @@ rotate_char(char c, short dir) {
 }
 
 inline void
-controller_t::on_rotate(short dir, unsigned long t) {
+controller_t::on_rotate(short dir) {
     debug(4, "on_rotate: ", dir);
 
     // rotate on RIGHT hold - change mode
     if (in_.right().hold()) {
         uint8_t m = rotate(mode_, MODE_NORMAL, MODE_MAX, dir);
 
-        set_mode(m, t);
+        set_mode(m);
         return;
     }
 
     switch(mode_) {
     case MODE_NORMAL: {
-
         // rotate on LEFT hold - change program
         if (in_.left().hold()) {
             set_program(rotate(prog_id_, MAX_PROGRAMS, dir));
@@ -1310,7 +1310,7 @@ controller_t::on_rotate(short dir, unsigned long t) {
 
         lcd.setCursor(cursor_pos_, 0);
         lcd.write(c);
-        show_cursor(t);
+        show_cursor();
 
         set_dirty(program_ != program_master_);
 
@@ -1367,7 +1367,7 @@ controller_t::on_rotate(short dir, unsigned long t) {
 
 
 inline void
-controller_t::mute(unsigned long t) {
+controller_t::mute() {
     if (wait_mute_) return;
 
     out_.mute();
@@ -1377,7 +1377,7 @@ controller_t::mute(unsigned long t) {
 }
 
 inline void
-controller_t::on_mute_timer(unsigned long t) {
+controller_t::on_mute_timer() {
     if (wait_mute_) {
         on_mute_ = true;
 
@@ -1389,6 +1389,22 @@ controller_t::on_mute_timer(unsigned long t) {
         on_mute_ = false;
         out_.unmute();
     }
+}
+
+inline void
+controller_t::data_blink() {
+    if (data_blink_timer_.active() || (t - last_data_blink_) < 100) return;
+
+    out_.data_led(false);
+
+    data_blink_timer_.schedule(t + 10);
+}
+
+inline void
+controller_t::on_data_blink_timer() {
+    out_.data_led(true);
+
+    last_data_blink_ = t;
 }
 
 template<typename T>
@@ -1431,7 +1447,7 @@ controller_t::set_edit_loop(uint8_t edit_loop) {
 }
 
 inline void
-controller_t::set_mode(uint8_t m, unsigned long t) {
+controller_t::set_mode(uint8_t m) {
     debug(1, "set_mode: ", mode_, " -> ", m);
 
     if (m == mode_) return;
@@ -1521,7 +1537,7 @@ controller_t::set_mode(uint8_t m, unsigned long t) {
     case MODE_SETTINGS_FACTORY_RESET:
         memcpy(lcd_buf[1], " Factory Reset  ", 16);
         set_dirty(true);
-        store_blink_timer_.start(t, 0, 150);
+        store_blink_start(0, 150);
         break;
 
 #if defined(DEBUG)
@@ -1576,27 +1592,6 @@ controller_t::set_mode(uint8_t m, unsigned long t) {
         uptime_ = t / 1000;
         print_number(lcd_buf[1], 12, uptime_);
         break;
-
-    case MODE_LOOP_COUNT:
-        memcpy(lcd_buf[0], " Loop count     ", 16);
-        memcpy(lcd_buf[1] + 14, " k", 2);
-        uptime_ = loop_count_ / 1000;
-        print_number(lcd_buf[1], 14, uptime_);
-        break;
-
-    case MODE_INPUT_COUNT:
-        memcpy(lcd_buf[0], " Input count    ", 16);
-        memcpy(lcd_buf[1] + 14, " k", 2);
-        uptime_ = input_count_ / 1000;
-        print_number(lcd_buf[1], 14, uptime_);
-        break;
-
-    case MODE_PC_COUNT:
-        memcpy(lcd_buf[0], " PC count       ", 16);
-        memcpy(lcd_buf[1] + 14, "  ", 2);
-        uptime_ = pc_count_;
-        print_number(lcd_buf[1], 14, uptime_);
-        break;
     }
 
     // adjust loop led for all modes except MIDI mon and control settings
@@ -1618,7 +1613,7 @@ controller_t::set_mode(uint8_t m, unsigned long t) {
 }
 
 inline void
-controller_t::show_cursor(unsigned long t)
+controller_t::show_cursor()
 {
     lcd.setCursor(cursor_pos_, 0);
     lcd.cursor();
@@ -1695,64 +1690,55 @@ controller_t::show_master(bool master)
 }
 
 inline void
-controller_t::button_handler::on_down(bool down, unsigned long t)
+controller_t::button_handler::on_down(bool down, unsigned long)
 {
-    controller_.on_down(id_, down, t);
+    controller_.on_down(id_, down);
 }
 
 inline void
-controller_t::button_handler::on_hold(unsigned long t)
+controller_t::button_handler::on_hold(unsigned long)
 {
-    controller_.on_hold(id_, t);
+    controller_.on_hold(id_);
 }
 
 inline void
-controller_t::encoder_handler::on_rotate(short dir, unsigned long t)
+controller_t::encoder_handler::on_rotate(short dir, unsigned long)
 {
-    controller_.on_rotate(dir, t);
+    controller_.on_rotate(dir);
 }
 
 inline void
-controller_t::mute_timer_callback::operator()(unsigned long t)
+controller_t::on_store_blink_timer()
 {
-    controller_.on_mute_timer(t);
-}
+    store_blink_timer_.led_on_ = !store_blink_timer_.led_on_;
 
-inline void
-controller_t::hide_cursor_timer_callback::operator()(unsigned long)
-{
-    controller_.hide_hint();
-    controller_.hide_cursor();
+    out_.store_led(store_blink_timer_.led_on_);
 
-    lcd_update(0, 1, LCD_COLUMNS);
-}
-
-inline void
-controller_t::store_blink_timer_callback::operator()(unsigned long t)
-{
-    led_on_ = !led_on_;
-
-    controller_.out_.store_led(led_on_);
-
-    if (!led_on_) {
-        if (rest_ == 0) {
+    if (!store_blink_timer_.led_on_) {
+        if (store_blink_timer_.rest_ == 0) {
             return;
         }
 
-        if (rest_ != 0xFF) { rest_--; }
+        if (store_blink_timer_.rest_ != 0xFF) { store_blink_timer_.rest_--; }
     }
 
-    controller_.store_blink_timer_.schedule(t + period_);
+    store_blink_timer_.schedule(t + store_blink_timer_.period_);
 }
 
 inline void
-controller_t::store_blink_timer_callback::start(unsigned long t, uint8_t count, unsigned long period)
+controller_t::store_blink_start(uint8_t count, uint16_t period)
+{
+    store_blink_timer_.start(count, period);
+
+    on_store_blink_timer();
+}
+
+inline void
+controller_t::store_blink_timer_callback::start(uint8_t count, uint16_t period)
 {
     led_on_ = false;
     rest_ = count - 1;
     period_ = period;
-
-    (*this)(t);
 }
 
 inline void
