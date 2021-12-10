@@ -2,7 +2,6 @@
 #pragma once
 
 #include <stdint.h>
-#include <avr/io.h>
 
 #include "port_traits.h"
 
@@ -19,13 +18,11 @@ namespace pin {
       constexpr static uint8_t bit_mask = 1 << BIT_NO;
       constexpr static uint8_t bit_no = BIT_NO;
 
-      static void input() { port_traits::dir() &= ~bit_mask; }
+      static void input() { port_traits::dirclr(bit_mask); }
 
-      static void output() { port_traits::dir() |= bit_mask; }
+      static void output() { port_traits::dirset(bit_mask); }
 
-      static bool read() {
-          return read_bit() != 0;
-      }
+      static bool read() { return read_bit() != 0; }
 
       static uint8_t read_bit() {
           return port_traits::in() & bit_mask;
@@ -39,9 +36,11 @@ namespace pin {
           }
       }
 
-      static void high() { port_traits::out() |= bit_mask; }
+      static void high() { port_traits::outset(bit_mask); }
 
-      static void low() { port_traits::out() &= ~bit_mask; }
+      static void low() { port_traits::outclr(bit_mask); }
+
+      static void toggle() { port_traits::outtgl(bit_mask); }
   };
 
 } // namespace pin

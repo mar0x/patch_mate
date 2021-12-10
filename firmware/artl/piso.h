@@ -14,33 +14,33 @@ struct piso {
     using ld = LD_PIN;
     using clk = CLK_PIN;
 
-    void setup() {
-        qh().input();
+    static void setup() {
+        qh::input();
 
-        ld().output();
-        ld().high();
+        ld::output();
+        ld::high();
 
-        clk().output();
-        clk().low();
+        clk::output();
+        clk::low();
     }
 
     struct read_bit {
-        uint8_t operator()() const {
-            uint8_t res = qh().read();
+        static uint8_t read() {
+            uint8_t res = qh::read();
 
-            clk().high();
-            clk().low();
+            clk::high();
+            clk::low();
 
             return res;
         }
     };
 
-    value_type read() const {
-        ld().low();
-        ld().high();
+    static value_type read() {
+        ld::low();
+        ld::high();
 
         value_type tmp;
-        bit_order().read( tmp, read_bit() );
+        bit_order::read(tmp, read_bit());
 
         return tmp;
     }

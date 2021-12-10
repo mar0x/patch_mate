@@ -50,7 +50,7 @@ struct spi_oled {
     using cs = artl::digital_out< artl::port::B, 6 >;
     using ss = artl::digital_out< artl::port::B, 0 >;
 
-    void begin() {
+    void begin(uint8_t, uint8_t) {
         ss::setup();
 
         cs::setup();

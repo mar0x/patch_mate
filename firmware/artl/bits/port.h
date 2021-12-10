@@ -11,6 +11,10 @@ namespace port {
     struct D { };
     struct E { };
     struct F { };
+    struct H { };
+    struct J { };
+    struct K { };
+    struct Q { };
 
 }
 

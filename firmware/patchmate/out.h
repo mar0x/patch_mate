@@ -1,16 +1,16 @@
 
 #pragma once
 
-#include <SPI.h>
+#include "../artl/digital_out.h"
+#include "../artl/bit_order.h"
+#include "../artl/sipo.h"
 
-#include "artl/digital_out.h"
+#include "../config.h"
+#include "../debug.h"
+#include "../usb_midi.h"
+#include "../midi_cmd.h"
 
-#include "config.h"
-#include "debug.h"
-#include "usb_midi.h"
-#include "midi_cmd.h"
-
-#include "serial_out.h"
+#include "../serial_out.h"
 
 namespace patch_mate {
 
@@ -37,84 +37,60 @@ struct out : public serial_out {
     void usb_midi_write(const midi_cmd_t& c, uint8_t jack);
 
 private:
-    /* 3x 74HC595 pinout
-           +16
+    /* 2x 74HC595 pinout
+                 +8
       pin  msb  lsb  desc
       --------------------
-       Q0   0    7   NC
-       Q1   1    6   LOOP 1 (0) LED
-       Q2   2    5   LOOP 2 (1) LED
-       Q3   3    4   LOOP 3 (2) LED
-       Q4   4    3   LOOP 4 (3) LED
-       Q5   5    2   LOOP 5 (4) LED
-       Q6   6    1   LOOP 6 (5) LED
-       Q7   7    0   LOOP 7 (6) LED
-
-           +8    +8
-      pin  msb  lsb  desc
-      --------------------
-       Q0   0    7   LOOP 8 (7) LED
-       Q1   1    6   LOOP 4 (3) RELAY
+       Q0   0    7   LOOP 1 (0) RELAY
+       Q1   1    6   LOOP 2 (1) RELAY
        Q2   2    5   LOOP 3 (2) RELAY
-       Q3   3    4   LOOP 2 (1) RELAY
-       Q4   4    3   LOOP 1 (0) RELAY
-       Q5   5    2   LOOP 10 (9) RELAY
-       Q6   6    1   LOOP 9 (8) RELAY
+       Q3   3    4   LOOP 4 (3) RELAY
+       Q4   4    3   LOOP 5 (4) RELAY
+       Q5   5    2   LOOP 6 (5) RELAY
+       Q6   6    1   LOOP 7 (6) RELAY
        Q7   7    0   LOOP 8 (7) RELAY
 
-                +16
+            +8
       pin  msb  lsb  desc
       --------------------
-       Q0   0    7   LOOP 9 (8) LED
-       Q1   1    6   LOOP 10 (9) LED
-       Q2   2    5   NC
-       Q3   3    4   NC
-       Q4   4    3   NC
-       Q5   5    2   LOOP 7 (6) RELAY
-       Q6   6    1   LOOP 6 (5) RELAY
-       Q7   7    0   LOOP 5 (4) RELAY
+       Q0   0    7   LOOP 1 (0) LED
+       Q1   1    6   LOOP 2 (1) LED
+       Q2   2    5   LOOP 3 (2) LED
+       Q3   3    4   LOOP 4 (3) LED
+       Q4   4    3   LOOP 5 (4) LED
+       Q5   5    2   LOOP 6 (5) LED
+       Q6   6    1   LOOP 7 (6) LED
+       Q7   7    0   LOOP 8 (7) LED
+
+       DS            A2
+      ST_CP          10
+      SH_CP          A1
+
      */
 
-    enum hi_mask {
-        LED8 = 1 << 0,
-        LED9 = 1 << 1,
-        REL6 = 1 << 5,
-        REL5 = 1 << 6,
-        REL4 = 1 << 7,
+    enum {
+        LED_START   = 8,
+        LED_MASK    = 0xFF00U,
+        RELAY_START = 0,
+        RELAY_MASK  = 0x00FFU,
     };
 
-    enum mid_mask {
-        LED7 = 1 << 0,
-        REL3 = 1 << 1,
-        REL2 = 1 << 2,
-        REL1 = 1 << 3,
-        REL0 = 1 << 4,
-        REL9 = 1 << 5,
-        REL8 = 1 << 6,
-        REL7 = 1 << 7,
-    };
+    using mute_out = artl::digital_out< artl::port::B, 4 >;
+    using store_out = artl::digital_out< artl::port::F, 4 >;
 
-    enum lo_mask {
-        LED0 = 1 << 1,
-        LED1 = 1 << 2,
-        LED2 = 1 << 3,
-        LED3 = 1 << 4,
-        LED4 = 1 << 5,
-        LED5 = 1 << 6,
-        LED6 = 1 << 7,
-    };
+    using data = artl::digital_out< artl::port::F, 5 >;
+    using latch = artl::digital_out< artl::port::B, 6 >;
+    using clock = artl::digital_out< artl::port::F, 6 >;
 
-    using mute_out = artl::digital_out< artl::port::F, 0 >;
-    using store_out = artl::digital_out< artl::port::C, 7 >;
-    using data_out = artl::digital_out< artl::port::D, 7 >;
-    using rel_cs = artl::digital_out< artl::port::B, 7 >;
+    using sipo_t = uint16_t;
+    using sipo = artl::sipo<sipo_t, artl::msb_first, data, latch, clock>;
+
+    sipo_t led_;
+    sipo_t rel_;
+    sipo_t new_led_;
+    sipo_t new_rel_;
 
     void commit(uint16_t led, uint16_t rel);
-
-    uint16_t led_;
-    uint16_t rel_;
-    uint16_t new_led_;
-    uint16_t new_rel_;
 };
 
 
@@ -125,10 +101,9 @@ out::setup()
 
     mute_out::setup();
     store_out::setup();
-    data_out::setup();
+    sipo::setup();
 
-    rel_cs::setup();
-    rel_cs::high();
+    data::setup();
 }
 
 inline void
@@ -136,7 +111,7 @@ out::loop_relay(uint8_t i, bool v)
 {
     if (i >= MAX_LOOP) return;
 
-    uint16_t m = 1;
+    sipo_t m = 1;
     m = (m << i);
 
     if (v) {
@@ -151,7 +126,7 @@ out::loop_led(uint8_t i, bool v)
 {
     if (i >= MAX_LOOP) return;
 
-    uint16_t m = 1;
+    sipo_t m = 1;
     m = (m << i);
 
     if (v) {
@@ -181,9 +156,8 @@ out::store_led(bool v)
 }
 
 inline void
-out::data_led(bool v)
+out::data_led(bool)
 {
-    data_out::write(v);
 }
 
 inline void
@@ -318,39 +292,10 @@ out::commit(uint16_t led, uint16_t rel)
     led_ = led;
     rel_ = rel;
 
-    uint8_t hi = 0;
-    uint8_t mid = 0;
-    uint8_t lo = 0;
+    data::setup();
 
-    if (led_ & (1 << 0)) lo  |= LED0;
-    if (led_ & (1 << 1)) lo  |= LED1;
-    if (led_ & (1 << 2)) lo  |= LED2;
-    if (led_ & (1 << 3)) lo  |= LED3;
-    if (led_ & (1 << 4)) lo  |= LED4;
-    if (led_ & (1 << 5)) lo  |= LED5;
-    if (led_ & (1 << 6)) lo  |= LED6;
-    if (led_ & (1 << 7)) mid |= LED7;
-    if (led_ & (1 << 8)) hi  |= LED8;
-    if (led_ & (1 << 9)) hi  |= LED9;
-
-    if (rel_ & (1 << 0)) mid |= REL0;
-    if (rel_ & (1 << 1)) mid |= REL1;
-    if (rel_ & (1 << 2)) mid |= REL2;
-    if (rel_ & (1 << 3)) mid |= REL3;
-    if (rel_ & (1 << 4)) hi  |= REL4;
-    if (rel_ & (1 << 5)) hi  |= REL5;
-    if (rel_ & (1 << 6)) hi  |= REL6;
-    if (rel_ & (1 << 7)) mid |= REL7;
-    if (rel_ & (1 << 8)) mid |= REL8;
-    if (rel_ & (1 << 9)) mid |= REL9;
-
-    rel_cs::low();
-
-    SPI.transfer(hi);
-    SPI.transfer(mid);
-    SPI.transfer(lo);
-
-    rel_cs::high();
+    sipo_t v = (led_ << LED_START) | (rel_ << RELAY_START);
+    sipo::write(v);
 }
 
 inline void

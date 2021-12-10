@@ -78,6 +78,8 @@ struct midi_cmd_t {
         return c != CMD_SYS ? c : b;
     }
 
+    bool sys_ex() const { return sys_ex_ || (size_ > 0 && command() == CMD_SYS_EX); }
+
     uint8_t command() const { return command(cmd_[0]); }
     uint8_t channel() const { return cmd_[0] & 0x0FU; }
     uint8_t controller() const { return cmd_[1]; }
@@ -105,6 +107,7 @@ struct midi_cmd_t {
         case CMD_SYS_EX:
             return 2;
 
+        case CMD_SYS_EX_END:
         case CMD_SYS_CLOCK:
         case CMD_SYS_TICK:
         case CMD_SYS_START:
@@ -118,11 +121,6 @@ struct midi_cmd_t {
 
         return 0;
     }
-/*
-    operator bool() const {
-        return false;
-    }
-*/
 
     bool ready() const {
         if (size_ == 0) return false;
@@ -154,47 +152,32 @@ struct midi_cmd_t {
         return size_ == cmd.size_ && memcmp(cmd_, cmd.cmd_, size_) == 0;
     }
 
-    void reset() { size_ = 0; }
-
-    template<typename STREAM>
-    bool read(STREAM& s) {
-        uint8_t b;
-
-        while (!*this && s.available()) {
-            b = s.read();
-
-            read(b);
+    void reset() {
+        if (size_ == MAX_SIZE && command() == CMD_SYS_EX && cmd_[size_ - 1] != CMD_SYS_EX_END) {
+            sys_ex_ = true;
         }
 
-        return *this;
-    }
-
-    template<typename STREAM>
-    void write(STREAM& s) {
-#if defined(DEBUG)
-        for (uint8_t i = 0; i < size_; ++i) {
-            debug(4, "midi write: ", cmd_[i]);
+        if (size_ > 0 && cmd_[size_ - 1] == CMD_SYS_EX_END) {
+            sys_ex_ = false;
         }
-#endif
 
-        s.write(cmd_, size_);
+        size_ = 0;
     }
 
-    bool read(uint8_t b) {
+    void read(uint8_t b) {
         debug(4, "midi read: ", b);
 
-        if (is_midi_cmd(b) && b != CMD_SYS_EX_END) {
+        if (is_midi_cmd(b) && (b != CMD_SYS_EX_END || size_ == 0)) {
             cmd_[0] = b;
             size_ = 1;
+            sys_ex_ = false;
 
-            return *this;
+            return;
         }
 
-        if (size_ > 0 && size_ < MAX_SIZE) {
+        if ((size_ > 0 || sys_ex_) && size_ < MAX_SIZE) {
             cmd_[size_++] = b;
         }
-
-        return *this;
     }
 
 private:
@@ -204,6 +187,7 @@ private:
 
     uint8_t cmd_[MAX_SIZE];
     uint8_t size_ = 0;
+    bool sys_ex_ = false;
 };
 
 }

@@ -7,7 +7,27 @@ enum {
     LCD_COLUMNS = 16,
 };
 
+
+#if defined(ARDUINO)
+#if defined(ARDUINO_AVR_PATCHMATE_X)
 static spi_oled lcd;
+#else
+enum {
+    LCD_RS = 2,
+    LCD_E = 3,
+
+    LCD_DB4 = 4,
+    LCD_DB5 = 5,
+    LCD_DB6 = 6,
+    LCD_DB7 = 7,
+};
+
+static LiquidCrystal lcd(LCD_RS, LCD_E, LCD_DB4, LCD_DB5, LCD_DB6, LCD_DB7);
+#endif
+#else
+static LiquidCrystal lcd;
+#endif
+
 static char lcd_buf[LCD_LINES][LCD_COLUMNS];
 
 inline void
@@ -27,7 +47,7 @@ lcd_buf_clear(uint8_t line)
 inline void
 lcd_setup()
 {
-    lcd.begin();
+    lcd.begin(LCD_COLUMNS, LCD_LINES);
 }
 
 inline void

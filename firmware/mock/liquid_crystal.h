@@ -3,7 +3,7 @@
 
 struct LiquidCrystal {
 
-    void begin() { }
+    void begin(uint8_t, uint8_t) { }
 
     void clear() { debug(7, "lcd clear"); }
 

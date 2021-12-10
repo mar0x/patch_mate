@@ -3,6 +3,7 @@ BUILD_PATH = $(abspath ./.build)
 BUILD_CACHE = $(abspath ./.cache)
 
 # FQBN = arduino:avr:leonardo
+# FQBN = patchmate:avr:patchmate
 FQBN = patchmate:avr:patchmateX
 
 MCU = atmega32u4
@@ -94,7 +95,7 @@ AVR_GXX="$(AVR_GCC_PATH)/bin/avr-g++"
 
 CPPFLAGS = -std=c++11 -xc++ -MMD -lncurses -Wall
 
-.PHONY: all compile prefs upload dirs clean
+.PHONY: all compile prefs upload dirs clean help
 
 all: firmware
 # compile
@@ -114,13 +115,16 @@ $(BUILD_PATH) $(BUILD_CACHE):
 	mkdir -p $@
 
 clean:
-	rm -rf $(BUILD_PATH) $(BUILD_CACHE) firmware firmware.d
+	rm -rf $(BUILD_PATH) $(BUILD_CACHE) firmware firmware.d firmware.dSYM
 
 prefs: dirs
 	$(ARDUINO_BUILDER) -dump-prefs $(ARDUINO_BUILDER_ARGS)
 
 compile: dirs
-	$(ARDUINO_BUILDER) -compile $(ARDUINO_BUILDER_ARGS)
+	$(ARDUINO_BUILDER) -verbose -compile $(ARDUINO_BUILDER_ARGS) -debug-level=10
+
+help: dirs
+	$(ARDUINO_BUILDER) -help
 
 csc:
 	$(AVR_GXX) \

@@ -22,6 +22,8 @@ struct digital_out {
 
     static void low() { traits::low(); }
 
+    static void toggle() { traits::toggle(); }
+
     static void write(bool v) { traits::write(v); }
 };
 

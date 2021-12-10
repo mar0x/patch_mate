@@ -23,6 +23,8 @@ struct digital_pin {
 
     static void low() { traits::low(); }
 
+    static void toggle() { traits::toggle(); }
+
     static void write(bool v) { traits::write(v); }
 
     static bool read() { return traits::read(); }

@@ -1,7 +1,7 @@
 
 #pragma once
 
-#define FW_VERSION "2021.03.13"
+#define FW_VERSION "2021.03.16"
 
 #include "rotate.h"
 #include "lcd.h"
@@ -31,9 +31,13 @@ struct version_t {
         memcpy(sn_ + 3, sn, 4);
     }
 
+    const char *sn() const { return sn_ + 3; }
+
     void hw(const char *hw) {
         memcpy(hw_ + 3, hw, 10);
     }
+
+    const char *hw() const { return hw_ + 3; }
 
     void reset() { line_ = 0; }
 

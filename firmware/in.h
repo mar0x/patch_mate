@@ -181,38 +181,21 @@ in<T>::usb_midi_read(midi_cmd_t &c, uint8_t& jack) const {
     usb_midi::event_t ev;
     if (!usb_midi::port.recv(ev)) return false;
 
-    if (!ev.header) return false;
+    uint8_t size = ev.size();
 
-    uint8_t cin = ev.header & 0x0F;
-    switch (cin) {
-    case 0:
-    case 1:
-        return false;
-    case 5:
-        c.read(ev.byte1);
-        break;
-    case 2:
-    case 6:
-    case 0xC:
-    case 0xD:
-        c.read(ev.byte1);
+    if (size == 0) return false;
+
+    c.read(ev.byte1);
+
+    if (size > 1) {
         c.read(ev.byte2);
-        break;
-    case 3:
-    case 4:
-    case 7:
-    case 8:
-    case 9:
-    case 0xA:
-    case 0xB:
-    case 0xE:
-        c.read(ev.byte1);
-        c.read(ev.byte2);
-        c.read(ev.byte3);
-        break;
+
+        if (size > 2) {
+            c.read(ev.byte3);
+        }
     }
 
-    jack = (ev.header & 0xF0) >> 4;
+    jack = ev.jack();
 
     return true;
 }

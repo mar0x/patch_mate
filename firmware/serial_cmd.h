@@ -63,7 +63,8 @@ struct serial_cmd_t {
         CMD_MIDI_MON_OUT,       // MMO
         CMD_HELP,               // ?
 
-        CMD_BTN_PRESS,          // P b
+        CMD_BTN_PRESS,          // B b
+        CMD_DISPLAY_DUMP,       // D
 
         CMD_SERIAL_NUMBER,      // SN
         CMD_HARDWARE,           // HW
@@ -312,6 +313,7 @@ serial_cmd_t::parse() {
             if (b[0] == 'V') { command_ = CMD_VERSION; }
             if (b[0] == 'E') { command_ = CMD_ECHO; }
             if (b[0] == 'B') { command_ = CMD_BTN_PRESS; }
+            if (b[0] == 'D') { command_ = CMD_DISPLAY_DUMP; }
             if (b[0] == '?') { command_ = CMD_HELP; }
             break;
 
@@ -362,6 +364,7 @@ PR [<P> [<T> [<NAME>]]]
 
  Simulation:
 B [L/R/U/D] - button press
+D - display dump
 
  Settings:
 MC [<C>] - MIDI channel

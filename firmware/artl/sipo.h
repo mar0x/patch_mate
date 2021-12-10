@@ -14,28 +14,28 @@ struct sipo {
     using latch = LATCH_PIN; /* aka ST_CP */
     using clock = CLOCK_PIN; /* aka SH_CP */
 
-    void setup() {
-        data().output();
-        latch().output();
-        clock().output();
+    static void setup() {
+        data::output();
+        latch::output();
+        clock::output();
 
-        latch().high();
+        latch::high();
     }
 
     struct write_bit {
-        void operator()(bool b) const {
-            data().write(b);
+        static void write(bool b) {
+            data::write(b);
 
-            clock().high();
-            clock().low();
+            clock::high();
+            clock::low();
         }
     };
 
-    void write(value_type v) const {
-        latch().low();
+    static void write(value_type v) {
+        latch::low();
 
-        bit_order().write( v, write_bit() );
-        latch().high();
+        bit_order::write(v, write_bit());
+        latch::high();
     }
 
 };

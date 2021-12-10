@@ -13,12 +13,33 @@
 
 #if defined(ARDUINO)
 
-#include <EEPROM.h>
+#include "eeprom.h"
+
+#if defined(ARDUINO_AVR_PATCHMATE_X)
 
 #include "spi_eeprom.h"
 #include "spi_oled.h"
+
 #include "in.h"
 #include "out.h"
+
+#else
+
+#include <LiquidCrystal.h>
+
+#if defined(ARDUINO_AVR_PATCHMATE)
+
+#include "patchmate/in.h"
+#include "patchmate/out.h"
+
+#else
+
+#include "dummy/in.h"
+#include "dummy/out.h"
+
+#endif
+
+#endif
 
 #else
 
@@ -31,6 +52,8 @@
 #include "mock/out.h"
 
 #endif
+
+#include "storage.h"
 
 #include "artl/button.h"
 #include "artl/encoder.h"
@@ -65,8 +88,8 @@ struct controller_t {
     void setup();
     void loop();
 
-    bool read_eeprom();
-    void reset_eeprom();
+    bool check_storage();
+    void reset_storage();
 
     void process_midi_cmd(const midi_cmd_t& cmd);
     void process_serial_cmd();
@@ -210,6 +233,7 @@ struct controller_t {
     midi_cmd_t midi_cmd_;
 
     serial_cmd_t serial_cmd_;
+    bool serial_connected_ = false;
 
     bool dirty_ = false;
     bool bad_magic_;
@@ -259,7 +283,7 @@ controller_t::setup() {
     in_.setup();
     out_.setup();
 
-    spi_eeprom::setup();
+    storage::setup();
 
     t = millis();
 
@@ -273,7 +297,7 @@ controller_t::setup() {
 
     out_.data_led(true);
 
-    if (read_eeprom()) {
+    if (check_storage()) {
         set_mode(MODE_NORMAL);
         set_program(0, true);
     } else {
@@ -300,6 +324,10 @@ controller_t::loop() {
 
     while (!midi_cmd_.ready() && in_.midi_available()) {
         uint8_t b = in_.midi_read();
+
+        if (b != CMD_SYS_ACTIVE_S) {
+            data_blink();
+        }
 
         if (midi_mon_[0].active()) {
             midi_mon_[0].read(b);
@@ -329,6 +357,10 @@ controller_t::loop() {
         uint8_t jack;
 
         if (in_.usb_midi_read(cmd, jack)) {
+            if (cmd[0] != CMD_SYS_ACTIVE_S) {
+                data_blink();
+            }
+
             switch (jack) {
             case 0:
                 process_midi_cmd(cmd);
@@ -340,8 +372,19 @@ controller_t::loop() {
         }
     }
 
+    if (serial_connected_ != in_.serial_connected()) {
+        serial_connected_ = in_.serial_connected();
+
+        if (serial_connected_) {
+            out_.serial_println("");
+            out_.serial_print(version_.sn(), "> ");
+        }
+    }
+
     while (!serial_cmd_ && in_.serial_available()) {
         uint8_t b = in_.serial_read();
+
+        data_blink();
 
         serial_cmd_.read(b);
 
@@ -419,38 +462,25 @@ controller_t::loop() {
     artl::yield();
 }
 
-static const char eemagic[4] = { 'M', 'P', 'M', '5' };
-
 inline bool
-controller_t::read_eeprom() {
-    char magic_test[sizeof(eemagic)];
-
-    serial_num_t sn; sn.get();
+controller_t::check_storage() {
+    serial_num_t sn;
+    storage::read(sn);
     version_.sn(sn);
 
-    hardware_id_t hw; hw.get();
+    hardware_id_t hw;
+    storage::read(hw);
     version_.hw(hw);
 
-    EEPROM.get(0, magic_test);
-    if (memcmp(eemagic, magic_test, sizeof(eemagic)) != 0) {
+    if (!storage::check()) {
         bad_magic_ = true;
         return false;
     }
 
-    memset(magic_test, 0, sizeof(magic_test));
-
-    spi_eeprom::get(0, magic_test);
-    if (memcmp(eemagic, magic_test, sizeof(eemagic)) != 0) {
-        bad_magic_ = true;
-        return false;
-    }
-
-    program_t::setup(sizeof(eemagic));
-    settings_t::setup(sizeof(eemagic));
-
-    settings_.read();
+    storage::read(settings_);
 
     bad_magic_ = false;
+
 #if defined(DEBUG)
     debug_level_ = settings_.usb_debug;
 #endif
@@ -458,23 +488,10 @@ controller_t::read_eeprom() {
 }
 
 inline void
-controller_t::reset_eeprom() {
-    EEPROM.put(0, eemagic);
+controller_t::reset_storage() {
+    storage::reset();
 
-    spi_eeprom::put(0, eemagic);
-
-    program_t::setup(sizeof(eemagic));
-
-    for (uint8_t i = 0; i < MAX_PROGRAMS; i++) {
-        program_t().write(i);
-    }
-
-    settings_t::setup(sizeof(eemagic));
-
-    settings_ = settings_t();
-    settings_.write();
-
-    bad_magic_ = false;
+    check_storage();
 }
 
 inline void
@@ -574,11 +591,24 @@ controller_t::process_serial_cmd() {
         break;
     }
     case serial_cmd_t::CMD_STORE: {
-        if (!dirty_) { out_.serial_println("CLEAR"); }
-        else if (bad_magic_) { out_.serial_println("BAD MAGIC"); }
-        else { commit(); }
+        if (mode_ == MODE_SETTINGS_FACTORY_RESET) {
+            reset_storage();
+            set_mode(MODE_NORMAL);
+            set_program(0, true);
+            store_blink_start();
 
-        print_program(prog_id_, program_);
+            out_.serial_println("FR");
+            break;
+        }
+
+        if (mode_ == MODE_NORMAL) {
+            if (!dirty_) { out_.serial_println("CLEAR"); }
+            else if (bad_magic_) { out_.serial_println("BAD MAGIC"); }
+            else { commit(); }
+
+          print_program(prog_id_, program_);
+        }
+
         break;
     }
     case serial_cmd_t::CMD_RESTORE: {
@@ -591,21 +621,21 @@ controller_t::process_serial_cmd() {
     case serial_cmd_t::CMD_PROGRAM: {
         program_t pr = program_;
         uint8_t p = prog_id_;
-        uint16_t l = pr.loop;
+        loop_value_t l = pr.loop;
 
         if (serial_cmd_.get_arg(1, p)) {
             if (p >= MAX_PROGRAMS) p = prog_id_;
 
             if (p != prog_id_) {
-                pr.read(p);
+                storage::read(p, pr);
             }
 
-            if (serial_cmd_.get_arg(2, l)) {
+            if (serial_cmd_.get_arg(2, l) && !bad_magic_) {
                 pr.loop = l;
 
                 serial_cmd_.get_arg(3, pr.title);
 
-                pr.write(p);
+                storage::write(p, pr);
 
                 if (p == prog_id_) { set_program(prog_id_); }
             }
@@ -698,7 +728,10 @@ controller_t::process_serial_cmd() {
         uint8_t v;
         if (serial_cmd_.get_arg(1, v)) {
             settings_.echo = v != 0;
-            settings_.write(settings_.echo);
+
+            if (!bad_magic_) {
+                storage::write(settings_, settings_.echo);
+            }
         }
 
         out_.serial_println("E ", settings_.echo);
@@ -711,10 +744,10 @@ controller_t::process_serial_cmd() {
         } v;
 
         if (serial_cmd_.get_arg(1, v.sn)) {
-            v.sn.put();
+            storage::write(v.sn);
             version_.sn(v.sn);
         } else {
-            v.sn.get();
+            storage::read(v.sn);
         }
 
         out_.serial_println("SN ", v.sn.buf);
@@ -727,10 +760,10 @@ controller_t::process_serial_cmd() {
         } v;
 
         if (serial_cmd_.get_arg(1, v.hw)) {
-            v.hw.put();
+            storage::write(v.hw);
             version_.hw(v.hw);
         } else {
-            v.hw.get();
+            storage::read(v.hw);
         }
 
         out_.serial_println("HW ", v.hw.buf);
@@ -756,6 +789,13 @@ controller_t::process_serial_cmd() {
         }
 
         out_.serial_println("B ", btn.btn);
+        break;
+    }
+    case serial_cmd_t::CMD_DISPLAY_DUMP: {
+        out_.serial_write((const uint8_t *) lcd_buf[0], LCD_COLUMNS);
+        out_.serial_println("");
+        out_.serial_write((const uint8_t *) lcd_buf[1], LCD_COLUMNS);
+        out_.serial_println("");
         break;
     }
     }
@@ -795,7 +835,7 @@ controller_t::update_setting(uint8_t mode, T& s, T v) {
     }
 
     s = v;
-    settings_.write(s);
+    storage::write(settings_, s);
 }
 
 inline void
@@ -805,6 +845,10 @@ controller_t::midi_out(uint8_t b) {
     }
 
     out_.midi_write(b);
+
+    if (b != CMD_SYS_ACTIVE_S) {
+        data_blink();
+    }
 }
 
 inline void
@@ -822,7 +866,7 @@ controller_t::set_program(uint8_t prog, bool banner) {
 
     prog_id_ = prog;
 
-    program_.read(prog);
+    storage::read(prog, program_);
     program_master_ = program_;
 
     if (settings_.midi_out_prog) {
@@ -1119,7 +1163,7 @@ controller_t::on_hold(uint8_t i) {
                 return;
             }
 
-            // Changes made, but EEPROM not ready - confirm EEPROM Reset first;
+            // Changes made, but storage is not ready - confirm storage Reset first;
             if (bad_magic_ && mode_ != MODE_SETTINGS_FACTORY_RESET) {
                 set_mode(MODE_SETTINGS_FACTORY_RESET);
                 return;
@@ -1149,11 +1193,11 @@ controller_t::on_hold(uint8_t i) {
 
         case MODE_SETTINGS_MUTE_DELAY:
             settings_.mute_delay_ms = edit_.value();
-            settings_.write(settings_.mute_delay_ms);
+            storage::write(settings_, settings_.mute_delay_ms);
             break;
 
         case MODE_SETTINGS_FACTORY_RESET:
-            reset_eeprom();
+            reset_storage();
             set_mode(MODE_NORMAL);
             set_program(0, true);
             store_blink_start();
@@ -1174,7 +1218,7 @@ controller_t::on_hold(uint8_t i) {
                 return;
             }
 
-            // Changes made, but EEPROM not ready - confirm EEPROM Reset first;
+            // Changes made, but storage not ready - confirm storage Reset first;
             if (bad_magic_ && mode_ != MODE_SETTINGS_FACTORY_RESET) {
                 set_mode(MODE_SETTINGS_FACTORY_RESET);
                 return;
@@ -1184,19 +1228,18 @@ controller_t::on_hold(uint8_t i) {
                 program_t tmp_prog;
 
                 if (mode_ == MODE_PROGRAM_SWAP) {
-                    tmp_prog.read(edit_.value());
-                    tmp_prog.write(prog_id_);
-
+                    storage::read(edit_.value(), tmp_prog);
+                    storage::write(prog_id_, tmp_prog);
                 } else {
                     int step = edit_.value() > prog_id_ ? 1 : -1;
 
                     for (uint8_t p = prog_id_; p != edit_.value(); p += step) {
-                        tmp_prog.read(p + step);
-                        tmp_prog.write(p);
+                        storage::read(p + step, tmp_prog);
+                        storage::write(p, tmp_prog);
                     }
                 }
 
-                program_master_.write(edit_.value());
+                storage::write(edit_.value(), program_master_);
                 prog_id_ = edit_.value();
             }
 
@@ -1220,7 +1263,7 @@ controller_t::on_hold(uint8_t i) {
 inline void
 controller_t::commit() {
     // commit program change
-    program_.write(prog_id_);
+    storage::write(prog_id_, program_);
 
     program_master_ = program_;
 
@@ -1343,7 +1386,7 @@ controller_t::on_rotate(short dir) {
         set_dirty(edit_.dirty());
 
         program_t dprog;
-        dprog.read(edit_.value());
+        storage::read(edit_.value(), dprog);
         print_number(lcd_buf[1] + 3, 3, edit_.value() + settings_.prog_start);
         memcpy(lcd_buf[1] + 7, dprog.title, 9);
 
@@ -1393,11 +1436,11 @@ controller_t::on_mute_timer() {
 
 inline void
 controller_t::data_blink() {
-    if (data_blink_timer_.active() || (t - last_data_blink_) < 100) return;
+    if (data_blink_timer_.active() || (t - last_data_blink_) < 200) return;
 
     out_.data_led(false);
 
-    data_blink_timer_.schedule(t + 10);
+    data_blink_timer_.schedule(t + 50);
 }
 
 inline void
@@ -1425,7 +1468,7 @@ controller_t::commit_edit()
 {
     uint8_t *v = ((uint8_t *) &settings_) + edit_settings_offset_;
     *v = edit_.value();
-    settings_.write(*v);
+    storage::write(settings_, *v);
 }
 
 inline void

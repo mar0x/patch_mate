@@ -7,6 +7,8 @@
 #include "serial_num.h"
 #include "usb_midi_desc.h"
 
+#include "storage.h"
+
 namespace usb_midi {
 
 struct event_t {
@@ -17,6 +19,13 @@ struct event_t {
 
     void reset() { header = 0; }
     bool empty() const { return header == 0; }
+    uint8_t jack() const { return (header & 0xF0) >> 4; }
+    uint8_t size() const {
+        static const uint8_t cin2size[16] =
+            { 0, 0, 2, 3, 3, 1, 2, 3, 3, 3, 3, 3, 2, 2, 3, 1 };
+
+        return cin2size[header & 0x0F];
+    }
 
     operator bool() const { return header != 0; }
 };
@@ -80,9 +89,12 @@ protected:
         name[1] = 'M';
         name[2] = 'X';
 
-        patch_mate::serial_num_t::get(name + 3);
+        using storage = patch_mate::storage;
+        using serial_num_t = patch_mate::serial_num_t;
 
-        return 3 + sizeof(patch_mate::serial_num_t);
+        storage::read(* (serial_num_t *) (name + 3));
+
+        return 3 + sizeof(serial_num_t);
     }
 
 public:

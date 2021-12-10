@@ -29,6 +29,10 @@ struct out {
     void usb_midi_write(uint8_t b, uint8_t);
     void usb_midi_write(const midi_cmd_t& c, uint8_t);
 
+    static void serial_write(const uint8_t *b, uint8_t l) {
+        pts.write(b, l);
+    }
+
     template<typename T1>
     void serial_print(const T1& a1) { pts.print(a1); }
 

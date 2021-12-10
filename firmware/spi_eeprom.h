@@ -37,6 +37,8 @@ public:
         cs::high();
     }
 
+    static constexpr uint16_t length() { return 0x2000; }
+
     static uint8_t status() {
         transfer scope;
 

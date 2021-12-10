@@ -20,6 +20,8 @@ struct digital_in {
 
     static void pullup() { traits::high(); }
 
+    static void pulldown() { traits::low(); }
+
     static bool read() { return traits::read(); }
 
     static uint8_t read_bit() { return traits::read_bit(); }
