@@ -2,8 +2,8 @@
 ##############################################################
 
 patchmate.name=PatchMate
-patchmate.vid.0=0x2341
-patchmate.pid.0=0x8036
+patchmate.vid.0=0x16c0
+patchmate.pid.0=0x05e4
 
 patchmate.upload.tool=arduino:avrdude
 patchmate.upload.protocol=avr109
@@ -24,9 +24,10 @@ patchmate.bootloader.lock_bits=0x2F
 
 patchmate.build.mcu=atmega32u4
 patchmate.build.f_cpu=16000000L
-patchmate.build.vid=0x2341
-patchmate.build.pid=0x8036
+patchmate.build.vid=0x16c0
+patchmate.build.pid=0x05e4
 patchmate.build.usb_product="PatchMate"
+patchmate.build.usb_manufacturer="MVR-Electronic.ru"
 patchmate.build.board=AVR_PATCHMATE
 patchmate.build.core=arduino:arduino
 patchmate.build.variant=patchmate
@@ -35,8 +36,8 @@ patchmate.build.extra_flags={build.usb_flags}
 ##############################################################
 
 patchmateX.name=PatchMate X
-patchmateX.vid.0=0x2341
-patchmateX.pid.0=0x803B
+patchmateX.vid.0=0x16c0
+patchmateX.pid.0=0x05e4
 
 patchmateX.upload.tool=arduino:avrdude
 patchmateX.upload.protocol=avr109
@@ -57,9 +58,10 @@ patchmateX.bootloader.lock_bits=0x2F
 
 patchmateX.build.mcu=atmega32u4
 patchmateX.build.f_cpu=16000000L
-patchmateX.build.vid=0x2341
-patchmateX.build.pid=0x803B
+patchmateX.build.vid=0x16c0
+patchmateX.build.pid=0x05e4
 patchmateX.build.usb_product="PatchMate X"
+patchmateX.build.usb_manufacturer="MVR-Electronic.ru"
 patchmateX.build.board=AVR_PATCHMATE_X
 patchmateX.build.core=arduino:arduino
 patchmateX.build.variant=patchmateX
