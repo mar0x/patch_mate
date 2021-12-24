@@ -1,7 +1,7 @@
 
 #pragma once
 
-#define FW_VERSION "2021.12.11"
+#define FW_VERSION "2021.12.24"
 
 #include "rotate.h"
 #include "lcd.h"

@@ -1339,7 +1339,7 @@ controller_t::on_rotate(short dir) {
     switch(mode_) {
     case MODE_NORMAL: {
         // rotate on LEFT hold - change program
-        if (in_.left().hold()) {
+        if (in_.left().hold() || !hide_cursor_timer_.active()) {
             set_program(rotate(prog_id_, MAX_PROGRAMS, dir));
 
             return;
