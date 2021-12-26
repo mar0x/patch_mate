@@ -50,6 +50,10 @@ inline bool is_midi_cmd(uint8_t b) {
     return (b & CMD_BIT) == CMD_BIT;
 }
 
+inline bool is_midi_sys(uint8_t b) {
+    return (b & CMD_SYS) == CMD_SYS;
+}
+
 struct midi_cmd_t {
     midi_cmd_t() = default;
     midi_cmd_t(uint8_t ch, uint8_t cmd) :
@@ -74,8 +78,12 @@ struct midi_cmd_t {
     }
 
     static uint8_t command(uint8_t b) {
-        uint8_t c = b & 0xF0U;
-        return c != CMD_SYS ? c : b;
+        if (is_midi_cmd(b)) {
+            uint8_t c = b & CMD_SYS;
+            return c != CMD_SYS ? c : b;
+        }
+
+        return 0;
     }
 
     bool sys_ex() const { return sys_ex_ || (size_ > 0 && command() == CMD_SYS_EX); }
