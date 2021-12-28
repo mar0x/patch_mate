@@ -2,6 +2,7 @@
 #pragma once
 
 #define DEBUG 1
+#define MAX_DEBUG_LEVEL 0
 
 /*
     1    set program
@@ -12,6 +13,7 @@
     2    toggle loop (on_down)
 
     3    set_dirty
+    3    mdr stop
 
     4    modi_cmd read byte
     4    modi_cmd write byte
@@ -19,11 +21,12 @@
     4    on_hold
     4    on_rotate (encoder)
 
-    4    snake start
-    4    snake loose x2
-
     5    on_down (release key)
+    5    mds (midi dump store byte)
+    5    mdr (midi dump read byte)
 
+    6    midi read
+    6    usb write
     6    loop_state read prog
     6    loop_state write prog
 
@@ -56,7 +59,7 @@ template<typename T1, typename ...Args> void debug__(const T1& a1, Args... args)
 }
 
 template<typename T1, typename ...Args> void debug(uint8_t l, const T1& a1, Args... args) {
-    if (l <= debug_level_) {
+    if (l <= MAX_DEBUG_LEVEL && l <= debug_level_) {
         debug__(a1, args...);
     }
 }

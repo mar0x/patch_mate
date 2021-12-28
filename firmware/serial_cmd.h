@@ -61,6 +61,8 @@ struct serial_cmd_t {
         CMD_FACTORY_RESET,      // FR v
         CMD_MIDI_MON_IN,        // MMI
         CMD_MIDI_MON_OUT,       // MMO
+        CMD_MIDI_DUMP_SEND,     // MDS
+        CMD_MIDI_DUMP_RECV,     // MDR
         CMD_HELP,               // ?
 
         CMD_BTN_PRESS,          // B b
@@ -342,6 +344,8 @@ serial_cmd_t::parse() {
             if (b[0] == 'M' && b[1] == 'L' && b[2] == 'O') { command_ = CMD_MIDI_LOOP_OUT_CTRL; }
             if (b[0] == 'M' && b[1] == 'M' && b[2] == 'I') { command_ = CMD_MIDI_MON_IN; }
             if (b[0] == 'M' && b[1] == 'M' && b[2] == 'O') { command_ = CMD_MIDI_MON_OUT; }
+            if (b[0] == 'M' && b[1] == 'D' && b[2] == 'S') { command_ = CMD_MIDI_DUMP_SEND; }
+            if (b[0] == 'M' && b[1] == 'D' && b[2] == 'R') { command_ = CMD_MIDI_DUMP_RECV; }
             break;
         }
     }
@@ -359,11 +363,13 @@ NM [<NAME>] - name change
 MD [<MODE>] - mode change
 ST - store changes
 RS - restore
+MDS - MIDI Dump Send
+MDR - MIDI Dump Receive
 
 PR [<P> [<T> [<NAME>]]]
 
  Simulation:
-B [L/R/U/D] - button press
+B [L/R/U/D/S] - button press
 D - display dump
 
  Settings:

@@ -33,6 +33,9 @@ struct midi_mon_t {
     void hide(unsigned long t);
 
     bool active() const { return active_; }
+    uint8_t *data() { return data_.data; }
+
+    void clear();
 
 private:
     enum {
@@ -69,8 +72,6 @@ private:
     inline bool valid_pos(uint8_t p) const {
         return data_.diff(p) < data_.size;
     }
-
-    void clear();
 
     void set_mode(uint8_t mode);
     void reindex();

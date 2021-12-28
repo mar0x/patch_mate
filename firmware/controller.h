@@ -139,6 +139,15 @@ struct controller_t {
 
     void show_master(bool master);
 
+    void midi_dump_send();
+    void midi_dump_start_subject(uint8_t subj, uint8_t size);
+    void midi_dump_end_subject();
+    void midi_dump(const void *d, uint8_t size);
+    void midi_dump(uint8_t b);
+    void midi_dump_flush();
+    void midi_dump_read(uint8_t b);
+    void midi_dump_read_stop(const char *reason, uint8_t size, uint8_t b);
+
     struct button_handler : public artl::default_button_handler {
         button_handler(uint8_t id) : id_(id) { }
 
@@ -207,6 +216,8 @@ struct controller_t {
         MODE_PROGRAM_MOVE,
         MODE_MIDI_IN_MONITOR,
         MODE_MIDI_OUT_MONITOR,
+        MODE_MIDI_DUMP_SEND,
+        MODE_MIDI_DUMP_RECV,
         MODE_ABOUT,
         MODE_UPTIME,
         MODE_MAX,
@@ -230,7 +241,26 @@ struct controller_t {
     uint8_t edit_settings_offset_;
     edit_value_t edit_;
 
+    enum {
+        DUMP_CSUM_START = 0xFF,
+
+        DUMP_SUBJECT = 0xE0,
+        DUMP_SIZE = 0x1F,
+
+        DUMP_NONE = 0x00,
+        DUMP_SETTINGS = 0x20,
+        DUMP_PROGRAM = 0x40,
+        DUMP_MAGIC = 0xE0,
+    };
+
     midi_cmd_t midi_cmd_;
+    midi_cmd_t dump_cmd_;
+    uint8_t dump_csum_;
+    bool dump_read_started_;
+    uint8_t dump_8th_bit_;
+    uint8_t dump_subject_;
+    uint8_t dump_pos_;
+    uint8_t *dump_buf_;
 
     serial_cmd_t serial_cmd_;
     bool serial_connected_ = false;
@@ -325,6 +355,8 @@ controller_t::loop() {
     while (!midi_cmd_.ready() && in_.midi_available()) {
         uint8_t b = in_.midi_read();
 
+        debug(6, "midi read:", b);
+
         if (b != CMD_SYS_ACTIVE_S) {
             data_blink();
         }
@@ -340,12 +372,14 @@ controller_t::loop() {
         if (is_midi_rt(b)) {
             out_.usb_midi_write(b, 1);
         } else {
-            midi_cmd_.read(b);
+            midi_cmd_ << b;
         }
     }
 
     if (midi_cmd_.ready()) {
-        out_.usb_midi_write(midi_cmd_, 1);
+        if (mode_ != MODE_MIDI_DUMP_RECV || !midi_cmd_.sys_ex()) {
+            out_.usb_midi_write(midi_cmd_, 1);
+        }
 
         process_midi_cmd(midi_cmd_);
 
@@ -496,9 +530,44 @@ controller_t::reset_storage() {
 
 inline void
 controller_t::process_midi_cmd(const midi_cmd_t& cmd) {
+    if (mode_ == MODE_MIDI_DUMP_RECV) {
+        if (!dump_read_started_ && cmd.command() == CMD_SYS_EX && cmd[1] == eemagic[0]) {
+            memcpy(lcd_buf[1], "  reading...    ", 16);
+            lcd_update(0, 1, LCD_COLUMNS);
+
+            dump_read_started_ = true;
+            dump_8th_bit_ = 0;
+            dump_subject_ = DUMP_MAGIC | sizeof(eemagic);
+            dump_csum_ = DUMP_CSUM_START;
+            dump_pos_ = 1;
+
+            if (midi_mon_[0].active()) {
+                midi_mon_[0].toggle_pause(t);
+            }
+
+            dump_buf_ = midi_mon_[0].data();
+
+            if (cmd.size() == 3) {
+                midi_dump_read(cmd[2]);
+            }
+
+            return;
+        }
+        if (dump_read_started_ && cmd.sys_ex()) {
+            for (uint8_t i = 0; i < cmd.size() && dump_read_started_; ++i) {
+                midi_dump_read(cmd[i]);
+            }
+            return;
+        }
+        if (dump_read_started_) {
+            midi_dump_read(cmd[0]);
+        }
+    }
+
     if (cmd.command() == CMD_PROG_CHANGE &&
         cmd.channel() == settings_.midi_channel) {
         set_program(cmd.program());
+        return;
     }
 
     if (cmd.command() == CMD_CTRL_CHANGE &&
@@ -508,6 +577,7 @@ controller_t::process_midi_cmd(const midi_cmd_t& cmd) {
                 set_loop(i, cmd.value() != 0);
             }
         }
+        return;
     }
 }
 
@@ -724,6 +794,14 @@ controller_t::process_serial_cmd() {
         // TODO
         break;
     }
+    case serial_cmd_t::CMD_MIDI_DUMP_SEND: {
+        midi_dump_send();
+        break;
+    }
+    case serial_cmd_t::CMD_MIDI_DUMP_RECV: {
+        set_mode(MODE_MIDI_DUMP_RECV);
+        break;
+    }
     case serial_cmd_t::CMD_ECHO: {
         uint8_t v;
         if (serial_cmd_.get_arg(1, v)) {
@@ -784,6 +862,7 @@ controller_t::process_serial_cmd() {
                 case 'R': on_down(RIGHT, true); break;
                 case 'U': on_rotate(1); break;
                 case 'D': on_rotate(-1); break;
+                case 'S': on_hold(STORE); break;
                 }
             }
         }
@@ -984,6 +1063,8 @@ controller_t::on_down(uint8_t i, bool down) {
             case 1: set_mode(MODE_PROGRAM_MOVE); break;
             case 2: set_mode(MODE_MIDI_IN_MONITOR); break;
             case 3: set_mode(MODE_MIDI_OUT_MONITOR); break;
+            case 4: set_mode(MODE_MIDI_DUMP_SEND); break;
+            case 5: set_mode(MODE_MIDI_DUMP_RECV); break;
             case 9: set_mode(MODE_ABOUT); break;
         }
         return;
@@ -1243,6 +1324,10 @@ controller_t::on_hold(uint8_t i) {
                 prog_id_ = edit_.value();
             }
 
+            break;
+
+        case MODE_MIDI_DUMP_SEND:
+            midi_dump_send();
             break;
         }
 
@@ -1504,6 +1589,14 @@ controller_t::set_mode(uint8_t m) {
         midi_mon_[mode_ - MODE_MIDI_IN_MONITOR].hide(t);
     }
 
+    if (mode_ == MODE_MIDI_DUMP_RECV) {
+        store_blink_timer_.stop();
+        midi_mon_[0].clear();
+        if (!midi_mon_[0].active()) {
+            midi_mon_[0].toggle_pause(t);
+        }
+    }
+
     mode_ = m;
 
     if (show_master_) {
@@ -1623,6 +1716,20 @@ controller_t::set_mode(uint8_t m) {
         out_.loop_led(1 << midi_mon_[1].mode());
         break;
 
+    case MODE_MIDI_DUMP_SEND:
+        memcpy(lcd_buf[0], "MIDI Dump Send  ", 16);
+        memcpy(lcd_buf[1], "  press Store   ", 16);
+        break;
+
+    case MODE_MIDI_DUMP_RECV:
+        memcpy(lcd_buf[0], "MIDI Dump Recv  ", 16);
+        memcpy(lcd_buf[1], "  waiting...    ", 16);
+
+        dump_read_started_ = false;
+
+        store_blink_start(0, 300);
+        break;
+
     case MODE_ABOUT:
         memcpy(lcd_buf[0], "About PatchMate ", 16);
         version_.reset();
@@ -1730,6 +1837,198 @@ controller_t::show_master(bool master)
 
     lcd_update(0, 0, LCD_COLUMNS);
     lcd_update(0, 1, LCD_COLUMNS);
+}
+
+inline void
+controller_t::midi_dump_send()
+{
+    dump_cmd_ << CMD_SYS_EX;
+
+    dump_csum_ = DUMP_CSUM_START;
+
+    midi_dump(eemagic, sizeof(eemagic));
+
+    midi_dump_start_subject(DUMP_SETTINGS, sizeof(settings_));
+    midi_dump(&settings_, sizeof(settings_));
+    midi_dump_end_subject();
+
+    program_t p;
+    for (uint8_t i = 0; i < MAX_PROGRAMS; i++) {
+        storage::read(i, p);
+        midi_dump_start_subject(DUMP_PROGRAM, 1 + 2 + p.title_size());
+        midi_dump(i);
+        uint16_t l = p.loop;
+        midi_dump(&l, sizeof(l));
+        midi_dump(p.title, p.title_size());
+        midi_dump_end_subject();
+    }
+
+    dump_cmd_ << CMD_SYS_EX_END;
+    midi_dump_flush();
+}
+
+inline void
+controller_t::midi_dump_start_subject(uint8_t subj, uint8_t size)
+{
+    size += ((size % 4) ? 4 - (size % 4) : 0);
+    dump_subject_ = subj | (size / 4);
+    dump_csum_ = DUMP_CSUM_START;
+
+    midi_dump(dump_subject_);
+
+    dump_pos_ = 0;
+}
+
+inline void
+controller_t::midi_dump_end_subject()
+{
+    while (dump_pos_ < (dump_subject_ & DUMP_SIZE) * 4) { midi_dump(0x20); }
+    midi_dump(dump_csum_);
+}
+
+inline void
+controller_t::midi_dump(const void *d, uint8_t size)
+{
+    uint8_t *b = (uint8_t *) d;
+
+    for (uint8_t i = 0; i < size; ++i) {
+        midi_dump(b[i]);
+    }
+}
+
+inline void
+controller_t::midi_dump(uint8_t b)
+{
+    dump_csum_ += b;
+    ++dump_pos_;
+
+    debug(5, "mds:", dump_pos_, ",", b, ",", dump_csum_);
+
+    if (b < 126) {
+        dump_cmd_ << b;
+        if (dump_cmd_.ready()) midi_dump_flush();
+        return;
+    }
+
+    dump_cmd_ << (b > 127 ? 127 : 126);
+    if (dump_cmd_.ready()) midi_dump_flush();
+
+    dump_cmd_ << (b & 127);
+    if (dump_cmd_.ready()) midi_dump_flush();
+}
+
+inline void
+controller_t::midi_dump_flush()
+{
+    out_.usb_midi_write(dump_cmd_, 0);
+    midi_out_cmd(dump_cmd_);
+
+    dump_cmd_.reset();
+}
+
+inline void
+controller_t::midi_dump_read(uint8_t b)
+{
+    if (is_midi_cmd(b)) {
+        if (dump_subject_ != DUMP_NONE) {
+            midi_dump_read_stop("bad format", 10, b);
+        } else {
+            midi_dump_read_stop("OK", 2, b);
+
+            set_mode(MODE_NORMAL);
+            set_program(prog_id_, true);
+            store_blink_start();
+        }
+        return;
+    }
+
+    if (dump_8th_bit_) {
+        b = (dump_8th_bit_ & 0x80) | b;
+        dump_8th_bit_ = 0;
+    } else {
+        if (b == 127 || b == 126) {
+            dump_8th_bit_ = ((b == 127) ? 0x80 : 0x00) | 0x01;
+            return;
+        }
+    }
+
+    dump_csum_ += b;
+
+    debug(5, "mdr:", dump_pos_, ",", b, ",", dump_csum_);
+
+    switch (dump_subject_ & DUMP_SUBJECT) {
+    case DUMP_MAGIC:
+        if (b != eemagic[dump_pos_]) {
+            midi_dump_read_stop("bad magic", 10, b);
+            return;
+        }
+        ++dump_pos_;
+        if (dump_pos_ == sizeof(eemagic)) {
+            dump_subject_ = DUMP_NONE;
+            dump_csum_ = DUMP_CSUM_START;
+        }
+        break;
+
+    case DUMP_NONE:
+        if ((b & DUMP_SUBJECT) != DUMP_SETTINGS && (b & DUMP_SUBJECT) != DUMP_PROGRAM) {
+            midi_dump_read_stop("bad subject", 11, b);
+            return;
+        }
+
+        dump_subject_ = b;
+        dump_pos_ = 0;
+        break;
+
+    case DUMP_SETTINGS:
+    case DUMP_PROGRAM:
+        if (dump_pos_ == 4 * (dump_subject_ & DUMP_SIZE)) {
+            if (dump_csum_ != (uint8_t) (b + b)) {
+                midi_dump_read_stop("bad checksum", 12, b);
+                return;
+            }
+
+            if ((dump_subject_ & DUMP_SUBJECT) == DUMP_SETTINGS) {
+                memcpy(&settings_, dump_buf_, sizeof(settings_));
+                storage::write(settings_);
+            } else {
+                if (dump_buf_[0] < MAX_PROGRAMS) {
+                    program_t p;
+                    uint16_t l;
+                    memcpy(&l, dump_buf_ + 1, 2);
+                    p.loop = l;
+                    uint8_t tsize = dump_pos_ - 3;
+                    if (tsize > sizeof(p.title)) {
+                        tsize = sizeof(p.title);
+                    }
+                    memcpy(p.title, dump_buf_ + 3, dump_pos_ - 3);
+                    storage::write(dump_buf_[0], p);
+                } else {
+                    debug(3, "mdr ignore prog ", dump_buf_[0]);
+                }
+            }
+
+            dump_subject_ = DUMP_NONE;
+            dump_csum_ = DUMP_CSUM_START;
+        } else {
+            dump_buf_[dump_pos_++] = b;
+        }
+        break;
+    }
+}
+
+inline void
+controller_t::midi_dump_read_stop(const char *reason, uint8_t size, uint8_t b)
+{
+    debug(3, "mdr stop ", reason, ":", dump_pos_, ",", b, ",", dump_csum_);
+
+    lcd_buf[1][0] = ' ';
+    lcd_buf[1][1] = ' ';
+    memcpy(lcd_buf[1] + 2, reason, size);
+    memset(lcd_buf[1] + 2 + size, ' ', LCD_COLUMNS - 2 - size);
+
+    lcd_update(0, 1, LCD_COLUMNS);
+
+    dump_read_started_ = false;
 }
 
 inline void

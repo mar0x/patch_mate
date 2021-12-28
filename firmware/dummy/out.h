@@ -201,6 +201,8 @@ out::usb_midi_write(const midi_cmd_t& c, uint8_t jack)
     ev.byte3 = c.size() > 2 ? c[2] : 0;
 
     usb_midi::port.send(ev);
+
+    debug(6, "usb write: ", ev.header, ",", ev.byte1, ",",  ev.byte2, ",", ev.byte3);
 }
 
 inline void

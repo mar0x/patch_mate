@@ -88,6 +88,9 @@ in<T>::usb_midi_read(midi_cmd_t &c, uint8_t& jack) const {
 
     if (size == 0) return false;
 
+    debug(4, "umr:", ev.header, ",", ev.byte1, ",", ev.byte2, ",", ev.byte3);
+
+    c.sys_ex(ev.sys_ex());
     c.read(ev.byte1);
 
     if (size > 1) {

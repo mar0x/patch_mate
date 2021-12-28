@@ -26,6 +26,10 @@ struct event_t {
 
         return cin2size[header & 0x0F];
     }
+    bool sys_ex() const {
+        uint8_t cin = header & 0x0F;
+        return cin == 4 || cin == 6 || cin == 7 || cin == 15;
+    }
 
     operator bool() const { return header != 0; }
 };
